@@ -39,21 +39,10 @@ int archive_filename(struct archive *a, struct archive_entry *entry)
 }
 
 /*
- * JORFCONT
+ * = JORFCONT
  * <STRUCTURE_TXT>
  *
- * JORFTEXT TEXTE_VERSION
- * <CID>JORFTEXT000041856940</CID>
- * <NUM_PARUTION>0113</NUM_PARUTION>
- * <NUM_SEQUENCE>15</NUM_SEQUENCE>
- * <NOR>ECOI1935482R</NOR>
- * <DATE_TEXTE>2020-05-07</DATE_TEXTE>
- * <ORIGINE_PUBLI>JORF n°0113 du 8 mai 2020</ORIGINE_PUBLI>
- * <PAGE_DEB_PUBLI/>
- * <PAGE_FIN_PUBLI/>
- * <TITREFULL>
- * <AUTORITE/>
- * <MINISTERE>Ministère de l'économie et des finances</MINISTERE>
+ * = JORFTEXT TEXTE_VERSION
  * <MCS_TXT/>
  * <LIENS/>
  * <NOTICE>
@@ -65,16 +54,16 @@ int archive_filename(struct archive *a, struct archive_entry *entry)
  * <SM>
  * <ENTREPRISE>
  *
- * JORFTEXT TEXTELR
+ * = JORFTEXT TEXTELR
  * <VERSIONS>
  * <STRUCT>
- * 
- * JORFSCTA
+ *
+ * = JORFSCTA
  * <COMMENTAIRE/>
  * <CONTEXTE>
  * <STRUCTURE_TA>
  *
- * JORFARTI
+ * = JORFARTI
  * <MCS_ART>
  * <CONTEXTE>
  * <VERSIONS>
@@ -86,6 +75,9 @@ int archive_filename(struct archive *a, struct archive_entry *entry)
 
 #define FIELD_LEN_ID 20
 static const xmlChar *FIELD_NAME_ID = BAD_CAST "ID";
+static const xmlChar *FIELD_NAME_CID = BAD_CAST "CID";
+#define FIELD_LEN_NOR 12
+static const xmlChar *FIELD_NAME_NOR = BAD_CAST "NOR";
 #define FIELD_LEN_NATURE 60
 static const xmlChar *FIELD_NAME_NATURE = BAD_CAST "NATURE";
 #define FIELD_LEN_TYPE 30
@@ -94,21 +86,46 @@ static const xmlChar *FIELD_NAME_TYPE = BAD_CAST "TYPE";
 static const xmlChar *FIELD_NAME_DATE_DEBUT = BAD_CAST "DATE_DEBUT";
 static const xmlChar *FIELD_NAME_DATE_FIN = BAD_CAST "DATE_FIN";
 static const xmlChar *FIELD_NAME_DATE_PUBLI = BAD_CAST "DATE_PUBLI";
+static const xmlChar *FIELD_NAME_DATE_TEXTE = BAD_CAST "DATE_TEXTE";
 #define FIELD_LEN_NUM 60
 static const xmlChar *FIELD_NAME_NUM = BAD_CAST "NUM";
+static const xmlChar *FIELD_NAME_NUM_PARUTION = BAD_CAST "NUM_PARUTION";
+static const xmlChar *FIELD_NAME_NUM_SEQUENCE = BAD_CAST "NUM_SEQUENCE";
 #define FIELD_LEN_TITRE 1024
 static const xmlChar *FIELD_NAME_TITRE = BAD_CAST "TITRE";
 static const xmlChar *FIELD_NAME_TITRE_TA = BAD_CAST "TITRE_TA";
+#define FIELD_LEN_TITREFULL 2048
+static const xmlChar *FIELD_NAME_TITREFULL = BAD_CAST "TITREFULL";
+#define FIELD_LEN_ORIGINE_PUBLI 36
+static const xmlChar *FIELD_NAME_ORIGINE_PUBLI = BAD_CAST "ORIGINE_PUBLI";
+#define FIELD_LEN_PAGE 6
+static const xmlChar *FIELD_NAME_PAGE_DEB_PUBLI = BAD_CAST "PAGE_DEB_PUBLI";
+static const xmlChar *FIELD_NAME_PAGE_FIN_PUBLI = BAD_CAST "PAGE_FIN_PUBLI";
+#define FIELD_LEN_AUTORITE 256
+static const xmlChar *FIELD_NAME_AUTORITE = BAD_CAST "AUTORITE";
+static const xmlChar *FIELD_NAME_MINISTERE = BAD_CAST "MINISTERE";
 
 struct parsed_data {
     char id[FIELD_LEN_ID+1]; /* JORFARTI000037658324 + \0 */
+    char cid[FIELD_LEN_ID+1]; /* JORFTEXT000041856940 + \0 */
     char nature[FIELD_LEN_NATURE+1]; /* DECRET + \0 */
     char type[FIELD_LEN_TYPE+1]; /* ENTIEREMENT_MODIF + \0 */
     char date_debut[FIELD_LEN_DATE+1]; /* 1999-01-01 + \0 */
     char date_fin[FIELD_LEN_DATE+1]; /* 1999-01-01 + \0 */
-    char num[FIELD_LEN_NUM+1]; /* 3 + \0 */
-    char titre[FIELD_LEN_TITRE+1]; /* JORF n 0113 du 8 mai 2020 + \0 */
     char date_publi[FIELD_LEN_DATE+1]; /* 1999-01-01 + \0 */
+    char date_texte[FIELD_LEN_DATE+1]; /* 1999-01-01 + \0 */
+    char num[FIELD_LEN_NUM+1]; /* 3 + \0 */
+    char num_parution[FIELD_LEN_NUM+1]; /* 3 + \0 */
+    char num_sequence[FIELD_LEN_NUM+1]; /* 3 + \0 */
+    char titre[FIELD_LEN_TITRE+1]; /* JORF n 0113 du 8 mai 2020 + \0 */
+    char titrefull[FIELD_LEN_TITREFULL+1]; /* JORF n 0113 du 8 mai 2020 + \0 */
+    char nor[FIELD_LEN_NOR+1]; /* ECOI1935482R + \0 */
+    char origine_publi[FIELD_LEN_ORIGINE_PUBLI+1]; /* ECOI1935482R + \0 */
+    char page_deb_publi[FIELD_LEN_PAGE+1]; /* 12 + \0 */
+    char page_fin_publi[FIELD_LEN_PAGE+1]; /* 13 + \0 */
+    char autorite[FIELD_LEN_AUTORITE+1]; /* Autorité... + \0 */
+    char ministere[FIELD_LEN_AUTORITE+1]; /* Ministère de... + \0 */
+
     int current_size;
     char *current_field;
     const xmlChar *current_name;
@@ -117,6 +134,7 @@ struct parsed_data {
 void print_parsed_data(struct parsed_data *pdata)
 {
 	printf("ID = %s\n", pdata->id);
+	printf("CID = %s\n", pdata->cid);
 	printf("NATURE = %s\n", pdata->nature);
 	printf("TYPE = %s\n", pdata->type);
 	printf("DATE_DEBUT = %s\n", pdata->date_debut);
@@ -124,6 +142,17 @@ void print_parsed_data(struct parsed_data *pdata)
 	printf("NUM = %s\n", pdata->num);
 	printf("TITRE = %s\n", pdata->titre);
 	printf("DATE_PUBLI = %s\n", pdata->date_publi);
+	printf("NOR = %s\n", pdata->nor);
+	printf("DATE_TEXTE = %s\n", pdata->date_texte);
+	printf("NUM_PARUTION = %s\n", pdata->num_parution);
+	printf("NUM_SEQUENCE = %s\n", pdata->num_sequence);
+	printf("ORIGINE_PUBLI = %s\n", pdata->origine_publi);
+	printf("PAGE_DEB_PUBLI = %s\n", pdata->page_deb_publi);
+	printf("PAGE_FIN_PUBLI = %s\n", pdata->page_fin_publi);
+	printf("TITREFULL = %s\n", pdata->titrefull);
+	printf("AUTORITE = %s\n", pdata->autorite);
+	printf("MINISTERE = %s\n", pdata->ministere);
+
 }
 
 void start_element_callback(void *user_data, const xmlChar *name, const xmlChar **attrs)
@@ -141,6 +170,11 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_field = pdata->id;
 		pdata->current_size = FIELD_LEN_ID;
 		pdata->current_name = FIELD_NAME_ID;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_CID)) {
+		pdata->current_field = pdata->cid;
+		pdata->current_size = FIELD_LEN_ID;
+		pdata->current_name = FIELD_NAME_CID;
 	}
 	if (xmlStrEqual(name, FIELD_NAME_NATURE)) {
 		pdata->current_field = pdata->nature;
@@ -187,6 +221,56 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_size = FIELD_LEN_TITRE;
 		pdata->current_name = FIELD_NAME_TITRE_TA;
 	}
+	if (xmlStrEqual(name, FIELD_NAME_NOR)) {
+		pdata->current_field = pdata->nor;
+		pdata->current_size = FIELD_LEN_NOR;
+		pdata->current_name = FIELD_NAME_NOR;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_DATE_TEXTE)) {
+		pdata->current_field = pdata->date_texte;
+		pdata->current_size = FIELD_LEN_DATE;
+		pdata->current_name = FIELD_NAME_DATE_TEXTE;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_NUM_PARUTION)) {
+		pdata->current_field = pdata->num_parution;
+		pdata->current_size = FIELD_LEN_NUM;
+		pdata->current_name = FIELD_NAME_NUM_PARUTION;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_NUM_SEQUENCE)) {
+		pdata->current_field = pdata->num_sequence;
+		pdata->current_size = FIELD_LEN_NUM;
+		pdata->current_name = FIELD_NAME_NUM_SEQUENCE;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_ORIGINE_PUBLI)) {
+		pdata->current_field = pdata->origine_publi;
+		pdata->current_size = FIELD_LEN_ORIGINE_PUBLI;
+		pdata->current_name = FIELD_NAME_ORIGINE_PUBLI;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_PAGE_DEB_PUBLI)) {
+		pdata->current_field = pdata->page_deb_publi;
+		pdata->current_size = FIELD_LEN_PAGE;
+		pdata->current_name = FIELD_NAME_PAGE_DEB_PUBLI;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_PAGE_FIN_PUBLI)) {
+		pdata->current_field = pdata->page_fin_publi;
+		pdata->current_size = FIELD_LEN_PAGE;
+		pdata->current_name = FIELD_NAME_PAGE_FIN_PUBLI;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_TITREFULL)) {
+		pdata->current_field = pdata->titrefull;
+		pdata->current_size = FIELD_LEN_TITREFULL;
+		pdata->current_name = FIELD_NAME_TITREFULL;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_AUTORITE)) {
+		pdata->current_field = pdata->autorite;
+		pdata->current_size = FIELD_LEN_AUTORITE;
+		pdata->current_name = FIELD_NAME_AUTORITE;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_MINISTERE)) {
+		pdata->current_field = pdata->ministere;
+		pdata->current_size = FIELD_LEN_AUTORITE;
+		pdata->current_name = FIELD_NAME_MINISTERE;
+	}
 }
 
 void end_element_callback(void *user_data, const xmlChar *name)
@@ -201,6 +285,17 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		|| xmlStrEqual(name, FIELD_NAME_TITRE)
 		|| xmlStrEqual(name, FIELD_NAME_TITRE_TA)
 		|| xmlStrEqual(name, FIELD_NAME_DATE_PUBLI)
+		|| xmlStrEqual(name, FIELD_NAME_CID)
+		|| xmlStrEqual(name, FIELD_NAME_NOR)
+		|| xmlStrEqual(name, FIELD_NAME_DATE_TEXTE)
+		|| xmlStrEqual(name, FIELD_NAME_NUM_PARUTION)
+		|| xmlStrEqual(name, FIELD_NAME_NUM_SEQUENCE)
+		|| xmlStrEqual(name, FIELD_NAME_ORIGINE_PUBLI)
+		|| xmlStrEqual(name, FIELD_NAME_PAGE_DEB_PUBLI)
+		|| xmlStrEqual(name, FIELD_NAME_PAGE_FIN_PUBLI)
+		|| xmlStrEqual(name, FIELD_NAME_TITREFULL)
+		|| xmlStrEqual(name, FIELD_NAME_AUTORITE)
+		|| xmlStrEqual(name, FIELD_NAME_MINISTERE)
 		) {
 		pdata->current_field = NULL;
 		pdata->current_size = 0;
