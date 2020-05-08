@@ -70,13 +70,37 @@ int archive_filename(struct archive *a, struct archive_entry *entry)
  * <SM>
  * <BLOC_TEXTUEL>
  * <LIENS>
+ *
+ * = LEGITEXT TEXTE_VERSION
+ * <LIENS/>
+ * <VISAS>
+ * <SIGNATAIRES>
+ * <TP>
+ * <NOTA>
+ * <ABRO>
+ * <RECT>
+ *
+ * = LEGITEXT TEXTELR
+ * <VERSIONS_A_VENIR>
+ * <VERSIONS>
+ * <STRUCT>
+ *
+ * = LEGISCTA
+ * <CONTEXTE>
+ * <STRUCTURE_TA>
+ *
+ * = LEGIARTI
+ * <CONTEXTE>
+ * <NOTA>
+ * <BLOC_TEXTUEL>
+ * <LIENS>
  */
 
 
 #define FIELD_LEN_ID 20
 static const xmlChar *FIELD_NAME_ID = BAD_CAST "ID";
 static const xmlChar *FIELD_NAME_CID = BAD_CAST "CID";
-#define FIELD_LEN_NOR 12
+#define FIELD_LEN_NOR 15
 static const xmlChar *FIELD_NAME_NOR = BAD_CAST "NOR";
 #define FIELD_LEN_NATURE 60
 static const xmlChar *FIELD_NAME_NATURE = BAD_CAST "NATURE";
@@ -87,23 +111,26 @@ static const xmlChar *FIELD_NAME_DATE_DEBUT = BAD_CAST "DATE_DEBUT";
 static const xmlChar *FIELD_NAME_DATE_FIN = BAD_CAST "DATE_FIN";
 static const xmlChar *FIELD_NAME_DATE_PUBLI = BAD_CAST "DATE_PUBLI";
 static const xmlChar *FIELD_NAME_DATE_TEXTE = BAD_CAST "DATE_TEXTE";
+static const xmlChar *FIELD_NAME_DERNIERE_MODIFICATION = BAD_CAST "DERNIERE_MODIFICATION";
 #define FIELD_LEN_NUM 60
 static const xmlChar *FIELD_NAME_NUM = BAD_CAST "NUM";
 static const xmlChar *FIELD_NAME_NUM_PARUTION = BAD_CAST "NUM_PARUTION";
 static const xmlChar *FIELD_NAME_NUM_SEQUENCE = BAD_CAST "NUM_SEQUENCE";
 #define FIELD_LEN_TITRE 1024
 static const xmlChar *FIELD_NAME_TITRE = BAD_CAST "TITRE";
-static const xmlChar *FIELD_NAME_TITRE_TA = BAD_CAST "TITRE_TA";
 #define FIELD_LEN_TITREFULL 2048
 static const xmlChar *FIELD_NAME_TITREFULL = BAD_CAST "TITREFULL";
-#define FIELD_LEN_ORIGINE_PUBLI 36
+static const xmlChar *FIELD_NAME_TITRE_TA = BAD_CAST "TITRE_TA";
+#define FIELD_LEN_ORIGINE_PUBLI 192
 static const xmlChar *FIELD_NAME_ORIGINE_PUBLI = BAD_CAST "ORIGINE_PUBLI";
-#define FIELD_LEN_PAGE 6
+#define FIELD_LEN_PAGE 8
 static const xmlChar *FIELD_NAME_PAGE_DEB_PUBLI = BAD_CAST "PAGE_DEB_PUBLI";
 static const xmlChar *FIELD_NAME_PAGE_FIN_PUBLI = BAD_CAST "PAGE_FIN_PUBLI";
 #define FIELD_LEN_AUTORITE 256
 static const xmlChar *FIELD_NAME_AUTORITE = BAD_CAST "AUTORITE";
 static const xmlChar *FIELD_NAME_MINISTERE = BAD_CAST "MINISTERE";
+#define FIELD_LEN_ETAT 64
+static const xmlChar *FIELD_NAME_ETAT = BAD_CAST "ETAT";
 
 struct parsed_data {
     char id[FIELD_LEN_ID+1]; /* JORFARTI000037658324 + \0 */
@@ -125,10 +152,13 @@ struct parsed_data {
     char page_fin_publi[FIELD_LEN_PAGE+1]; /* 13 + \0 */
     char autorite[FIELD_LEN_AUTORITE+1]; /* Autorité... + \0 */
     char ministere[FIELD_LEN_AUTORITE+1]; /* Ministère de... + \0 */
+    char etat[FIELD_LEN_ETAT+1];
+    char derniere_modification[FIELD_LEN_DATE+1];
 
     int current_size;
     char *current_field;
     const xmlChar *current_name;
+    int status;
 };
 
 void print_parsed_data(struct parsed_data *pdata)
@@ -152,7 +182,8 @@ void print_parsed_data(struct parsed_data *pdata)
 	printf("TITREFULL = %s\n", pdata->titrefull);
 	printf("AUTORITE = %s\n", pdata->autorite);
 	printf("MINISTERE = %s\n", pdata->ministere);
-
+	printf("ETAT = %s\n", pdata->etat);
+	printf("DERNIERE_MODIFICATION = %s\n", pdata->derniere_modification);
 }
 
 void start_element_callback(void *user_data, const xmlChar *name, const xmlChar **attrs)
@@ -206,19 +237,14 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_size = FIELD_LEN_TITRE;
 		pdata->current_name = FIELD_NAME_TITRE;
 	}
-	if (xmlStrEqual(name, FIELD_NAME_TITRE)) {
-		pdata->current_field = pdata->titre;
-		pdata->current_size = FIELD_LEN_TITRE;
-		pdata->current_name = FIELD_NAME_TITRE;
-	}
 	if (xmlStrEqual(name, FIELD_NAME_DATE_PUBLI)) {
 		pdata->current_field = pdata->date_publi;
 		pdata->current_size = FIELD_LEN_DATE;
 		pdata->current_name = FIELD_NAME_DATE_PUBLI;
 	}
 	if (xmlStrEqual(name, FIELD_NAME_TITRE_TA)) {
-		pdata->current_field = pdata->titre;
-		pdata->current_size = FIELD_LEN_TITRE;
+		pdata->current_field = pdata->titrefull;
+		pdata->current_size = FIELD_LEN_TITREFULL;
 		pdata->current_name = FIELD_NAME_TITRE_TA;
 	}
 	if (xmlStrEqual(name, FIELD_NAME_NOR)) {
@@ -271,6 +297,17 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_size = FIELD_LEN_AUTORITE;
 		pdata->current_name = FIELD_NAME_MINISTERE;
 	}
+	if (xmlStrEqual(name, FIELD_NAME_ETAT)) {
+		pdata->current_field = pdata->etat;
+		pdata->current_size = FIELD_LEN_ETAT;
+		pdata->current_name = FIELD_NAME_ETAT;
+	}
+	if (xmlStrEqual(name, FIELD_NAME_DERNIERE_MODIFICATION)) {
+		pdata->current_field = pdata->derniere_modification;
+		pdata->current_size = FIELD_LEN_DATE;
+		pdata->current_name = FIELD_NAME_DERNIERE_MODIFICATION;
+	}
+
 }
 
 void end_element_callback(void *user_data, const xmlChar *name)
@@ -296,6 +333,8 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		|| xmlStrEqual(name, FIELD_NAME_TITREFULL)
 		|| xmlStrEqual(name, FIELD_NAME_AUTORITE)
 		|| xmlStrEqual(name, FIELD_NAME_MINISTERE)
+		|| xmlStrEqual(name, FIELD_NAME_ETAT)
+		|| xmlStrEqual(name, FIELD_NAME_DERNIERE_MODIFICATION)
 		) {
 		pdata->current_field = NULL;
 		pdata->current_size = 0;
@@ -314,9 +353,34 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 			pdata->current_field += len;
 			pdata->current_size -= len;
 		} else {
-			fprintf(stderr, "no more size in current field\n");
+			fprintf(stderr, "no more size in current field %s (%d)\n",
+				pdata->current_name, len - pdata->current_size);
+			fprintf(stderr, "c: %.*s\n", len, chars);
+			pdata->current_field = NULL;
+			pdata->current_size = 0;
+			pdata->current_name = NULL;
+			pdata->status = 1;
 		}
 	}
+}
+
+int has_xml_suffix(const char *s)
+{
+	int ret = 0;
+
+	if (s != NULL) {
+		size_t size = strlen(s);
+
+		if (size >= 4 &&
+		    s[size-4] == '.' &&
+		    s[size-3] == 'x' &&
+		    s[size-2] == 'm' &&
+		    s[size-1] == 'l') {
+			ret = 1;
+		}
+	}
+
+	return ret;
 }
 
 int archive_show(struct archive *a, struct archive_entry *entry)
@@ -328,14 +392,19 @@ int archive_show(struct archive *a, struct archive_entry *entry)
 	xmlParserCtxtPtr ctxt;
 	struct parsed_data pdata;
 	xmlSAXHandler parser_handler = {0};
+	const char *fname;
 
+	fname = archive_entry_pathname(entry);
+	if (!has_xml_suffix(fname)) {
+		return 0;
+	}
 	memset(&pdata, 0, sizeof(pdata));
 
 	parser_handler.startElement = start_element_callback;
 	parser_handler.endElement = end_element_callback;
 	parser_handler.characters = characters_callback;
 
-	printf("%s\n", archive_entry_pathname(entry));
+	printf("%s\n", fname);
 	/*printf("%lld\n", archive_entry_size(entry));*/
 	ctxt = xmlCreatePushParserCtxt(&parser_handler, &pdata, NULL, 0, NULL);
 	for (;;) {
@@ -438,6 +507,7 @@ int main(int argc, char **argv)
 	}
 	if (params.show_file != NULL) {
 		/*list_files(params.list_file);*/
+		LIBXML_TEST_VERSION
 		iterate_archive(params.show_file, archive_show);
 		return 0;
 	}
