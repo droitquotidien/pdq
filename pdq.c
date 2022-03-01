@@ -402,7 +402,7 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 				else if (strcmp((const char *)attrs[0], "nor") == 0)
 					r = copy_attr_to_field(pdata->id,
 						attrs[0], attrs[1], xmlStrlen(attrs[1]),
-						"nor", pdata->nor, FIELD_LEN_NOR);
+						"texte_nor", pdata->texte_nor, FIELD_LEN_NOR);
 				else if (strcmp((const char *)attrs[0], "num") == 0)
 					r = copy_attr_to_field(pdata->id,
 						attrs[0], attrs[1], xmlStrlen(attrs[1]),
