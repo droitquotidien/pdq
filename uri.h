@@ -36,6 +36,7 @@ enum uri_kind {
     URI_CORPUS_TNUM_ANUM_VERSION, /* fr/code/civil/aid123/YYYYMMDD, fr/constitution/1956/aid123/YYYYMMDD */
     PARTIAL_URI_ANUM_VERSION, /* ANUM/YYYYMMDD */
     PARTIAL_URI_SNUM_VERSION, /* SNUM/YYYYMMDD */
+    PARTIAL_URI_VERSION, /* YYYYMMDD */
 };
 
 /*

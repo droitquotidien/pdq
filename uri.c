@@ -4,7 +4,9 @@
 char *_uri_cpy(char *dst, const char *src, char sep)
 {
 	char *p = dst;
-	p = stpcpy(p, src);
+	if (src != NULL) {
+		p = stpcpy(p, src);
+	}
 	if (sep != 0) {
 		*p++ = sep;
 		*p = '\0';
@@ -68,7 +70,8 @@ char *uri_cpy(struct uri *source, char *dst)
 			dst = _uri_cpy(dst, source->year, URI_SEP);
 			dst = _uri_cpy(dst, source->month, URI_SEP);
 			dst = _uri_cpy(dst, source->day, URI_SEP);
-			dst = _uri_cpy(dst, source->tnum, 0);
+			/*dst = _uri_cpy(dst, source->tnum, 0);*/
+			dst = _uri_cpy(dst, "%s", 0);
 			break;
 		case URI_CORPUS_NATURE_DATE_TNUM_ANUM:
 			dst = _uri_cpy(dst, source->country, URI_SEP);
@@ -131,8 +134,9 @@ char *uri_cpy(struct uri *source, char *dst)
 		case URI_CORPUS_TNUM:
 			dst = _uri_cpy(dst, source->country, URI_SEP);
 			dst = _uri_cpy(dst, source->corpus, URI_SEP);
-			dst = _uri_cpy(dst, source->tnum, 0);
-				break;
+			dst = _uri_cpy(dst, "%s", 0);
+			/* dst = _uri_cpy(dst, source->tnum, 0); */
+			break;
 		case URI_CORPUS_TNUM_SNUM_VERSION:
 			dst = _uri_cpy(dst, source->country, URI_SEP);
 			dst = _uri_cpy(dst, source->corpus, URI_SEP);
@@ -148,12 +152,20 @@ char *uri_cpy(struct uri *source, char *dst)
 			dst = _uri_cpy(dst, source->aversion, 0);
 			break;
 		case PARTIAL_URI_ANUM_VERSION:
-			dst = _uri_cpy(dst, source->anum, URI_SEP);
+			dst = _uri_cpy(dst, NULL, URI_SEP);
+			/*dst = _uri_cpy(dst, source->anum, URI_SEP);*/
+			dst = _uri_cpy(dst, "%s", URI_SEP);
 			dst = _uri_cpy(dst, source->aversion, 0);
 			break;
 		case PARTIAL_URI_SNUM_VERSION:
-			dst = _uri_cpy(dst, source->snum, URI_SEP);
+			dst = _uri_cpy(dst, NULL, URI_SEP);
+			/*dst = _uri_cpy(dst, source->snum, URI_SEP);*/
+			dst = _uri_cpy(dst, "%s", URI_SEP);
 			dst = _uri_cpy(dst, source->sversion, 0);
+			break;
+		case PARTIAL_URI_VERSION:
+			dst = _uri_cpy(dst, NULL, URI_SEP);
+			dst = _uri_cpy(dst, source->tversion, 0);
 			break;
 		default:
 			break;
