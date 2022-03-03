@@ -257,7 +257,7 @@ int date_to_version(char *date, char *version)
 	return 8;
 }
 
-int set_date_uri(struct parsed_data *pdata)
+int set_date_uri(struct metadata *mdata)
 {
 	int len;
 	int zc;
@@ -266,47 +266,47 @@ int set_date_uri(struct parsed_data *pdata)
 	char *date;
 	const char *val;
 
-	date_pub = check_date(pdata->date_publi);
+	date_pub = check_date(mdata->date_publi);
 	if (date_pub == NULL) {
-		fprintf(stderr, "error:%s: bad date_publi '%s'\n", pdata->id, pdata->date_publi);
+		fprintf(stderr, "error:%s: bad date_publi '%s'\n", mdata->id, mdata->date_publi);
 		return -1;
 	}
-	date_sig = check_date(pdata->date_texte);
+	date_sig = check_date(mdata->date_texte);
 	if (date_sig == NULL) {
-		fprintf(stderr, "error:%s: bad date_texte '%s'\n", pdata->id, pdata->date_texte);
+		fprintf(stderr, "error:%s: bad date_texte '%s'\n", mdata->id, mdata->date_texte);
 		return -1;
 	}
 	if (*date_sig == 0 || (date_sig[0] == '2' && date_sig[1] == '9')) {
-		pdata->uri_parts.datekind = PUB_DATEKIND;
+		mdata->uri_parts.datekind = PUB_DATEKIND;
 		date = date_pub;
 		if (*date_pub == 0 || (date_pub[0] == '2' && date_pub[1] == '9')) {
 			// *(date_pub + 2432424) = 5;
-			fprintf(stderr, "error:%s: no usable date\n", pdata->id);
+			fprintf(stderr, "error:%s: no usable date\n", mdata->id);
 			return -1;
 		}
 	} else if (*date_sig != 0) {
 		date = date_sig;
-		pdata->uri_parts.datekind = SIG_DATEKIND;
+		mdata->uri_parts.datekind = SIG_DATEKIND;
 		if (date_sig[0] == '2' && date_sig[1] == '9') {
 			// *(date_sig + 2432424) = 5;
-			fprintf(stderr, "error:%s: no usable date\n", pdata->id);
+			fprintf(stderr, "error:%s: no usable date\n", mdata->id);
 			return -1;
 		}
 	}
 
-	strncpy(pdata->uri_parts.year, date, 4);
+	strncpy(mdata->uri_parts.year, date, 4);
 	len = 5;
 	val = remove_zeros(date + 5, 2, &zc);
-	strncpy(pdata->uri_parts.month, val, 2 - zc);
+	strncpy(mdata->uri_parts.month, val, 2 - zc);
 	len += (2 - zc) + 1;
 	val = remove_zeros(date + 8, 2, &zc);
-	strncpy(pdata->uri_parts.day, val, 2 - zc);
+	strncpy(mdata->uri_parts.day, val, 2 - zc);
 	len += (2 - zc);
 
 	return len;
 }
 
-int set_num_uri(struct parsed_data *pdata, char *target, enum numkind *numkind,
+int set_num_uri(struct metadata *mdata, char *target, enum numkind *numkind,
 	const char *natural, const char *nor, const char *id, const char *idprefix)
 {
 	int len = 0;
@@ -328,8 +328,8 @@ int set_num_uri(struct parsed_data *pdata, char *target, enum numkind *numkind,
 				id, natural, plen - MAX_URI_NUMBER);
 			return -1;
 		}
-		strcpy(pdata->uri_parts.num1, val);
-		pdata->uri_parts.num1kind = NATURAL_NUMKIND;
+		strcpy(mdata->uri_parts.num1, val);
+		mdata->uri_parts.num1kind = NATURAL_NUMKIND;
 		if (*numkind == EMPTY_NUMKIND) {
 			strcpy(target, val);
 			len += plen;
@@ -352,8 +352,8 @@ int set_num_uri(struct parsed_data *pdata, char *target, enum numkind *numkind,
 				id, nor, plen - MAX_URI_NUMBER);
 			return -1;
 		}
-		strcpy(pdata->uri_parts.num2, val);
-		pdata->uri_parts.num2kind = NOR_NUMKIND;
+		strcpy(mdata->uri_parts.num2, val);
+		mdata->uri_parts.num2kind = NOR_NUMKIND;
 		if (*numkind == EMPTY_NUMKIND) {
 			strcpy(target, val);
 			len += plen;
@@ -375,12 +375,12 @@ int set_num_uri(struct parsed_data *pdata, char *target, enum numkind *numkind,
 				id, nor, plen - MAX_URI_NUMBER);
 			return -1;
 		}
-		tmp = pdata->uri_parts.num3;
+		tmp = mdata->uri_parts.num3;
 		if (idprefix != NULL) {
 			tmp = stpcpy(tmp, idprefix);
 		}
 		strcpy(tmp, val);
-		pdata->uri_parts.num3kind = ID_NUMKIND;
+		mdata->uri_parts.num3kind = ID_NUMKIND;
 		if (*numkind == EMPTY_NUMKIND) {
 			if (idprefix != NULL) {
 				target = stpcpy(target, idprefix);
@@ -397,7 +397,7 @@ int set_num_uri(struct parsed_data *pdata, char *target, enum numkind *numkind,
 	return len;
 }
 
-enum uri_kind set_text_uri(struct parsed_data *pdata, char *tnum_target, enum numkind *tnumkind,
+enum uri_kind set_text_uri(struct metadata *mdata, char *tnum_target, enum numkind *tnumkind,
 	const char *texte_num, const char *texte_nor, const char *texte_cid, const char *texte_nature,
 	size_t *len)
 {
@@ -406,15 +406,15 @@ enum uri_kind set_text_uri(struct parsed_data *pdata, char *tnum_target, enum nu
 	enum uri_kind kind;
 
 	if (strcmp(texte_nature, "CODE") == 0) {
-		strcpy(pdata->uri_parts.corpus, "code");
+		strcpy(mdata->uri_parts.corpus, "code");
 		*len += 5;  /* len(/code) */
 
 		cname = get_code_name(texte_cid);
 		if (cname == NULL) {
-			fprintf(stderr, "warning:%s: cannot find code name for %s\n", pdata->id, texte_cid);
+			fprintf(stderr, "warning:%s: cannot find code name for %s\n", mdata->id, texte_cid);
 		}
 
-		plen = set_num_uri(pdata, tnum_target,tnumkind,
+		plen = set_num_uri(mdata, tnum_target,tnumkind,
 				   cname, texte_nor, texte_cid,
 				   "tid");
 		if (plen < 0)
@@ -422,16 +422,16 @@ enum uri_kind set_text_uri(struct parsed_data *pdata, char *tnum_target, enum nu
 		*len += plen;
 		kind = URI_CORPUS_TNUM;
 	} else if (strcmp(texte_nature, "CONSTITUTION") == 0) {
-		strcpy(pdata->uri_parts.corpus, "cons");
+		strcpy(mdata->uri_parts.corpus, "cons");
 		*len += 5;  /* len(/cons) */
 		//(1789|1958|1946) 2004?
 
 		cname = get_constitution(texte_cid);
 		if (cname == NULL) {
-			fprintf(stderr, "warning:%s: cannot find constitution for %s\n", pdata->id, texte_cid);
+			fprintf(stderr, "warning:%s: cannot find constitution for %s\n", mdata->id, texte_cid);
 		}
 
-		plen = set_num_uri(pdata, tnum_target,tnumkind,
+		plen = set_num_uri(mdata, tnum_target,tnumkind,
 				   cname, texte_nor, texte_cid,
 				   "tid");
 		if (plen < 0)
@@ -439,25 +439,25 @@ enum uri_kind set_text_uri(struct parsed_data *pdata, char *tnum_target, enum nu
 		*len += plen;
 		kind = URI_CORPUS_TNUM;
 	} else {
-		strcpy(pdata->uri_parts.corpus, "lr");
+		strcpy(mdata->uri_parts.corpus, "lr");
 		*len += 3;  /* len(/lr) */
 
 		plen = strlen(texte_nature);
 		if (plen > MAX_URI_NATURE) {
 			fprintf(stderr, "error:%s: nature too small for text nature '%s' (%lu)\n",
-				pdata->id, cname, plen - MAX_URI_NATURE);
+				mdata->id, cname, plen - MAX_URI_NATURE);
 			return EMPTY_URI_KIND;
 		}
-		strcpy(pdata->uri_parts.nature, texte_nature);
-		lower_string(pdata->uri_parts.nature);
+		strcpy(mdata->uri_parts.nature, texte_nature);
+		lower_string(mdata->uri_parts.nature);
 		*len += plen + 1;
 
-		plen = set_date_uri(pdata);
+		plen = set_date_uri(mdata);
 		if (plen < 0)
 			return plen;
 		*len += plen + 1;
 
-		plen = set_num_uri(pdata, tnum_target,
+		plen = set_num_uri(mdata, tnum_target,
 			tnumkind, texte_num, texte_nor, texte_cid,
 			"tid");
 		if (plen < 0)
@@ -468,7 +468,7 @@ enum uri_kind set_text_uri(struct parsed_data *pdata, char *tnum_target, enum nu
 	return kind;
 }
 
-int set_jorflegi_uri(struct parsed_data *pdata)
+int set_jorflegi_uri(struct metadata *mdata)
 {
 	size_t len = 0;
 	size_t plen = 0;
@@ -480,95 +480,100 @@ int set_jorflegi_uri(struct parsed_data *pdata)
 	int zc;
 	enum uri_kind kind;
 
-	if (pdata->uri_parts.doctype == JORFCONT_DOCTYPE) {
-		strcpy(pdata->uri_parts.country, "fr");
-		strcpy(pdata->uri_parts.corpus, "jo");
+	if (mdata->uri_parts.doctype == JORFCONT_DOCTYPE) {
+		strcpy(mdata->uri_parts.country, "fr");
+		strcpy(mdata->uri_parts.corpus, "jo");
 		len = 5;
-		plen = set_date_uri(pdata);
+		plen = set_date_uri(mdata);
 		if (plen < 0)
 			return -1;
 		len += plen + 1;
-		plen = set_num_uri(pdata, pdata->uri_parts.cnum, &pdata->uri_parts.cnumkind,
-			pdata->num, NULL, pdata->id, "cid");
+		plen = set_num_uri(mdata, mdata->uri_parts.cnum, &mdata->uri_parts.cnumkind,
+			mdata->num, NULL, mdata->id, "cid");
 		if (plen < 0)
 			return -1;
 		len += plen + 1;
-		pdata->uri_parts.kind = URI_CORPUS_DATE_CNUM;
-	} else if (pdata->uri_parts.doctype == JORFTEXT_DOCTYPE || pdata->uri_parts.doctype == LEGITEXT_DOCTYPE) {
-		strcpy(pdata->uri_parts.country, "fr");
+		mdata->uri_parts.kind = URI_CORPUS_DATE_CNUM;
+	} else if (mdata->uri_parts.doctype == JORFTEXT_DOCTYPE || mdata->uri_parts.doctype == LEGITEXT_DOCTYPE) {
+		strcpy(mdata->uri_parts.country, "fr");
 		len = 2;  /* fr */
-		kind = set_text_uri(pdata, pdata->uri_parts.tnum, &pdata->uri_parts.tnumkind,
-				    pdata->num, pdata->nor, pdata->cid,
-				    pdata->nature, &len);
+		kind = set_text_uri(mdata, mdata->uri_parts.tnum, &mdata->uri_parts.tnumkind,
+				    mdata->num, mdata->nor, mdata->cid,
+				    mdata->nature, &len);
 		if (kind == EMPTY_URI_KIND)
 			return -1;
-		pdata->uri_parts.kind = kind;
-	} else if (pdata->uri_parts.doctype == JORFVERS_DOCTYPE) {
-		plen = date_to_version(pdata->date_publi, pdata->uri_parts.tversion);
+		mdata->uri_parts.kind = kind;
+	} else if (mdata->uri_parts.doctype == JORFVERS_DOCTYPE) {
+		plen = date_to_version(mdata->date_publi, mdata->uri_parts.tversion);
 		if (plen < 0)
 			return -1;
 		len = plen + 1;
-		pdata->uri_parts.tversion_datekind = PUB_DATEKIND;
-		pdata->uri_parts.kind = PARTIAL_URI_VERSION;
-	} else if (pdata->uri_parts.doctype == JORFSCTA_DOCTYPE) {
-		plen = set_num_uri(pdata, pdata->uri_parts.snum, &pdata->uri_parts.snumkind,
-				   NULL, NULL, pdata->id, "sid");
+		mdata->uri_parts.tversion_datekind = PUB_DATEKIND;
+		mdata->uri_parts.kind = PARTIAL_URI_VERSION;
+	} else if (mdata->uri_parts.doctype == JORFSCTA_DOCTYPE) {
+		plen = set_num_uri(mdata, mdata->uri_parts.snum, &mdata->uri_parts.snumkind,
+				   NULL, NULL, mdata->id, "sid");
 		if (plen < 0)
 			return -1;
 		len = plen + 1;
-		plen = date_to_version(pdata->date_publi, pdata->uri_parts.sversion);
+		plen = date_to_version(mdata->date_publi, mdata->uri_parts.sversion);
 		if (plen < 0)
 			return -1;
 		len += plen;
-		pdata->uri_parts.sversion_datekind = PUB_DATEKIND;
-		pdata->uri_parts.kind = PARTIAL_URI_SNUM_VERSION;
-	} else if (pdata->uri_parts.doctype == JORFARTI_DOCTYPE) {
-		plen = set_num_uri(pdata, pdata->uri_parts.anum, &pdata->uri_parts.anumkind,
-				   pdata->num, NULL, pdata->id, "aid");
+		mdata->uri_parts.sversion_datekind = PUB_DATEKIND;
+		mdata->uri_parts.kind = PARTIAL_URI_SNUM_VERSION;
+	} else if (mdata->uri_parts.doctype == JORFARTI_DOCTYPE) {
+		plen = set_num_uri(mdata, mdata->uri_parts.anum, &mdata->uri_parts.anumkind,
+				   mdata->num, NULL, mdata->id, "aid");
 		if (plen < 0)
 			return -1;
 		len = plen + 1;
 
-		plen = date_to_version(pdata->date_publi, pdata->uri_parts.aversion);
+		plen = date_to_version(mdata->date_publi, mdata->uri_parts.aversion);
 		if (plen < 0)
 			return -1;
 		len += plen + 1;
 
-		pdata->uri_parts.aversion_datekind = PUB_DATEKIND;
-		pdata->uri_parts.kind = PARTIAL_URI_ANUM_VERSION;
-	} else if (pdata->uri_parts.doctype == LEGIVERS_DOCTYPE) {
-		plen = date_to_version(pdata->date_debut, pdata->uri_parts.tversion);
+		mdata->uri_parts.aversion_datekind = PUB_DATEKIND;
+		mdata->uri_parts.kind = PARTIAL_URI_ANUM_VERSION;
+	} else if (mdata->uri_parts.doctype == LEGIVERS_DOCTYPE) {
+		plen = date_to_version(mdata->date_debut, mdata->uri_parts.tversion);
 		if (plen < 0)
 			return -1;
 		len = plen;
-		pdata->uri_parts.tversion_datekind = BEG_DATEKIND;
-		pdata->uri_parts.kind = PARTIAL_URI_VERSION;
-	} else if (pdata->uri_parts.doctype == LEGISCTA_DOCTYPE) {
-		plen = set_num_uri(pdata, pdata->uri_parts.snum, &pdata->uri_parts.snumkind,
-				   NULL, NULL, pdata->id, "sid");
+		mdata->uri_parts.tversion_datekind = BEG_DATEKIND;
+		mdata->uri_parts.kind = PARTIAL_URI_VERSION;
+	} else if (mdata->uri_parts.doctype == LEGISCTA_DOCTYPE) {
+		plen = set_num_uri(mdata, mdata->uri_parts.snum, &mdata->uri_parts.snumkind,
+				   NULL, NULL, mdata->id, "sid");
 		if (plen < 0)
 			return -1;
-		len = plen + 1;
-
-		plen = date_to_version(pdata->texte_debut, pdata->uri_parts.sversion);
+		len = plen;
+		mdata->uri_parts.kind = PARTIAL_URI_SNUM;
+		/*
+		 * Pas de date ici, car potentiellement il y a plusieurs dates de début (par ex,
+		 * code rural et ses deux textversions...
+		 *
+		plen = date_to_version(mdata->contexte.texte_debut, mdata->uri_parts.sversion);
 		if (plen < 0)
 			return -1;
 		len += plen;
-		pdata->uri_parts.sversion_datekind = BEG_DATEKIND;
-		pdata->uri_parts.kind = PARTIAL_URI_SNUM_VERSION;
-	} else if (pdata->uri_parts.doctype == LEGIARTI_DOCTYPE) {
-		plen = set_num_uri(pdata, pdata->uri_parts.anum, &pdata->uri_parts.anumkind,
-				   pdata->num, NULL, pdata->id, "aid");
+		mdata->uri_parts.sversion_datekind = BEG_DATEKIND;
+		mdata->uri_parts.kind = PARTIAL_URI_SNUM_VERSION;
+		*/
+	} else if (mdata->uri_parts.doctype == LEGIARTI_DOCTYPE) {
+		plen = set_num_uri(mdata, mdata->uri_parts.anum, &mdata->uri_parts.anumkind,
+				   mdata->num, NULL, mdata->id, "aid");
 		if (plen < 0)
 			return -1;
 		len = plen + 1;
 
-		plen = date_to_version(pdata->date_debut, pdata->uri_parts.aversion);
+		plen = date_to_version(mdata->date_debut, mdata->uri_parts.aversion);
 		if (plen < 0)
 			return -1;
 		len += plen + 1;
-		pdata->uri_parts.aversion_datekind = BEG_DATEKIND;
-		pdata->uri_parts.kind = PARTIAL_URI_ANUM_VERSION;
+		mdata->uri_parts.aversion_datekind = BEG_DATEKIND;
+		mdata->uri_parts.kind = PARTIAL_URI_ANUM_VERSION;
 	}
 
 	return len;

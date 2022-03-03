@@ -167,6 +167,11 @@ char *uri_cpy(struct uri *source, char *dst)
 			dst = _uri_cpy(dst, NULL, URI_SEP);
 			dst = _uri_cpy(dst, source->tversion, 0);
 			break;
+		case PARTIAL_URI_SNUM:
+			dst = _uri_cpy(dst, NULL, URI_SEP);
+			/*dst = _uri_cpy(dst, source->snum, URI_SEP);*/
+			dst = _uri_cpy(dst, "%s", 0);
+			break;
 		default:
 			break;
 	}

@@ -17,7 +17,7 @@ struct archive_info {
 struct gen_uri_info {
     enum fund fund;
     int xml_files;
-    struct parsed_data pdata;
+    struct parsed_data *pdata;
     xmlSAXHandler parser_handler;
     xmlParserCtxtPtr ctxt;
 };
@@ -165,6 +165,7 @@ static const xmlChar *FIELD_NAME_DATE_FIN = BAD_CAST "DATE_FIN";
 static const xmlChar *FIELD_NAME_DATE_PUBLI = BAD_CAST "DATE_PUBLI";
 static const xmlChar *FIELD_NAME_DATE_TEXTE = BAD_CAST "DATE_TEXTE";
 static const xmlChar *FIELD_NAME_DERNIERE_MODIFICATION = BAD_CAST "DERNIERE_MODIFICATION";
+static const xmlChar *FIELD_NAME_VERSION_A_VENIR = BAD_CAST "VERSION_A_VENIR";
 static const xmlChar *FIELD_NAME_NUM = BAD_CAST "NUM";
 static const xmlChar *FIELD_NAME_NUM_PARUTION = BAD_CAST "NUM_PARUTION";
 static const xmlChar *FIELD_NAME_NUM_SEQUENCE = BAD_CAST "NUM_SEQUENCE";
@@ -180,50 +181,61 @@ static const xmlChar *FIELD_NAME_ETAT = BAD_CAST "ETAT";
 static const xmlChar *FIELD_NAME_TEXTE = BAD_CAST "TEXTE";
 static const xmlChar *FIELD_NAME_TITRE_TXT = BAD_CAST "TITRE_TXT";
 static const xmlChar *FIELD_NAME_ORIGINE = BAD_CAST "ORIGINE";
+static const xmlChar *FIELD_NAME_VERSION = BAD_CAST "VERSION";
+static const xmlChar *FIELD_NAME_LIEN_TXT = BAD_CAST "LIEN_TXT";
+static const xmlChar *FIELD_NAME_LIEN_ART = BAD_CAST "LIEN_ART";
+static const xmlChar *FIELD_NAME_LIEN_SECTION_TA = BAD_CAST "LIEN_SECTION_TA";
+static const xmlChar *FIELD_NAME_LIENS = BAD_CAST "LIENS";
+static const xmlChar *FIELD_NAME_LIEN = BAD_CAST "LIEN";
+static const xmlChar *FIELD_NAME_STRUCT = BAD_CAST "STRUCT";
+static const xmlChar *FIELD_NAME_STRUCTURE_TA = BAD_CAST "STRUCTURE_TA";
 
 int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 {
 	int r = 0;
-	//printf("fund = %d\n", pdata->uri_parts.fund);
-	//printf("doctype = %d\n", pdata->uri_parts.doctype);
-	//printf("uri_kind = %d\n", pdata->uri_parts.kind);
-	/* ID;base;nature;PCID;uri_kind;uri;num1;num2;num3 */
-	r += fprintf_doctype(f, pdata->uri_parts.doctype);
-	r += fprintf(f, "%s;%s;%s;%s;%d;%s;%d;%s;%d;%s;%d;%s\n", pdata->id + 8,
-		pdata->uri_parts.base,
-		pdata->nature,
-		(*pdata->texte_cid == 0?(*pdata->cid == 0?"":pdata->cid):pdata->texte_cid),
-		pdata->uri_parts.kind,
-		pdata->uri,
-		pdata->uri_parts.num1kind,
-		(pdata->uri_parts.num1kind == EMPTY_NUMKIND?"":pdata->uri_parts.num1),
-		pdata->uri_parts.num2kind,
-		(pdata->uri_parts.num2kind == EMPTY_NUMKIND?"":pdata->uri_parts.num2),
-		pdata->uri_parts.num3kind,
-		(pdata->uri_parts.num3kind == EMPTY_NUMKIND?"":pdata->uri_parts.num3));
-	/*
-	printf("ID = %s\n", pdata->id);
-	printf("CID = %s\n", pdata->cid);
-	printf("NATURE = %s\n", pdata->nature);
-	printf("TYPE = %s\n", pdata->type);
-	printf("DATE_DEBUT = %s\n", pdata->date_debut);
-	printf("DATE_FIN = %s\n", pdata->date_fin);
-	printf("NUM = %s\n", pdata->num);
-	printf("TITRE = %s\n", pdata->titre);
-	printf("DATE_PUBLI = %s\n", pdata->date_publi);
-	printf("NOR = %s\n", pdata->nor);
-	printf("DATE_TEXTE = %s\n", pdata->date_texte);
-	printf("NUM_PARUTION = %s\n", pdata->num_parution);
-	printf("NUM_SEQUENCE = %s\n", pdata->num_sequence);
-	printf("ORIGINE_PUBLI = %s\n", pdata->origine_publi);
-	printf("PAGE_DEB_PUBLI = %s\n", pdata->page_deb_publi);
-	printf("PAGE_FIN_PUBLI = %s\n", pdata->page_fin_publi);
-	printf("TITREFULL = %s\n", pdata->titrefull);
-	printf("AUTORITE = %s\n", pdata->autorite);
-	printf("MINISTERE = %s\n", pdata->ministere);
-	printf("ETAT = %s\n", pdata->etat);
-	printf("DERNIERE_MODIFICATION = %s\n", pdata->derniere_modification);
-	 */
+	int i;
+	struct metadata *mdata = pdata->metadata;
+	struct versions *versions = pdata->versions;
+	struct liens *liens = pdata->liens;
+	struct toc *toc = pdata->toc;
+	struct document_version *docversion;
+	struct lien *lien;
+	struct tocitem *tocitem;
+
+	r += fprintf_doctype(f, mdata->uri_parts.doctype);
+	r += fprintf(f, "%s;%s;%s;%s;%d;%s;%d;%s;%d;%s;%d;%s\n", mdata->id + 8,
+		mdata->uri_parts.base,
+		mdata->nature,
+		(*mdata->contexte.cid == 0?(*mdata->cid == 0?"":mdata->cid):mdata->contexte.cid),
+		mdata->uri_parts.kind,
+		mdata->uri,
+		mdata->uri_parts.num1kind,
+		(mdata->uri_parts.num1kind == EMPTY_NUMKIND?"":mdata->uri_parts.num1),
+		mdata->uri_parts.num2kind,
+		(mdata->uri_parts.num2kind == EMPTY_NUMKIND?"":mdata->uri_parts.num2),
+		mdata->uri_parts.num3kind,
+		(mdata->uri_parts.num3kind == EMPTY_NUMKIND?"":mdata->uri_parts.num3));
+	for (i = 0; i < versions->nb_versions; i++) {
+		docversion = &versions->versions[i];
+		fprintf(f, "\tversions.version;%s;%s;%s;%s;%s\n",
+			docversion->id, docversion->date_debut, docversion->date_fin,
+			docversion->etat, docversion->num);
+	}
+	for (i = 0; i < liens->nb_liens; i++) {
+		lien = &liens->liens[i];
+		fprintf(f, "\tliens.lien;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
+			lien->cid_texte, lien->date_signature_texte, lien->nature_texte,
+			lien->nor_texte, lien->num_texte,
+			lien->id, lien->num, lien->sens, lien->typelien, lien->titre);
+	}
+	for (i = 0; i < toc->nb_tocitems; i++) {
+		tocitem = &toc->tocitems[i];
+		fprintf(f, "\ttoc.tocitem;%d;%d;%s;%s;%s;%s;%s;%s\n",
+			tocitem->niv, tocitem->kind, tocitem->id, tocitem->cid,
+			tocitem->date_debut, tocitem->date_fin,
+			tocitem->etat, tocitem->titrefull);
+	}
+
 	return r;
 }
 
@@ -240,39 +252,109 @@ int copy_attr_to_field(char *id, const xmlChar *attr_name, const xmlChar *attr_v
 	return len;
 }
 
+void reset_current(struct parsed_data *pdata)
+{
+	pdata->current_field = NULL;
+	pdata->current_size = 0;
+	pdata->current_name = NULL;
+	pdata->parent_element = PE_EMPTY;
+}
+
+struct parsed_data *allocate_parsed_data()
+{
+	struct parsed_data *pdata;
+
+	pdata = calloc(1, sizeof(struct parsed_data));
+	if (pdata == NULL) {
+		perror("calloc parsed_data");
+		return NULL;
+	}
+	pdata->metadata = calloc(1, sizeof(struct metadata));
+	if (pdata->metadata == NULL) {
+		perror("calloc parsed_data->metadata");
+		return NULL;
+	}
+	pdata->versions = calloc(1, sizeof(struct versions));
+	if (pdata->versions == NULL) {
+		perror("calloc parsed_data->versions");
+		return NULL;
+	}
+	pdata->versions->max_versions = MAX_VERSIONS;
+	pdata->liens = calloc(1, sizeof(struct liens));
+	if (pdata->liens == NULL) {
+		perror("calloc parsed_data->liens");
+		return NULL;
+	}
+	pdata->liens->max_liens = MAX_LIENS;
+	pdata->toc = calloc(1, sizeof(struct toc));
+	if (pdata->toc == NULL) {
+		perror("calloc parsed_data->toc");
+		return NULL;
+	}
+	pdata->toc->max_tocitems = MAX_TOCITEMS;
+
+	return pdata;
+}
+
+void free_parsed_data(struct parsed_data *pdata)
+{
+	free(pdata->metadata);
+	free(pdata->versions);
+	free(pdata->liens);
+	free(pdata->toc);
+	free(pdata);
+}
+
+void reset_parsed_data(struct parsed_data *pdata)
+{
+	reset_current(pdata);
+	memset(pdata->metadata, 0, sizeof(struct metadata));
+	pdata->liens->nb_liens = 0;
+	pdata->versions->nb_versions = 0;
+}
+
 void start_element_callback(void *user_data, const xmlChar *name, const xmlChar **attrs)
 {
 	struct parsed_data *pdata = user_data;
+	struct metadata *mdata;
+	struct versions *versions;
+	struct liens *liens;
+	struct document_version *docversion;
+	struct lien *lien;
 	int r;
 
-	if (pdata->uri_parts.doctype == EMPTY_DOCTYPE) {
-		if (strcmp(pdata->uri_parts.base, "JORF") == 0) {
+	mdata = pdata->metadata;
+	versions = pdata->versions;
+	liens = pdata->liens;
+
+	if (mdata->uri_parts.doctype == EMPTY_DOCTYPE) {
+		if (strcmp(mdata->uri_parts.base, "JORF") == 0) {
 			if (xmlStrEqual(name, ROOT_JORFCONT)) {
-				pdata->uri_parts.doctype = JORFCONT_DOCTYPE;
+				mdata->uri_parts.doctype = JORFCONT_DOCTYPE;
 			} else if (xmlStrEqual(name, ROOT_JORFTEXT)) {
-				pdata->uri_parts.doctype = JORFTEXT_DOCTYPE;
+				mdata->uri_parts.doctype = JORFTEXT_DOCTYPE;
 			} else if (xmlStrEqual(name, ROOT_JORFVERS)) {
-				pdata->uri_parts.doctype = JORFVERS_DOCTYPE;
+				mdata->uri_parts.doctype = JORFVERS_DOCTYPE;
 			} else if (xmlStrEqual(name, ROOT_JORFSCTA)) {
-				pdata->uri_parts.doctype = JORFSCTA_DOCTYPE;
+				mdata->uri_parts.doctype = JORFSCTA_DOCTYPE;
 			} else if (xmlStrEqual(name, ROOT_JORFARTI)) {
-				pdata->uri_parts.doctype = JORFARTI_DOCTYPE;
+				mdata->uri_parts.doctype = JORFARTI_DOCTYPE;
 			} else {
 				fprintf(stderr, "Unknown root for XML file: %s\n",
 					(char *)name);
 				exit(1);
 			}
-		} else if (strcmp(pdata->uri_parts.base, "LEGI") == 0) {
+		} else if (strcmp(mdata->uri_parts.base, "LEGI") == 0) {
 			if (xmlStrEqual(name, ROOT_LEGITEXT)) {
-				pdata->uri_parts.doctype = LEGITEXT_DOCTYPE;
+				mdata->uri_parts.doctype = LEGITEXT_DOCTYPE;
 			} else if (xmlStrEqual(name, ROOT_LEGIVERS)) {
-				pdata->uri_parts.doctype = LEGIVERS_DOCTYPE;
+				mdata->uri_parts.doctype = LEGIVERS_DOCTYPE;
 			} else if (xmlStrEqual(name, ROOT_LEGISCTA)) {
-				pdata->uri_parts.doctype = LEGISCTA_DOCTYPE;
+				mdata->uri_parts.doctype = LEGISCTA_DOCTYPE;
 			} else if (xmlStrEqual(name, ROOT_LEGIARTI)) {
-				pdata->uri_parts.doctype = LEGIARTI_DOCTYPE;
+				mdata->uri_parts.doctype = LEGIARTI_DOCTYPE;
 			} else if (xmlStrEqual(name, ROOT_VERSIONS)) {
-				pdata->uri_parts.doctype = VERSIONS_DOCTYPE;
+				mdata->uri_parts.doctype = VERSIONS_DOCTYPE;
 			} else {
 				fprintf(stderr, "Unknown root for XML file: %s\n",
 					(char *) name);
@@ -280,161 +362,388 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 			}
 		} else {
 			if (xmlStrEqual(name, ROOT_ID)) {
-				pdata->uri_parts.doctype = VERSIONS_ID_DOCTYPE;
+				mdata->uri_parts.doctype = VERSIONS_ID_DOCTYPE;
 			}
 		}
 	}
-	/*
-	printf("Beginning of element : %s \n", name);
-	while (NULL != attrs && NULL != attrs[0]) {
-		printf("attribute: %s=%s\n",attrs[0],attrs[1]);
-		attrs = &attrs[2];
-	}
-	*/
 	if (xmlStrEqual(name, FIELD_NAME_ID)) {
-		pdata->current_field = pdata->id;
+		pdata->current_field = mdata->id;
 		pdata->current_size = FIELD_LEN_ID;
 		pdata->current_name = FIELD_NAME_ID;
 	} else if (xmlStrEqual(name, FIELD_NAME_CID)) {
-		pdata->current_field = pdata->cid;
+		pdata->current_field = mdata->cid;
 		pdata->current_size = FIELD_LEN_ID;
 		pdata->current_name = FIELD_NAME_CID;
 	} else if (xmlStrEqual(name, FIELD_NAME_NATURE)) {
-		pdata->current_field = pdata->nature;
+		pdata->current_field = mdata->nature;
 		pdata->current_size = FIELD_LEN_NATURE;
 		pdata->current_name = FIELD_NAME_NATURE;
 	} else if (xmlStrEqual(name, FIELD_NAME_TYPE)) {
-		pdata->current_field = pdata->type;
+		pdata->current_field = mdata->type;
 		pdata->current_size = FIELD_LEN_TYPE;
 		pdata->current_name = FIELD_NAME_TYPE;
 	} else if (xmlStrEqual(name, FIELD_NAME_DATE_DEBUT)) {
-		pdata->current_field = pdata->date_debut;
+		pdata->current_field = mdata->date_debut;
 		pdata->current_size = FIELD_LEN_DATE;
 		pdata->current_name = FIELD_NAME_DATE_DEBUT;
 	} else if (xmlStrEqual(name, FIELD_NAME_DATE_FIN)) {
-		pdata->current_field = pdata->date_fin;
+		pdata->current_field = mdata->date_fin;
 		pdata->current_size = FIELD_LEN_DATE;
 		pdata->current_name = FIELD_NAME_DATE_FIN;
 	} else if (xmlStrEqual(name, FIELD_NAME_NUM)) {
-		pdata->current_field = pdata->num;
+		pdata->current_field = mdata->num;
 		pdata->current_size = FIELD_LEN_NUM;
 		pdata->current_name = FIELD_NAME_NUM;
 	} else if (xmlStrEqual(name, FIELD_NAME_TITRE)) {
-		pdata->current_field = pdata->titre;
+		pdata->current_field = mdata->titre;
 		pdata->current_size = FIELD_LEN_TITRE;
 		pdata->current_name = FIELD_NAME_TITRE;
 	} else if (xmlStrEqual(name, FIELD_NAME_DATE_PUBLI)) {
-		pdata->current_field = pdata->date_publi;
+		pdata->current_field = mdata->date_publi;
 		pdata->current_size = FIELD_LEN_DATE;
 		pdata->current_name = FIELD_NAME_DATE_PUBLI;
 	} else if (xmlStrEqual(name, FIELD_NAME_TITRE_TA)) {
-		pdata->current_field = pdata->titrefull;
+		pdata->current_field = mdata->titrefull;
 		pdata->current_size = FIELD_LEN_TITREFULL;
 		pdata->current_name = FIELD_NAME_TITRE_TA;
 	} else if (xmlStrEqual(name, FIELD_NAME_NOR)) {
-		pdata->current_field = pdata->nor;
+		pdata->current_field = mdata->nor;
 		pdata->current_size = FIELD_LEN_NOR;
 		pdata->current_name = FIELD_NAME_NOR;
 	} else if (xmlStrEqual(name, FIELD_NAME_DATE_TEXTE)) {
-		pdata->current_field = pdata->date_texte;
+		pdata->current_field = mdata->date_texte;
 		pdata->current_size = FIELD_LEN_DATE;
 		pdata->current_name = FIELD_NAME_DATE_TEXTE;
 	} else if (xmlStrEqual(name, FIELD_NAME_NUM_PARUTION)) {
-		pdata->current_field = pdata->num_parution;
+		pdata->current_field = mdata->num_parution;
 		pdata->current_size = FIELD_LEN_NUM;
 		pdata->current_name = FIELD_NAME_NUM_PARUTION;
 	} else if (xmlStrEqual(name, FIELD_NAME_NUM_SEQUENCE)) {
-		pdata->current_field = pdata->num_sequence;
+		pdata->current_field = mdata->num_sequence;
 		pdata->current_size = FIELD_LEN_NUM;
 		pdata->current_name = FIELD_NAME_NUM_SEQUENCE;
 	} else if (xmlStrEqual(name, FIELD_NAME_ORIGINE_PUBLI)) {
-		pdata->current_field = pdata->origine_publi;
+		pdata->current_field = mdata->origine_publi;
 		pdata->current_size = FIELD_LEN_ORIGINE_PUBLI;
 		pdata->current_name = FIELD_NAME_ORIGINE_PUBLI;
 	} else if (xmlStrEqual(name, FIELD_NAME_PAGE_DEB_PUBLI)) {
-		pdata->current_field = pdata->page_deb_publi;
+		pdata->current_field = mdata->page_deb_publi;
 		pdata->current_size = FIELD_LEN_PAGE;
 		pdata->current_name = FIELD_NAME_PAGE_DEB_PUBLI;
 	} else if (xmlStrEqual(name, FIELD_NAME_PAGE_FIN_PUBLI)) {
-		pdata->current_field = pdata->page_fin_publi;
+		pdata->current_field = mdata->page_fin_publi;
 		pdata->current_size = FIELD_LEN_PAGE;
 		pdata->current_name = FIELD_NAME_PAGE_FIN_PUBLI;
 	} else if (xmlStrEqual(name, FIELD_NAME_TITREFULL)) {
-		pdata->current_field = pdata->titrefull;
+		pdata->current_field = mdata->titrefull;
 		pdata->current_size = FIELD_LEN_TITREFULL;
 		pdata->current_name = FIELD_NAME_TITREFULL;
 	} else if (xmlStrEqual(name, FIELD_NAME_AUTORITE)) {
-		pdata->current_field = pdata->autorite;
+		pdata->current_field = mdata->autorite;
 		pdata->current_size = FIELD_LEN_AUTORITE;
 		pdata->current_name = FIELD_NAME_AUTORITE;
 	} else if (xmlStrEqual(name, FIELD_NAME_MINISTERE)) {
-		pdata->current_field = pdata->ministere;
+		pdata->current_field = mdata->ministere;
 		pdata->current_size = FIELD_LEN_AUTORITE;
 		pdata->current_name = FIELD_NAME_MINISTERE;
 	} else if (xmlStrEqual(name, FIELD_NAME_ETAT)) {
-		pdata->current_field = pdata->etat;
+		pdata->current_field = mdata->etat;
 		pdata->current_size = FIELD_LEN_ETAT;
 		pdata->current_name = FIELD_NAME_ETAT;
 	} else if (xmlStrEqual(name, FIELD_NAME_ORIGINE)) {
-		pdata->current_field = pdata->origine;
+		pdata->current_field = mdata->origine;
 		pdata->current_size = FIELD_LEN_ORIGINE;
 		pdata->current_name = FIELD_NAME_ORIGINE;
 	} else if (xmlStrEqual(name, FIELD_NAME_DERNIERE_MODIFICATION)) {
-		pdata->current_field = pdata->derniere_modification;
+		pdata->current_field = mdata->derniere_modification;
 		pdata->current_size = FIELD_LEN_DATE;
 		pdata->current_name = FIELD_NAME_DERNIERE_MODIFICATION;
-	} else if (pdata->uri_parts.doctype == JORFSCTA_DOCTYPE
-			|| pdata->uri_parts.doctype == JORFARTI_DOCTYPE
-			|| pdata->uri_parts.doctype == LEGISCTA_DOCTYPE
-			|| pdata->uri_parts.doctype == LEGIARTI_DOCTYPE) {
-		if (xmlStrEqual(name, FIELD_NAME_TEXTE)) {
+	} else if (xmlStrEqual(name, FIELD_NAME_VERSION_A_VENIR)) {
+		if (mdata->nb_versions_a_venir < MAX_VERSIONS) {
+			pdata->current_field = mdata->versions_a_venir[mdata->nb_versions_a_venir++];
+			pdata->current_size = FIELD_LEN_DATE;
+			pdata->current_name = FIELD_NAME_VERSION_A_VENIR;
+		} else {
+			fprintf(stderr, "warning:%s: too much VERSION_A_VENIR (MAX_VERSIONS=%d)\n",
+				mdata->id, MAX_VERSIONS);
+			reset_current(pdata);
+		}
+	} else if (xmlStrEqual(name, FIELD_NAME_TEXTE) && (
+			mdata->uri_parts.doctype == JORFSCTA_DOCTYPE
+			|| mdata->uri_parts.doctype == JORFARTI_DOCTYPE
+			|| mdata->uri_parts.doctype == LEGISCTA_DOCTYPE
+			|| mdata->uri_parts.doctype == LEGIARTI_DOCTYPE)) {
+		/*
+		 * <CONTEXTE>
+		 *  <TEXTE autorite="" cid="LEGITEXT000006071367"
+		 *    date_publi="2999-01-01" date_signature="2999-01-01"
+		 *    ministere="" nature="CODE" nor="" num="" num_parution_jo="">
+		 */
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = FIELD_NAME_TEXTE;
+		while (NULL != attrs && NULL != attrs[0]) {
+			r = 0;
+			if (strcmp((const char *)attrs[0], "cid") == 0)
+				r = copy_attr_to_field(mdata->id,
+					attrs[0], attrs[1], xmlStrlen(attrs[1]),
+					"contexte.cid",
+					mdata->contexte.cid, FIELD_LEN_ID);
+			else if (strcmp((const char *)attrs[0], "nature") == 0)
+				r = copy_attr_to_field(mdata->id,
+					attrs[0], attrs[1], xmlStrlen(attrs[1]),
+					"contexte.nature",
+					mdata->contexte.nature, FIELD_LEN_NATURE);
+			else if (strcmp((const char *)attrs[0], "nor") == 0)
+				r = copy_attr_to_field(mdata->id,
+					attrs[0], attrs[1], xmlStrlen(attrs[1]),
+					"contexte.nor",
+					mdata->contexte.nor, FIELD_LEN_NOR);
+			else if (strcmp((const char *)attrs[0], "num") == 0)
+				r = copy_attr_to_field(mdata->id,
+					attrs[0], attrs[1], xmlStrlen(attrs[1]),
+					"contexte.num",
+					mdata->contexte.num, FIELD_LEN_NUM);
+			else if (strcmp((const char *)attrs[0], "date_signature") == 0)
+				r = copy_attr_to_field(mdata->id,
+					attrs[0], attrs[1], xmlStrlen(attrs[1]),
+					"contexte.date_signature",
+					mdata->contexte.date_signature, FIELD_LEN_DATE);
+			else if (strcmp((const char *)attrs[0], "date_publi") == 0)
+				r = copy_attr_to_field(mdata->id,
+					attrs[0], attrs[1], xmlStrlen(attrs[1]),
+					"contexte.date_publi",
+					mdata->contexte.date_publi, FIELD_LEN_DATE);
+			/* Ignored: autorite, ministere, num_parution_jo */
+			// TODO: que faire quand r < 0 ?
+			attrs = &attrs[2];
+		}
+	} else if (xmlStrEqual(name, FIELD_NAME_TITRE_TXT) && (
+			mdata->uri_parts.doctype == JORFSCTA_DOCTYPE
+			|| mdata->uri_parts.doctype == JORFARTI_DOCTYPE
+			|| mdata->uri_parts.doctype == LEGISCTA_DOCTYPE
+			|| mdata->uri_parts.doctype == LEGIARTI_DOCTYPE)) {
+		/*
+		 * <CONTEXTE>
+		 *   ...
+		 *      <TITRE_TXT c_titre_court="Code rural et de la pêche maritime"
+		 *        debut="2010-05-08" fin="2999-01-01"
+		 *        id_txt="LEGITEXT000022197698">Code rural et de la pêche maritime</TITRE_TXT>
+		 *      <TITRE_TXT c_titre_court="Code rural" debut="1979-12-01" fin="2010-05-08"
+		 *        id_txt="LEGITEXT000006071367">Code rural (nouveau)</TITRE_TXT>
+		 */
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = FIELD_NAME_TITRE_TXT;
+		/*
+		if (mdata->contexte.nb_versions < MAX_VERSIONS) {
+			docversion = &pdata->contexte.versions[pdata->contexte.nb_versions++];
+			docversion->kind = DOCKIND_TEXT;
 			while (NULL != attrs && NULL != attrs[0]) {
 				r = 0;
-				if (strcmp((const char *)attrs[0], "cid") == 0)
-					r = copy_attr_to_field(pdata->id,
-						attrs[0], attrs[1], xmlStrlen(attrs[1]),
-						"texte_cid", pdata->texte_cid, FIELD_LEN_ID);
-					//strcpy(pdata->texte_cid, (const char *)attrs[1]);
-				else if (strcmp((const char *)attrs[0], "nature") == 0)
-					r = copy_attr_to_field(pdata->id,
-						attrs[0], attrs[1], xmlStrlen(attrs[1]),
-						"texte_nature", pdata->texte_nature, FIELD_LEN_NATURE);
-				else if (strcmp((const char *)attrs[0], "nor") == 0)
-					r = copy_attr_to_field(pdata->id,
-						attrs[0], attrs[1], xmlStrlen(attrs[1]),
-						"texte_nor", pdata->texte_nor, FIELD_LEN_NOR);
-				else if (strcmp((const char *)attrs[0], "num") == 0)
-					r = copy_attr_to_field(pdata->id,
-						attrs[0], attrs[1], xmlStrlen(attrs[1]),
-						"texte_num", pdata->texte_num, FIELD_LEN_NUM);
-				else if (strcmp((const char *)attrs[0], "date_signature") == 0)
-					r = copy_attr_to_field(pdata->id,
-						attrs[0], attrs[1], xmlStrlen(attrs[1]),
-						"date_texte", pdata->date_texte, FIELD_LEN_DATE);
-				else if (strcmp((const char *)attrs[0], "date_publi") == 0)
-					r = copy_attr_to_field(pdata->id,
-						attrs[0], attrs[1], xmlStrlen(attrs[1]),
-						"date_publi", pdata->date_publi, FIELD_LEN_DATE);
+				if (strcmp((const char *) attrs[0], "debut") == 0)
+					r = copy_attr_to_field(
+						pdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"contexte.versions[].date_debut",
+						docversion->date_debut,
+						FIELD_LEN_DATE);
+				else if (strcmp((const char *) attrs[0], "fin") == 0)
+					r = copy_attr_to_field(
+						pdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"contexte.versions[].date_fin",
+						docversion->date_fin,
+						FIELD_LEN_DATE);
+				else if (strcmp((const char *) attrs[0], "id_txt") == 0)
+					r = copy_attr_to_field(
+						pdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"contexte.versions[].id",
+						docversion->id,
+						FIELD_LEN_ID);
+				attrs = &attrs[2];
+			}
+		} else {
+			fprintf(stderr, "warning:%s: too much %s (%d)\n",
+				pdata->id, FIELD_NAME_TITRE_TXT, MAX_VERSIONS);
+		}
+		 */
+	} else if (xmlStrEqual(name, FIELD_NAME_VERSION)) {
+		/*
+		 * <CONTEXTE>
+		 *   ...
+		 *      <TITRE_TXT c_titre_court="Code rural et de la pêche maritime"
+		 *        debut="2010-05-08" fin="2999-01-01"
+		 *        id_txt="LEGITEXT000022197698">Code rural et de la pêche maritime</TITRE_TXT>
+		 *      <TITRE_TXT c_titre_court="Code rural" debut="1979-12-01" fin="2010-05-08"
+		 *        id_txt="LEGITEXT000006071367">Code rural (nouveau)</TITRE_TXT>
+		 */
+		if (versions->nb_versions < versions->max_versions) {
+			pdata->current_field = NULL;
+			pdata->current_size = 0;
+			pdata->current_name = FIELD_NAME_VERSION;
+			pdata->parent_element = PE_VERSION;
+			docversion = &versions->versions[versions->nb_versions];
+			memset(docversion, 0, sizeof(struct document_version));
+			versions->nb_versions++;
+			while (NULL != attrs && NULL != attrs[0]) {
+				r = 0;
+				if (strcmp((const char *) attrs[0], "etat") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"versions.versions[].etat",
+						docversion->etat,
+						FIELD_LEN_ETAT);
 				// TODO: que faire quand r < 0 ?
 				attrs = &attrs[2];
 			}
-		} else if (xmlStrEqual(name, FIELD_NAME_TITRE_TXT)) {
+		} else {
+			fprintf(stderr, "warning:%s: too much %s (%d)\n",
+				mdata->id, FIELD_NAME_VERSION, versions->max_versions);
+			reset_current(pdata);
+		}
+	} else if (xmlStrEqual(name, FIELD_NAME_LIEN_ART) || xmlStrEqual(name, FIELD_NAME_LIEN_TXT)) {
+		if (pdata->parent_element == PE_VERSION) {
+			docversion = &versions->versions[versions->nb_versions-1];
+			if (xmlStrEqual(name, FIELD_NAME_LIEN_ART))
+				docversion->kind = DOCKIND_ARTICLE;
+			else
+				docversion->kind = DOCKIND_TEXT;
 			while (NULL != attrs && NULL != attrs[0]) {
 				r = 0;
-				if (strcmp((const char *)attrs[0], "debut") == 0)
-					if (*pdata->texte_debut == 0) /* Set value only once (first text) */
-						r = copy_attr_to_field(pdata->id,
-							attrs[0], attrs[1], xmlStrlen(attrs[1]),
-							"texte_debut", pdata->texte_debut, FIELD_LEN_DATE);
+				if (strcmp((const char *) attrs[0], "debut") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"versions.versions[].date_debut",
+						docversion->date_debut,
+						FIELD_LEN_DATE);
+				else if (strcmp((const char *) attrs[0], "fin") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"versions.versions[].date_fin",
+						docversion->date_fin,
+						FIELD_LEN_DATE);
+				else if (strcmp((const char *) attrs[0], "id") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"versions.versions[].id",
+						docversion->id,
+						FIELD_LEN_ID);
+				else if (strcmp((const char *) attrs[0], "num") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"versions.versions[].num",
+						docversion->num,
+						FIELD_LEN_NUM);
 				// TODO: que faire quand r < 0 ?
 				attrs = &attrs[2];
 			}
 		}
+	} else if (xmlStrEqual(name, FIELD_NAME_LIEN)) {
+		if (liens->nb_liens < MAX_LIENS) {
+			lien = &liens->liens[liens->nb_liens];
+			memset(lien, 0, sizeof(struct lien));
+			liens->nb_liens++;
+			pdata->current_field = lien->titre;
+			pdata->current_size = FIELD_LEN_TITRE;
+			pdata->current_name = FIELD_NAME_LIEN;
+			while (NULL != attrs && NULL != attrs[0]) {
+				r = 0;
+				if (strcmp((const char *) attrs[0], "cidtexte") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"lien.cid_texte",
+						lien->cid_texte,
+						FIELD_LEN_ID);
+				else if (strcmp((const char *) attrs[0], "id") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"lien.id",
+						lien->id,
+						FIELD_LEN_ID);
+				else if (strcmp((const char *) attrs[0], "datesignatexte") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"lien.date_signature_texte",
+						lien->date_signature_texte,
+						FIELD_LEN_DATE);
+				else if (strcmp((const char *) attrs[0], "naturetexte") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"lien.nature_texte",
+						lien->nature_texte,
+						FIELD_LEN_NATURE);
+				else if (strcmp((const char *) attrs[0], "nortexte") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"lien.nor_texte",
+						lien->nor_texte,
+						FIELD_LEN_NOR);
+				else if (strcmp((const char *) attrs[0], "numtexte") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"lien.num_texte",
+						lien->num_texte,
+						FIELD_LEN_NUM);
+				else if (strcmp((const char *) attrs[0], "num") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"lien.num",
+						lien->num,
+						FIELD_LEN_NUM);
+				else if (strcmp((const char *) attrs[0], "sens") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"lien.sens",
+						lien->sens,
+						FIELD_LEN_SENS);
+				else if (strcmp((const char *) attrs[0], "typelien") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"lien.typelien",
+						lien->typelien,
+						FIELD_LEN_TYPELIEN);
+				// TODO: que faire quand r < 0 ?
+				attrs = &attrs[2];
+			}
+		} else {
+			fprintf(stderr, "warning:%s: too much %s (%d)\n",
+				mdata->id, FIELD_NAME_LIEN, liens->max_liens);
+			reset_current(pdata);
+		}
 	}
-	/* <CONTEXTE>
-	 * <TEXTE cid="JORFTEXT000032974294" date_publi="2016-08-06" date_signature="2016-07-26"
-	 * nature="ARRETE" nor="AFSS1621351A" num="" num_parution_jo="0182">
-	*/
 }
 
 void end_element_callback(void *user_data, const xmlChar *name)
@@ -463,12 +772,15 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		|| xmlStrEqual(name, FIELD_NAME_ETAT)
 		|| xmlStrEqual(name, FIELD_NAME_DERNIERE_MODIFICATION)
 		|| xmlStrEqual(name, FIELD_NAME_ORIGINE)
+		|| xmlStrEqual(name, FIELD_NAME_TEXTE)
+		|| xmlStrEqual(name, FIELD_NAME_TITRE_TXT)
+		|| xmlStrEqual(name, FIELD_NAME_VERSION_A_VENIR)
+		|| xmlStrEqual(name, FIELD_NAME_VERSION)
+		|| xmlStrEqual(name, FIELD_NAME_LIENS)
+		|| xmlStrEqual(name, FIELD_NAME_LIEN)
 		) {
-		pdata->current_field = NULL;
-		pdata->current_size = 0;
-		pdata->current_name = NULL;
+		reset_current(pdata);
 	}
-
 }
 
 void characters_callback(void *user_data, const xmlChar *chars, int len)
@@ -482,10 +794,8 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 			pdata->current_size -= len;
 		} else {
 			fprintf(stderr, "critical:%s: no more size in current field %s (%d) [%.*s]\n",
-				pdata->id, pdata->current_name, len - pdata->current_size, len, chars);
-			pdata->current_field = NULL;
-			pdata->current_size = 0;
-			pdata->current_name = NULL;
+				pdata->metadata->id, pdata->current_name, len - pdata->current_size, len, chars);
+			reset_current(pdata);
 			pdata->status = 1;
 		}
 	}
@@ -500,6 +810,7 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 	off_t offset;
 	xmlParserCtxtPtr ctxt;
 	struct parsed_data *pdata;
+	struct metadata *mdata;
 	xmlSAXHandler parser_handler = {0};
 	const char *fname;
 	struct gen_uri_info *infos = user_data;
@@ -512,10 +823,11 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 		return 0;
 	}
 
-	pdata = &infos->pdata;
-	memset(pdata, 0, sizeof(infos->pdata));
-	pdata->uri_parts.fund = infos->fund;
-	set_base(fname, size, pdata->uri_parts.base);
+	pdata = infos->pdata;
+	reset_parsed_data(pdata);
+	mdata = pdata->metadata;
+	mdata->uri_parts.fund = infos->fund;
+	set_base(fname, size, mdata->uri_parts.base);
 	infos->xml_files++;
 	ctxt = infos->ctxt;
 
@@ -534,17 +846,17 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 	for (;;) {
 		r = archive_read_data_block(a, &buff, &len, &offset);
 		if (r == ARCHIVE_EOF) {
-			uri_len = set_jorflegi_uri(pdata);
+			uri_len = set_jorflegi_uri(mdata);
 			if (uri_len == -1) {
-				fprintf_doctype(stdout, pdata->uri_parts.doctype);
-				fprintf(stdout, "%s ERROR\n", pdata->id + 8);
+				fprintf_doctype(stdout, mdata->uri_parts.doctype);
+				fprintf(stdout, "%s ERROR\n", mdata->id + 8);
 				// return -1;
 			} else if (uri_len == 0) {
-				fprintf_doctype(stdout, pdata->uri_parts.doctype);
-				fprintf(stdout, "%s IGNORED\n", pdata->id + 8);
+				fprintf_doctype(stdout, mdata->uri_parts.doctype);
+				fprintf(stdout, "%s IGNORED\n", mdata->id + 8);
 			} else {
-				if (pdata->uri_parts.kind != EMPTY_URI_KIND) {
-					uri_cpy(&pdata->uri_parts, pdata->uri);
+				if (mdata->uri_parts.kind != EMPTY_URI_KIND) {
+					uri_cpy(&mdata->uri_parts, mdata->uri);
 				}
 				fprintf_parsed_data(stdout, pdata);
 			}
@@ -633,16 +945,22 @@ int generate_uris(char *fname, enum fund fund)
 	struct gen_uri_info infos = {0};
 	xmlSAXHandler parser_handler = {0};
 
+	infos.pdata = allocate_parsed_data();
+	if (infos.pdata == NULL) {
+		exit(EXIT_FAILURE);
+	}
+
 	parser_handler.startElement = start_element_callback;
 	parser_handler.endElement = end_element_callback;
 	parser_handler.characters = characters_callback;
 
-	infos.ctxt = xmlCreatePushParserCtxt(&parser_handler, &infos.pdata, NULL, 0, NULL);
+	infos.ctxt = xmlCreatePushParserCtxt(&parser_handler, infos.pdata, NULL, 0, NULL);
 	infos.fund = fund;
 
 	r = iterate_archive(fname, archive_show, &infos);
 
 	xmlFreeParserCtxt(infos.ctxt);
+	free_parsed_data(infos.pdata);
 
 	return r;
 }

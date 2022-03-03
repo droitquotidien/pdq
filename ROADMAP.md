@@ -7,9 +7,18 @@
     - [X] ajouter trois champs en fin de ligne de production URI
     - [X] utiliser `;` comme séparateur de champs (pour champ vide)
     - [X] définir les URI avec un template à trois niveaux max `XX/%s[/%s[/%s]`
+- [X] Support CONTEXTE (SCTA, ARTI)
+- [X] Support VERSION_A_VENIR (LEGIVERS)
+- [X] Support VERSIONS
+- [ ] Passer à un parsed_data modulaire. versions, etc, n'ont pas forcément besoin d'être mis à zero avant d'écrire dedans. Permet de gagner du temps sur le memset(). Essayer le realloc également.
+- [ ] Support LIENS
+- [ ] Support MCS_ART
+- [ ] Support MCS_TXT
+- [ ] Support STRUCTURE/STRUCTURE_TA
+- [ ] Support STRUCTURE_TXT (JORFCONT)
+- [ ] Support CONTENU
 - [ ] Formaliser toutes les possibilités de collision d'URI
 - [ ] Normaliser les natures pour les URI
 - [ ] Identifiants de section s1.2.3
-- [ ] Parse des données textuelles et stockage en mémoire
 - [ ] Mécanisme de relation avec le traitement des URI (co-routine)
   - [ ] yield Python pour traitement et création
