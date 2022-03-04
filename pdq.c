@@ -4,6 +4,7 @@
  * Copyright (C) GA Silber, 2020
  */
 #include <string.h>
+#include <assert.h>
 #include "pdq.h"
 #include "uri.h"
 #include "parse.h"
@@ -189,6 +190,9 @@ static const xmlChar *FIELD_NAME_LIENS = BAD_CAST "LIENS";
 static const xmlChar *FIELD_NAME_LIEN = BAD_CAST "LIEN";
 static const xmlChar *FIELD_NAME_STRUCT = BAD_CAST "STRUCT";
 static const xmlChar *FIELD_NAME_STRUCTURE_TA = BAD_CAST "STRUCTURE_TA";
+static const xmlChar *FIELD_NAME_STRUCTURE_TXT = BAD_CAST "STRUCTURE_TXT";
+static const xmlChar *FIELD_NAME_TM = BAD_CAST "TM";
+static const xmlChar *FIELD_NAME_TITRE_TM = BAD_CAST "TITRE_TM";
 
 int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 {
@@ -215,6 +219,7 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 		(mdata->uri_parts.num2kind == EMPTY_NUMKIND?"":mdata->uri_parts.num2),
 		mdata->uri_parts.num3kind,
 		(mdata->uri_parts.num3kind == EMPTY_NUMKIND?"":mdata->uri_parts.num3));
+	/*
 	for (i = 0; i < versions->nb_versions; i++) {
 		docversion = &versions->versions[i];
 		fprintf(f, "\tversions.version;%s;%s;%s;%s;%s\n",
@@ -228,6 +233,8 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 			lien->nor_texte, lien->num_texte,
 			lien->id, lien->num, lien->sens, lien->typelien, lien->titre);
 	}
+	 */
+/*
 	for (i = 0; i < toc->nb_tocitems; i++) {
 		tocitem = &toc->tocitems[i];
 		fprintf(f, "\ttoc.tocitem;%d;%d;%s;%s;%s;%s;%s;%s\n",
@@ -235,7 +242,7 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 			tocitem->date_debut, tocitem->date_fin,
 			tocitem->etat, tocitem->titrefull);
 	}
-
+*/
 	return r;
 }
 
@@ -257,7 +264,12 @@ void reset_current(struct parsed_data *pdata)
 	pdata->current_field = NULL;
 	pdata->current_size = 0;
 	pdata->current_name = NULL;
+}
+
+void reset_parent(struct parsed_data *pdata)
+{
 	pdata->parent_element = PE_EMPTY;
+	pdata->depth = 0;
 }
 
 struct parsed_data *allocate_parsed_data()
@@ -311,6 +323,7 @@ void reset_parsed_data(struct parsed_data *pdata)
 	memset(pdata->metadata, 0, sizeof(struct metadata));
 	pdata->liens->nb_liens = 0;
 	pdata->versions->nb_versions = 0;
+	pdata->toc->nb_tocitems = 0;
 }
 
 void start_element_callback(void *user_data, const xmlChar *name, const xmlChar **attrs)
@@ -319,13 +332,17 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 	struct metadata *mdata;
 	struct versions *versions;
 	struct liens *liens;
+	struct toc *toc;
 	struct document_version *docversion;
 	struct lien *lien;
+	struct tocitem *tocitem;
 	int r;
+	int niv;
 
 	mdata = pdata->metadata;
 	versions = pdata->versions;
 	liens = pdata->liens;
+	toc = pdata->toc;
 
 	if (mdata->uri_parts.doctype == EMPTY_DOCTYPE) {
 		if (strcmp(mdata->uri_parts.base, "JORF") == 0) {
@@ -458,6 +475,47 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_field = mdata->derniere_modification;
 		pdata->current_size = FIELD_LEN_DATE;
 		pdata->current_name = FIELD_NAME_DERNIERE_MODIFICATION;
+	} else if (xmlStrEqual(name, FIELD_NAME_STRUCTURE_TXT)) {
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = FIELD_NAME_STRUCTURE_TXT;
+		pdata->parent_element = PE_STRUCT;
+	} else if (xmlStrEqual(name, FIELD_NAME_TM)) {
+		/* TM appears also in <CONTEXTE> */
+		if (pdata->parent_element == PE_STRUCT) {
+			pdata->current_field = NULL;
+			pdata->current_size = 0;
+			pdata->current_name = FIELD_NAME_TM;
+			pdata->depth++;
+			while (NULL != attrs && NULL != attrs[0]) {
+				r = 0;
+				if (strcmp((const char *) attrs[0], "niv") == 0) {
+					if (xmlStrlen(attrs[1]) > 0) {
+						niv = atoi((const char *) attrs[1]);
+					}
+				}
+				// TODO: que faire quand r < 0 ?
+				attrs = &attrs[2];
+			}
+			assert(niv == pdata->depth);
+		}
+	} else if (xmlStrEqual(name, FIELD_NAME_TITRE_TM)) {
+		if (pdata->parent_element == PE_STRUCT) {
+			if (toc->nb_tocitems < toc->max_tocitems) {
+				tocitem = &toc->tocitems[toc->nb_tocitems];
+				memset(tocitem, 0, sizeof(struct tocitem));
+				toc->nb_tocitems++;
+				tocitem->niv = pdata->depth;
+				tocitem->kind = DOCKIND_TITLE;
+				pdata->current_field = tocitem->titrefull;
+				pdata->current_size = FIELD_LEN_TITREFULL;
+				pdata->current_name = name;
+			} else {
+				fprintf(stderr, "warning:%s: too much %s (%d)\n",
+					mdata->id, name, toc->max_tocitems);
+				/*reset_current(pdata);*/
+			}
+		}
 	} else if (xmlStrEqual(name, FIELD_NAME_VERSION_A_VENIR)) {
 		if (mdata->nb_versions_a_venir < MAX_VERSIONS) {
 			pdata->current_field = mdata->versions_a_venir[mdata->nb_versions_a_venir++];
@@ -466,7 +524,7 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		} else {
 			fprintf(stderr, "warning:%s: too much VERSION_A_VENIR (MAX_VERSIONS=%d)\n",
 				mdata->id, MAX_VERSIONS);
-			reset_current(pdata);
+			/*reset_current(pdata);*/
 		}
 	} else if (xmlStrEqual(name, FIELD_NAME_TEXTE) && (
 			mdata->uri_parts.doctype == JORFSCTA_DOCTYPE
@@ -535,43 +593,6 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_field = NULL;
 		pdata->current_size = 0;
 		pdata->current_name = FIELD_NAME_TITRE_TXT;
-		/*
-		if (mdata->contexte.nb_versions < MAX_VERSIONS) {
-			docversion = &pdata->contexte.versions[pdata->contexte.nb_versions++];
-			docversion->kind = DOCKIND_TEXT;
-			while (NULL != attrs && NULL != attrs[0]) {
-				r = 0;
-				if (strcmp((const char *) attrs[0], "debut") == 0)
-					r = copy_attr_to_field(
-						pdata->id,
-						attrs[0], attrs[1],
-						xmlStrlen(attrs[1]),
-						"contexte.versions[].date_debut",
-						docversion->date_debut,
-						FIELD_LEN_DATE);
-				else if (strcmp((const char *) attrs[0], "fin") == 0)
-					r = copy_attr_to_field(
-						pdata->id,
-						attrs[0], attrs[1],
-						xmlStrlen(attrs[1]),
-						"contexte.versions[].date_fin",
-						docversion->date_fin,
-						FIELD_LEN_DATE);
-				else if (strcmp((const char *) attrs[0], "id_txt") == 0)
-					r = copy_attr_to_field(
-						pdata->id,
-						attrs[0], attrs[1],
-						xmlStrlen(attrs[1]),
-						"contexte.versions[].id",
-						docversion->id,
-						FIELD_LEN_ID);
-				attrs = &attrs[2];
-			}
-		} else {
-			fprintf(stderr, "warning:%s: too much %s (%d)\n",
-				pdata->id, FIELD_NAME_TITRE_TXT, MAX_VERSIONS);
-		}
-		 */
 	} else if (xmlStrEqual(name, FIELD_NAME_VERSION)) {
 		/*
 		 * <CONTEXTE>
@@ -606,15 +627,91 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		} else {
 			fprintf(stderr, "warning:%s: too much %s (%d)\n",
 				mdata->id, FIELD_NAME_VERSION, versions->max_versions);
-			reset_current(pdata);
+			/*reset_current(pdata);*/
 		}
-	} else if (xmlStrEqual(name, FIELD_NAME_LIEN_ART) || xmlStrEqual(name, FIELD_NAME_LIEN_TXT)) {
+	} else if (xmlStrEqual(name, FIELD_NAME_LIEN_SECTION_TA)) {
+		if (pdata->parent_element == PE_STRUCT) {
+			/*
+			<LIEN_SECTION_TA cid="LEGISCTA000006138434" debut="2003-09-06" etat="VIGUEUR" fin="2999-01-01"
+      				id="LEGISCTA000006138434" niv="3"
+				url="/LEGI/SCTA/00/00/06/13/84/LEGISCTA000006138434.xml">
+			 Titre Ier : Dispositions générales</LIEN_SECTION_TA>
+			*/
+			if (toc->nb_tocitems < toc->max_tocitems) {
+				tocitem = &toc->tocitems[toc->nb_tocitems];
+				memset(tocitem, 0, sizeof(struct tocitem));
+				toc->nb_tocitems++;
+				pdata->current_field = NULL; /*tocitem->titrefull;*/
+				pdata->current_size = 0; /*FIELD_LEN_TITREFULL;*/
+				pdata->current_name = name;
+				while (NULL != attrs && NULL != attrs[0]) {
+					r = 0;
+					if (strcmp((const char *) attrs[0], "id") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.id",
+							tocitem->id,
+							FIELD_LEN_ID);
+					else if (strcmp((const char *) attrs[0], "cid") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.cid",
+							tocitem->cid,
+							FIELD_LEN_ID);
+					else if (strcmp((const char *) attrs[0], "num") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.num",
+							tocitem->num,
+							FIELD_LEN_NUM);
+					else if (strcmp((const char *) attrs[0], "etat") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.etat",
+							tocitem->etat,
+							FIELD_LEN_ETAT);
+					else if (strcmp((const char *) attrs[0], "debut") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.date_debut",
+							tocitem->date_debut,
+							FIELD_LEN_DATE);
+					else if (strcmp((const char *) attrs[0], "fin") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.date_fin",
+							tocitem->date_fin,
+							FIELD_LEN_DATE);
+					else if (strcmp((const char *) attrs[0], "niv") == 0) {
+						if (xmlStrlen(attrs[1]) > 0) {
+							tocitem->niv = atoi((const char *)attrs[1]);
+						}
+					}
+					// TODO: que faire quand r < 0 ?
+					attrs = &attrs[2];
+				}
+			} else {
+				fprintf(stderr, "warning:%s: too much %s (%d)\n",
+					mdata->id, name, toc->max_tocitems);
+				/*reset_current(pdata);*/
+			}
+		}
+	} else if (xmlStrEqual(name, FIELD_NAME_LIEN_ART)) {
 		if (pdata->parent_element == PE_VERSION) {
 			docversion = &versions->versions[versions->nb_versions-1];
-			if (xmlStrEqual(name, FIELD_NAME_LIEN_ART))
-				docversion->kind = DOCKIND_ARTICLE;
-			else
-				docversion->kind = DOCKIND_TEXT;
+			docversion->kind = DOCKIND_ARTICLE;
 			while (NULL != attrs && NULL != attrs[0]) {
 				r = 0;
 				if (strcmp((const char *) attrs[0], "debut") == 0)
@@ -649,6 +746,150 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 						"versions.versions[].num",
 						docversion->num,
 						FIELD_LEN_NUM);
+				// TODO: que faire quand r < 0 ?
+				attrs = &attrs[2];
+			}
+		} else if (pdata->parent_element == PE_STRUCT) {
+			/*
+			<LIEN_ART debut="2007-01-01" etat="MODIFIE_MORT_NE" fin="2006-01-06"
+			 id="LEGIARTI000006584667" num="L641-1-1" origine="LEGI"/>
+			*/
+			if (toc->nb_tocitems < toc->max_tocitems) {
+				tocitem = &toc->tocitems[toc->nb_tocitems];
+				memset(tocitem, 0, sizeof(struct tocitem));
+				toc->nb_tocitems++;
+				pdata->current_field = NULL; /*tocitem->titrefull;*/
+				pdata->current_size = 0; /*FIELD_LEN_TITREFULL;*/
+				pdata->current_name = name;
+				while (NULL != attrs && NULL != attrs[0]) {
+					r = 0;
+					if (strcmp((const char *) attrs[0], "id") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.id",
+							tocitem->id,
+							FIELD_LEN_ID);
+					else if (strcmp((const char *) attrs[0], "num") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.num",
+							tocitem->num,
+							FIELD_LEN_NUM);
+					else if (strcmp((const char *) attrs[0], "etat") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.etat",
+							tocitem->etat,
+							FIELD_LEN_ETAT);
+					else if (strcmp((const char *) attrs[0], "debut") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.date_debut",
+							tocitem->date_debut,
+							FIELD_LEN_DATE);
+					else if (strcmp((const char *) attrs[0], "fin") == 0)
+						r = copy_attr_to_field(
+							mdata->id,
+							attrs[0], attrs[1],
+							xmlStrlen(attrs[1]),
+							"tocitem.date_fin",
+							tocitem->date_fin,
+							FIELD_LEN_DATE);
+					// TODO: que faire quand r < 0 ?
+					attrs = &attrs[2];
+				}
+			} else {
+				fprintf(stderr, "warning:%s: too much %s (%d)\n",
+					mdata->id, name, toc->max_tocitems);
+				/*reset_current(pdata);*/
+			}
+		}
+	} else if (xmlStrEqual(name, FIELD_NAME_LIEN_TXT)) {
+		if (pdata->parent_element == PE_VERSION) {
+			docversion = &versions->versions[versions->nb_versions-1];
+			docversion->kind = DOCKIND_TEXT;
+			while (NULL != attrs && NULL != attrs[0]) {
+				r = 0;
+				if (strcmp((const char *) attrs[0], "debut") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"versions.versions[].date_debut",
+						docversion->date_debut,
+						FIELD_LEN_DATE);
+				else if (strcmp((const char *) attrs[0], "fin") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"versions.versions[].date_fin",
+						docversion->date_fin,
+						FIELD_LEN_DATE);
+				else if (strcmp((const char *) attrs[0], "id") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"versions.versions[].id",
+						docversion->id,
+						FIELD_LEN_ID);
+				else if (strcmp((const char *) attrs[0], "num") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"versions.versions[].num",
+						docversion->num,
+						FIELD_LEN_NUM);
+				// TODO: que faire quand r < 0 ?
+				attrs = &attrs[2];
+			}
+		} else if (pdata->parent_element == PE_STRUCT) {
+			/*
+			 * <LIEN_TXT idtxt="JORFTEXT000043933898"
+			 *   titretxt="Décret n° 2021-1071 ..."/>
+			 */
+			if (toc->nb_tocitems < toc->max_tocitems) {
+				tocitem = &toc->tocitems[toc->nb_tocitems];
+				memset(tocitem, 0, sizeof(struct tocitem));
+				toc->nb_tocitems++;
+				tocitem->niv = pdata->depth;
+				tocitem->kind = DOCKIND_TEXT;
+				pdata->current_field = NULL;
+				pdata->current_size = 0;
+				pdata->current_name = name;
+			} else {
+				fprintf(stderr, "warning:%s: too much %s (%d)\n",
+					mdata->id, name, toc->max_tocitems);
+				/*reset_current(pdata);*/
+			}
+			while (NULL != attrs && NULL != attrs[0]) {
+				r = 0;
+				if (strcmp((const char *) attrs[0], "idtxt") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"toc.tocitem[].id",
+						tocitem->id,
+						FIELD_LEN_ID);
+				else if (strcmp((const char *) attrs[0], "titretxt") == 0)
+					r = copy_attr_to_field(
+						mdata->id,
+						attrs[0], attrs[1],
+						xmlStrlen(attrs[1]),
+						"toc.tocitem[].titrefull",
+						tocitem->titrefull,
+						FIELD_LEN_TITREFULL);
 				// TODO: que faire quand r < 0 ?
 				attrs = &attrs[2];
 			}
@@ -741,8 +982,13 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		} else {
 			fprintf(stderr, "warning:%s: too much %s (%d)\n",
 				mdata->id, FIELD_NAME_LIEN, liens->max_liens);
-			reset_current(pdata);
+			/*reset_current(pdata);*/
 		}
+	} else if (xmlStrEqual(name, FIELD_NAME_STRUCT) || xmlStrEqual(name, FIELD_NAME_STRUCTURE_TA)) {
+			pdata->current_field = NULL;
+			pdata->current_size = 0;
+			pdata->current_name = name;
+			pdata->parent_element = PE_STRUCT;
 	}
 }
 
@@ -778,6 +1024,17 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		|| xmlStrEqual(name, FIELD_NAME_VERSION)
 		|| xmlStrEqual(name, FIELD_NAME_LIENS)
 		|| xmlStrEqual(name, FIELD_NAME_LIEN)
+		|| xmlStrEqual(name, FIELD_NAME_STRUCTURE_TA)
+		|| xmlStrEqual(name, FIELD_NAME_STRUCT)
+		|| xmlStrEqual(name, FIELD_NAME_STRUCTURE_TXT)
+		) {
+		reset_current(pdata);
+		reset_parent(pdata);
+	} else if (xmlStrEqual(name, FIELD_NAME_TM)) {
+		reset_current(pdata);
+		pdata->depth--;
+	} else if (xmlStrEqual(name, FIELD_NAME_TITRE_TM)
+		|| xmlStrEqual(name, FIELD_NAME_LIEN_TXT)
 		) {
 		reset_current(pdata);
 	}

@@ -516,7 +516,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 		if (plen < 0)
 			return -1;
 		len = plen + 1;
-		plen = date_to_version(mdata->date_publi, mdata->uri_parts.sversion);
+		plen = date_to_version(mdata->contexte.date_publi, mdata->uri_parts.sversion);
 		if (plen < 0)
 			return -1;
 		len += plen;
@@ -529,7 +529,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 			return -1;
 		len = plen + 1;
 
-		plen = date_to_version(mdata->date_publi, mdata->uri_parts.aversion);
+		plen = date_to_version(mdata->contexte.date_publi, mdata->uri_parts.aversion);
 		if (plen < 0)
 			return -1;
 		len += plen + 1;
@@ -553,14 +553,8 @@ int set_jorflegi_uri(struct metadata *mdata)
 		/*
 		 * Pas de date ici, car potentiellement il y a plusieurs dates de début (par ex,
 		 * code rural et ses deux textversions...
-		 *
-		plen = date_to_version(mdata->contexte.texte_debut, mdata->uri_parts.sversion);
-		if (plen < 0)
-			return -1;
-		len += plen;
-		mdata->uri_parts.sversion_datekind = BEG_DATEKIND;
-		mdata->uri_parts.kind = PARTIAL_URI_SNUM_VERSION;
-		*/
+		 * Ou alors il faudrait prendre la premiere?
+		 */
 	} else if (mdata->uri_parts.doctype == LEGIARTI_DOCTYPE) {
 		plen = set_num_uri(mdata, mdata->uri_parts.anum, &mdata->uri_parts.anumkind,
 				   mdata->num, NULL, mdata->id, "aid");

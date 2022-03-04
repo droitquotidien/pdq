@@ -20,8 +20,8 @@
 #define FIELD_LEN_TYPELIEN 16
 
 #define MAX_VERSIONS_A_VENIR 24
-#define MAX_VERSIONS 50
-#define MAX_TOCITEMS 128
+#define MAX_VERSIONS 80 /* MAX JORF/LEGI 71 */
+#define MAX_TOCITEMS 4000 /* MAX JORF 3730 LEGI 600 (LIEN_ART) */
 #define MAX_LIENS 24000 /* MAX JORF 23325 / LEGI 8858 */
 
 /*
@@ -134,6 +134,7 @@ struct tocitem {
     char date_debut[FIELD_LEN_DATE+1];
     char date_fin[FIELD_LEN_DATE+1];
     char etat[FIELD_LEN_ETAT+1];
+    char num[FIELD_LEN_NUM+1];
     char titrefull[FIELD_LEN_TITREFULL+1];
 };
 
@@ -213,6 +214,7 @@ struct content {
 enum parent_element {
     PE_EMPTY,
     PE_VERSION,
+    PE_STRUCT,
 };
 
 struct metadata {
@@ -255,6 +257,7 @@ struct parsed_data {
     char *current_field;
     const xmlChar *current_name;
     enum parent_element parent_element;
+    int depth;
     int status;
 };
 

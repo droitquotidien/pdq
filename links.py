@@ -11,7 +11,7 @@ from collections import Counter
 from pprint import pprint
 
 links = Counter()
-link_re = re.compile("warning:(?P<id>[^:]+): too much LIEN")
+link_re = re.compile("warning:(?P<id>[^:]+): too much VERSION")
 
 with open(sys.argv[1], "r") as f:
     for line in f:
@@ -23,5 +23,5 @@ with open(sys.argv[1], "r") as f:
             links[m.group('id')] += 1
 
 max_links = max(links.values())
-pprint(max_links+12)
+pprint(max_links+50)
 
