@@ -202,19 +202,26 @@ JORFARTI / LEGIARTI
       <br/>   Le décret délimite l'aire géographique de production et détermine les conditions de production et d'agrément du produit.<br/>
       </CONTENU></BLOC_TEXTUEL>
 
+ MCS_ART/MC
+ MCS_TXT/MC
  */
-/*
-struct content {
+
+#define MAX_CONTENT_NOTICE 4096
+#define MAX_CONTENT_VISAS 5000
+
+struct contenu {
     char notice[MAX_CONTENT_NOTICE+1];
     char visas[MAX_CONTENT_VISAS+1];
-	...
 };
-*/
+
 
 enum parent_element {
     PE_EMPTY,
     PE_VERSION,
     PE_STRUCT,
+    PE_NOTICE,
+    PE_VISAS,
+    PE_CONTENU,
 };
 
 struct metadata {
@@ -252,7 +259,8 @@ struct parsed_data {
     struct versions *versions;
     struct liens *liens;
     struct toc *toc;
-    /*struct content contenu;*/
+    struct contenu *contenu;
+    /* struct mc *mc; */
     int current_size;
     char *current_field;
     const xmlChar *current_name;

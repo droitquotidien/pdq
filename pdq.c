@@ -193,6 +193,9 @@ static const xmlChar *FIELD_NAME_STRUCTURE_TA = BAD_CAST "STRUCTURE_TA";
 static const xmlChar *FIELD_NAME_STRUCTURE_TXT = BAD_CAST "STRUCTURE_TXT";
 static const xmlChar *FIELD_NAME_TM = BAD_CAST "TM";
 static const xmlChar *FIELD_NAME_TITRE_TM = BAD_CAST "TITRE_TM";
+static const xmlChar *FIELD_NAME_CONTENU = BAD_CAST "CONTENU";
+static const xmlChar *FIELD_NAME_NOTICE = BAD_CAST "NOTICE";
+static const xmlChar *FIELD_NAME_VISAS = BAD_CAST "VISAS";
 
 int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 {
@@ -202,6 +205,7 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 	struct versions *versions = pdata->versions;
 	struct liens *liens = pdata->liens;
 	struct toc *toc = pdata->toc;
+	struct contenu *contenu = pdata->contenu;
 	struct document_version *docversion;
 	struct lien *lien;
 	struct tocitem *tocitem;
@@ -220,6 +224,14 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 		mdata->uri_parts.num3kind,
 		(mdata->uri_parts.num3kind == EMPTY_NUMKIND?"":mdata->uri_parts.num3));
 	/*
+	if (*contenu->notice != 0) {
+		fprintf(f, "\tcontenu.notice;\"\"\"%s\"\"\"\n", contenu->notice);
+	}
+	if (*contenu->visas != 0) {
+		fprintf(f, "\tcontenu.visas;\"\"\"%s\"\"\"\n", contenu->visas);
+	}
+	*/
+	/*
 	for (i = 0; i < versions->nb_versions; i++) {
 		docversion = &versions->versions[i];
 		fprintf(f, "\tversions.version;%s;%s;%s;%s;%s\n",
@@ -234,7 +246,7 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 			lien->id, lien->num, lien->sens, lien->typelien, lien->titre);
 	}
 	 */
-/*
+	/*
 	for (i = 0; i < toc->nb_tocitems; i++) {
 		tocitem = &toc->tocitems[i];
 		fprintf(f, "\ttoc.tocitem;%d;%d;%s;%s;%s;%s;%s;%s\n",
@@ -242,7 +254,7 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 			tocitem->date_debut, tocitem->date_fin,
 			tocitem->etat, tocitem->titrefull);
 	}
-*/
+	*/
 	return r;
 }
 
@@ -304,6 +316,11 @@ struct parsed_data *allocate_parsed_data()
 		return NULL;
 	}
 	pdata->toc->max_tocitems = MAX_TOCITEMS;
+	pdata->contenu = calloc(1, sizeof(struct contenu));
+	if (pdata->contenu == NULL) {
+		perror("calloc parsed_data->contenu");
+		return NULL;
+	}
 
 	return pdata;
 }
@@ -314,7 +331,14 @@ void free_parsed_data(struct parsed_data *pdata)
 	free(pdata->versions);
 	free(pdata->liens);
 	free(pdata->toc);
+	free(pdata->contenu);
 	free(pdata);
+}
+
+void reset_contenu(struct contenu *contenu)
+{
+	*contenu->notice = '\0';
+	*contenu->visas = '\0';
 }
 
 void reset_parsed_data(struct parsed_data *pdata)
@@ -324,6 +348,7 @@ void reset_parsed_data(struct parsed_data *pdata)
 	pdata->liens->nb_liens = 0;
 	pdata->versions->nb_versions = 0;
 	pdata->toc->nb_tocitems = 0;
+	reset_contenu(pdata->contenu);
 }
 
 void start_element_callback(void *user_data, const xmlChar *name, const xmlChar **attrs)
@@ -333,16 +358,19 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 	struct versions *versions;
 	struct liens *liens;
 	struct toc *toc;
+	struct contenu *contenu;
 	struct document_version *docversion;
 	struct lien *lien;
 	struct tocitem *tocitem;
 	int r;
 	int niv;
+	int len, len1, len2;
 
 	mdata = pdata->metadata;
 	versions = pdata->versions;
 	liens = pdata->liens;
 	toc = pdata->toc;
+	contenu = pdata->contenu;
 
 	if (mdata->uri_parts.doctype == EMPTY_DOCTYPE) {
 		if (strcmp(mdata->uri_parts.base, "JORF") == 0) {
@@ -383,7 +411,62 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 			}
 		}
 	}
-	if (xmlStrEqual(name, FIELD_NAME_ID)) {
+	if (pdata->parent_element == PE_CONTENU) {
+		/* mode copie: écrit les éléments XML */
+		/* TODO */
+		if (pdata->current_field != NULL) {
+			len = xmlStrlen(name) + 1; /* 1=len("<") */
+			if (len <= pdata->current_size) {
+				*pdata->current_field++ = '<';
+				memcpy(pdata->current_field, name, len - 1);
+				pdata->current_field += len - 1;
+				pdata->current_size -= len;
+				*pdata->current_field = '\0';  /* always ends with a 0 */
+			} else {
+				fprintf(stderr, "critical:%s: no more size in current field %s (%d) [<%s]\n",
+					pdata->metadata->id, pdata->current_name, len - pdata->current_size, name);
+				reset_current(pdata);
+				pdata->status = 1;
+			}
+			while (NULL != attrs && NULL != attrs[0]) {
+				len1 = xmlStrlen(attrs[0]);
+				len2 = xmlStrlen(attrs[1]);
+				len = len1 + len2 + 4; /* 4=len(' =""') */
+				if (len <= pdata->current_size) {
+					*pdata->current_field++ = ' ';
+					memcpy(pdata->current_field, attrs[0], len1);
+					pdata->current_field += len1;
+					*pdata->current_field++ = '=';
+					*pdata->current_field++ = '"';
+					memcpy(pdata->current_field, attrs[1], len2);
+					pdata->current_field += len2;
+					*pdata->current_field++ = '"';
+					pdata->current_size -= len;
+					*pdata->current_field = '\0';  /* always ends with a 0 */
+				} else {
+					fprintf(stderr, "critical:%s: no more size in current field %s (%d) [ %s=\"%s\"]\n",
+						pdata->metadata->id, pdata->current_name, len - pdata->current_size,
+						attrs[0], attrs[1]);
+					reset_current(pdata);
+					pdata->status = 1;
+					break;
+				}
+				attrs = &attrs[2];
+			}
+			len = 1; /* 1=len(">") */
+			if (len <= pdata->current_size) {
+				*pdata->current_field++ = '>';
+				pdata->current_size -= len;
+				*pdata->current_field = '\0';  /* always ends with a 0 */
+			} else {
+				fprintf(stderr, "critical:%s: no more size in current field %s (%d) [</%s>]\n",
+					pdata->metadata->id, pdata->current_name, len - pdata->current_size, name);
+				reset_current(pdata);
+				pdata->status = 1;
+			}
+		}
+
+	} else if (xmlStrEqual(name, FIELD_NAME_ID)) {
 		pdata->current_field = mdata->id;
 		pdata->current_size = FIELD_LEN_ID;
 		pdata->current_name = FIELD_NAME_ID;
@@ -480,6 +563,27 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_size = 0;
 		pdata->current_name = FIELD_NAME_STRUCTURE_TXT;
 		pdata->parent_element = PE_STRUCT;
+	} else if (xmlStrEqual(name, FIELD_NAME_NOTICE)) {
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = name;
+		pdata->parent_element = PE_NOTICE;
+	} else if (xmlStrEqual(name, FIELD_NAME_VISAS)) {
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = name;
+		pdata->parent_element = PE_VISAS;
+	} else if (xmlStrEqual(name, FIELD_NAME_CONTENU)) {
+		if (pdata->parent_element == PE_VISAS) {
+			pdata->current_field = contenu->visas;
+			pdata->current_size = MAX_CONTENT_VISAS;
+			pdata->parent_element = PE_CONTENU;
+		} else if (pdata->parent_element == PE_NOTICE) {
+			pdata->current_field = contenu->notice;
+			pdata->current_size = MAX_CONTENT_NOTICE;
+			pdata->parent_element = PE_CONTENU;
+		}
+		pdata->current_name = name;
 	} else if (xmlStrEqual(name, FIELD_NAME_TM)) {
 		/* TM appears also in <CONTEXTE> */
 		if (pdata->parent_element == PE_STRUCT) {
@@ -641,8 +745,9 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 				tocitem = &toc->tocitems[toc->nb_tocitems];
 				memset(tocitem, 0, sizeof(struct tocitem));
 				toc->nb_tocitems++;
-				pdata->current_field = NULL; /*tocitem->titrefull;*/
-				pdata->current_size = 0; /*FIELD_LEN_TITREFULL;*/
+				tocitem->kind = DOCKIND_SECTION;
+				pdata->current_field = tocitem->titrefull;
+				pdata->current_size = FIELD_LEN_TITREFULL;
 				pdata->current_name = name;
 				while (NULL != attrs && NULL != attrs[0]) {
 					r = 0;
@@ -758,9 +863,10 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 				tocitem = &toc->tocitems[toc->nb_tocitems];
 				memset(tocitem, 0, sizeof(struct tocitem));
 				toc->nb_tocitems++;
-				pdata->current_field = NULL; /*tocitem->titrefull;*/
-				pdata->current_size = 0; /*FIELD_LEN_TITREFULL;*/
+				pdata->current_field = NULL;
+				pdata->current_size = 0;
 				pdata->current_name = name;
+				tocitem->kind = DOCKIND_ARTICLE;
 				while (NULL != attrs && NULL != attrs[0]) {
 					r = 0;
 					if (strcmp((const char *) attrs[0], "id") == 0)
@@ -994,7 +1100,9 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 
 void end_element_callback(void *user_data, const xmlChar *name)
 {
+	int len;
 	struct parsed_data *pdata = user_data;
+
 	if (xmlStrEqual(name, FIELD_NAME_ID)
 		|| xmlStrEqual(name, FIELD_NAME_NATURE)
 		|| xmlStrEqual(name, FIELD_NAME_TYPE)
@@ -1027,6 +1135,9 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		|| xmlStrEqual(name, FIELD_NAME_STRUCTURE_TA)
 		|| xmlStrEqual(name, FIELD_NAME_STRUCT)
 		|| xmlStrEqual(name, FIELD_NAME_STRUCTURE_TXT)
+		|| xmlStrEqual(name, FIELD_NAME_NOTICE)
+		|| xmlStrEqual(name, FIELD_NAME_VISAS)
+		|| xmlStrEqual(name, FIELD_NAME_CONTENU)
 		) {
 		reset_current(pdata);
 		reset_parent(pdata);
@@ -1035,8 +1146,28 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		pdata->depth--;
 	} else if (xmlStrEqual(name, FIELD_NAME_TITRE_TM)
 		|| xmlStrEqual(name, FIELD_NAME_LIEN_TXT)
+		|| xmlStrEqual(name, FIELD_NAME_LIEN_SECTION_TA)
+		|| xmlStrEqual(name, FIELD_NAME_LIEN_ART)
 		) {
 		reset_current(pdata);
+	} else if (pdata->parent_element == PE_CONTENU) {
+		if (pdata->current_field != NULL) {
+			len = xmlStrlen(name) + 3; /* 3=len("</>") */
+			if (len <= pdata->current_size) {
+				*pdata->current_field++ = '<';
+				*pdata->current_field++ = '/';
+				memcpy(pdata->current_field, name, len - 3);
+				pdata->current_field += len - 3;
+				*pdata->current_field++ = '>';
+				pdata->current_size -= len;
+				*pdata->current_field = '\0';  /* always ends with a 0 */
+			} else {
+				fprintf(stderr, "critical:%s: no more size in current field %s (%d) [</%s>]\n",
+					pdata->metadata->id, pdata->current_name, len - pdata->current_size, name);
+				reset_current(pdata);
+				pdata->status = 1;
+			}
+		}
 	}
 }
 
@@ -1049,6 +1180,7 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 			memcpy(pdata->current_field, chars, len);
 			pdata->current_field += len;
 			pdata->current_size -= len;
+			*pdata->current_field = '\0';  /* always ends with a 0 */
 		} else {
 			fprintf(stderr, "critical:%s: no more size in current field %s (%d) [%.*s]\n",
 				pdata->metadata->id, pdata->current_name, len - pdata->current_size, len, chars);

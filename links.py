@@ -11,7 +11,9 @@ from collections import Counter
 from pprint import pprint
 
 links = Counter()
-link_re = re.compile("warning:(?P<id>[^:]+): too much VERSION")
+#link_re = re.compile("warning:(?P<id>[^:]+): ")
+link_re = re.compile("critical:(?P<id>[^:]+): no more size in current field CONTENU \((?P<amount>\d+)\)")
+maxa = 0
 
 with open(sys.argv[1], "r") as f:
     for line in f:
@@ -20,8 +22,9 @@ with open(sys.argv[1], "r") as f:
         m = link_re.match(line)
         if m is not None:
             one_match = True
-            links[m.group('id')] += 1
+            a = int(m.group('amount'))
+            if a > maxa:
+                maxa = a
 
-max_links = max(links.values())
-pprint(max_links+50)
+pprint(maxa)
 
