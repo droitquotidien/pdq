@@ -196,6 +196,8 @@ static const xmlChar *FIELD_NAME_TITRE_TM = BAD_CAST "TITRE_TM";
 static const xmlChar *FIELD_NAME_CONTENU = BAD_CAST "CONTENU";
 static const xmlChar *FIELD_NAME_NOTICE = BAD_CAST "NOTICE";
 static const xmlChar *FIELD_NAME_VISAS = BAD_CAST "VISAS";
+static const xmlChar *FIELD_NAME_SIGNATAIRES = BAD_CAST "SIGNATAIRES";
+static const xmlChar *FIELD_NAME_NOTA = BAD_CAST "NOTA";
 
 int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 {
@@ -231,6 +233,15 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 		fprintf(f, "\tcontenu.visas;\"\"\"%s\"\"\"\n", contenu->visas);
 	}
 	*/
+	/*
+	if (*contenu->signataires != 0) {
+		fprintf(f, "\tcontenu.signataires;\"\"\"%s\"\"\"\n", contenu->signataires);
+	}
+	 */
+	/*
+	if (*contenu->nota != 0) {
+		fprintf(f, "\tcontenu.nota;\"\"\"%s\"\"\"\n", contenu->nota);
+	}*/
 	/*
 	for (i = 0; i < versions->nb_versions; i++) {
 		docversion = &versions->versions[i];
@@ -275,7 +286,21 @@ void reset_current(struct parsed_data *pdata)
 {
 	pdata->current_field = NULL;
 	pdata->current_size = 0;
+	pdata->current_oversize = 0;
 	pdata->current_name = NULL;
+}
+
+void oversize_current(struct parsed_data *pdata, int len)
+{
+	int missing = 0;
+
+	if (pdata->current_size > 0) {
+		missing = len - pdata->current_size;
+		pdata->current_size = 0;
+	} else {
+		missing = len;
+	}
+	pdata->current_oversize += missing;
 }
 
 void reset_parent(struct parsed_data *pdata)
@@ -339,6 +364,8 @@ void reset_contenu(struct contenu *contenu)
 {
 	*contenu->notice = '\0';
 	*contenu->visas = '\0';
+	*contenu->signataires = '\0';
+	*contenu->nota = '\0';
 }
 
 void reset_parsed_data(struct parsed_data *pdata)
@@ -423,9 +450,9 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 				pdata->current_size -= len;
 				*pdata->current_field = '\0';  /* always ends with a 0 */
 			} else {
+				oversize_current(pdata, len);
 				fprintf(stderr, "critical:%s: no more size in current field %s (%d) [<%s]\n",
-					pdata->metadata->id, pdata->current_name, len - pdata->current_size, name);
-				reset_current(pdata);
+					pdata->metadata->id, pdata->current_name, pdata->current_oversize, name);
 				pdata->status = 1;
 			}
 			while (NULL != attrs && NULL != attrs[0]) {
@@ -444,10 +471,10 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 					pdata->current_size -= len;
 					*pdata->current_field = '\0';  /* always ends with a 0 */
 				} else {
+					oversize_current(pdata, len);
 					fprintf(stderr, "critical:%s: no more size in current field %s (%d) [ %s=\"%s\"]\n",
-						pdata->metadata->id, pdata->current_name, len - pdata->current_size,
+						pdata->metadata->id, pdata->current_name, pdata->current_oversize,
 						attrs[0], attrs[1]);
-					reset_current(pdata);
 					pdata->status = 1;
 					break;
 				}
@@ -459,9 +486,9 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 				pdata->current_size -= len;
 				*pdata->current_field = '\0';  /* always ends with a 0 */
 			} else {
+				oversize_current(pdata, len);
 				fprintf(stderr, "critical:%s: no more size in current field %s (%d) [</%s>]\n",
-					pdata->metadata->id, pdata->current_name, len - pdata->current_size, name);
-				reset_current(pdata);
+					pdata->metadata->id, pdata->current_name, pdata->current_oversize, name);
 				pdata->status = 1;
 			}
 		}
@@ -573,6 +600,16 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_size = 0;
 		pdata->current_name = name;
 		pdata->parent_element = PE_VISAS;
+	} else if (xmlStrEqual(name, FIELD_NAME_SIGNATAIRES)) {
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = name;
+		pdata->parent_element = PE_SIGNATAIRES;
+	} else if (xmlStrEqual(name, FIELD_NAME_NOTA)) {
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = name;
+		pdata->parent_element = PE_NOTA;
 	} else if (xmlStrEqual(name, FIELD_NAME_CONTENU)) {
 		if (pdata->parent_element == PE_VISAS) {
 			pdata->current_field = contenu->visas;
@@ -581,6 +618,14 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		} else if (pdata->parent_element == PE_NOTICE) {
 			pdata->current_field = contenu->notice;
 			pdata->current_size = MAX_CONTENT_NOTICE;
+			pdata->parent_element = PE_CONTENU;
+		} else if (pdata->parent_element == PE_NOTA) {
+			pdata->current_field = contenu->nota;
+			pdata->current_size = MAX_CONTENT_NOTA;
+			pdata->parent_element = PE_CONTENU;
+		} else if (pdata->parent_element == PE_SIGNATAIRES) {
+			pdata->current_field = contenu->signataires;
+			pdata->current_size = MAX_CONTENT_SIGNATAIRES;
 			pdata->parent_element = PE_CONTENU;
 		}
 		pdata->current_name = name;
@@ -1162,9 +1207,9 @@ void end_element_callback(void *user_data, const xmlChar *name)
 				pdata->current_size -= len;
 				*pdata->current_field = '\0';  /* always ends with a 0 */
 			} else {
+				oversize_current(pdata, len);
 				fprintf(stderr, "critical:%s: no more size in current field %s (%d) [</%s>]\n",
-					pdata->metadata->id, pdata->current_name, len - pdata->current_size, name);
-				reset_current(pdata);
+					pdata->metadata->id, pdata->current_name, pdata->current_oversize, name);
 				pdata->status = 1;
 			}
 		}
@@ -1182,9 +1227,9 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 			pdata->current_size -= len;
 			*pdata->current_field = '\0';  /* always ends with a 0 */
 		} else {
+			oversize_current(pdata, len);
 			fprintf(stderr, "critical:%s: no more size in current field %s (%d) [%.*s]\n",
-				pdata->metadata->id, pdata->current_name, len - pdata->current_size, len, chars);
-			reset_current(pdata);
+				pdata->metadata->id, pdata->current_name, pdata->current_oversize, len, chars);
 			pdata->status = 1;
 		}
 	}

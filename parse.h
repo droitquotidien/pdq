@@ -8,7 +8,7 @@
 #define FIELD_LEN_NATURE 62
 #define FIELD_LEN_TYPE 30
 #define FIELD_LEN_DATE 10
-#define FIELD_LEN_NUM 60
+#define FIELD_LEN_NUM 70
 #define FIELD_LEN_TITRE 1024
 #define FIELD_LEN_TITREFULL 2048
 #define FIELD_LEN_ORIGINE_PUBLI 192
@@ -174,17 +174,12 @@ struct liens {
 
 /*
 LEGIVERS:
-  <VISAS><CONTENU/></VISAS>
-  <SIGNATAIRES><CONTENU/></SIGNATAIRES>
   <TP><CONTENU/></TP>
   <NOTA><CONTENU/></NOTA>
   <ABRO><CONTENU/></ABRO>
   <RECT><CONTENU/></RECT>
 
 JORFVERS:
-  <NOTICE><CONTENU/></NOTICE>
-  <VISAS><CONTENU/></VISAS>
-  <SIGNATAIRES><CONTENU/></SIGNATAIRES>
   <TP><CONTENU/></TP>
   <ABRO><CONTENU/></ABRO>
   <RECT><CONTENU/></RECT>
@@ -207,13 +202,16 @@ JORFARTI / LEGIARTI
  */
 
 #define MAX_CONTENT_NOTICE 4096
-#define MAX_CONTENT_VISAS 5000
+#define MAX_CONTENT_VISAS 45000
+#define MAX_CONTENT_SIGNATAIRES 15000
+#define MAX_CONTENT_NOTA 15000
 
 struct contenu {
     char notice[MAX_CONTENT_NOTICE+1];
     char visas[MAX_CONTENT_VISAS+1];
+    char signataires[MAX_CONTENT_SIGNATAIRES+1];
+    char nota[MAX_CONTENT_NOTA+1];
 };
-
 
 enum parent_element {
     PE_EMPTY,
@@ -222,6 +220,8 @@ enum parent_element {
     PE_NOTICE,
     PE_VISAS,
     PE_CONTENU,
+    PE_SIGNATAIRES,
+    PE_NOTA,
 };
 
 struct metadata {
@@ -262,6 +262,7 @@ struct parsed_data {
     struct contenu *contenu;
     /* struct mc *mc; */
     int current_size;
+    int current_oversize;
     char *current_field;
     const xmlChar *current_name;
     enum parent_element parent_element;
