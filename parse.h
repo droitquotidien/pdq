@@ -201,16 +201,21 @@ JORFARTI / LEGIARTI
  MCS_TXT/MC
  */
 
-#define MAX_CONTENT_NOTICE 4096
-#define MAX_CONTENT_VISAS 45000
-#define MAX_CONTENT_SIGNATAIRES 15000
-#define MAX_CONTENT_NOTA 15000
+#define INITIAL_CONTENT_NOTICE 4096
+#define INITIAL_CONTENT_VISAS 4096
+#define INITIAL_CONTENT_SIGNATAIRES 4096
+#define INITIAL_CONTENT_NOTA 4096
+
+struct dtext {
+    size_t size;
+    char *text;
+};
 
 struct contenu {
-    char notice[MAX_CONTENT_NOTICE+1];
-    char visas[MAX_CONTENT_VISAS+1];
-    char signataires[MAX_CONTENT_SIGNATAIRES+1];
-    char nota[MAX_CONTENT_NOTA+1];
+    struct dtext notice;
+    struct dtext visas;
+    struct dtext signataires;
+    struct dtext nota;
 };
 
 enum parent_element {
@@ -261,11 +266,13 @@ struct parsed_data {
     struct toc *toc;
     struct contenu *contenu;
     /* struct mc *mc; */
-    int current_size;
-    int current_oversize;
+    struct dtext *current_dtext;
+    size_t current_size;
+    size_t current_oversize;
     char *current_field;
     const xmlChar *current_name;
     enum parent_element parent_element;
+    const xmlChar *current_parent;
     int depth;
     int status;
 };
