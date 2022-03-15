@@ -19,12 +19,16 @@
 #define FIELD_LEN_SENS 8
 #define FIELD_LEN_TYPELIEN 16
 #define FIELD_LEN_MC 256
+#define FIELD_LEN_DOMAINE 256
+#define FIELD_LEN_ENTREPRISE 8
 
 #define MAX_VERSIONS_A_VENIR 24
 #define MAX_VERSIONS 80 /* MAX JORF/LEGI 71 */
 #define MAX_TOCITEMS 4000 /* MAX JORF 3730 LEGI 600 (LIEN_ART) */
 #define MAX_LIENS 24000 /* MAX JORF 23325 / LEGI 8858 */
 #define MAX_MCS 1024
+#define MAX_DATE_EFFET 256
+#define MAX_DOMAINES 256
 
 /*
   <SECTION_TA>
@@ -132,6 +136,16 @@ struct mcs {
     char mc[MAX_MCS+1][FIELD_LEN_MC]; /* NULL ended */
     int nb_mcs;
     int max_mcs;
+};
+
+struct entreprise {
+    char texte_entreprise[FIELD_LEN_ENTREPRISE];
+    char dates_effet[MAX_DATE_EFFET+1][FIELD_LEN_DATE]; /* NULL ended */
+    int nb_dates_effet;
+    int max_dates_effet;
+    char domaines[MAX_DOMAINES+1][FIELD_LEN_DOMAINE]; /* NULL ended */
+    int nb_domaines;
+    int max_domaines;
 };
 
 struct tocitem {
@@ -249,6 +263,8 @@ enum parent_element {
     PE_SM, /* Résumé LEX */
     PE_BLOC_TEXTUEL,
     PE_MCS, /* Mots clés: MCS_ART ou MCS_TXT */
+    PE_DATES_EFFET,
+    PE_DOMAINES,
 };
 
 struct metadata {
@@ -288,6 +304,7 @@ struct parsed_data {
     struct toc *toc;
     struct contenu *contenu;
     struct mcs *mcs;
+    struct entreprise *entreprise;
     struct dtext *current_dtext;
     size_t current_size;
     size_t current_oversize;

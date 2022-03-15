@@ -206,6 +206,11 @@ static const xmlChar *FIELD_NAME_BLOC_TEXTUEL = BAD_CAST "BLOC_TEXTUEL";
 static const xmlChar *FIELD_NAME_MCS_ART = BAD_CAST "MCS_ART";
 static const xmlChar *FIELD_NAME_MCS_TXT = BAD_CAST "MCS_TXT";
 static const xmlChar *FIELD_NAME_MC = BAD_CAST "MC";
+static const xmlChar *FIELD_NAME_ENTREPRISE = BAD_CAST "ENTREPRISE";
+static const xmlChar *FIELD_NAME_DATES_EFFET = BAD_CAST "DATES_EFFET";
+static const xmlChar *FIELD_NAME_DATE_EFFET = BAD_CAST "DATE_EFFET";
+static const xmlChar *FIELD_NAME_DOMAINES = BAD_CAST "DOMAINES";
+static const xmlChar *FIELD_NAME_DOMAINE = BAD_CAST "DOMAINE";
 
 int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 {
@@ -220,7 +225,8 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 	struct lien *lien;
 	struct tocitem *tocitem;
 	struct mcs *mcs = pdata->mcs;
-	char *mc;
+	struct entreprise *entreprise = pdata->entreprise;
+	char *buf;
 
 	r += fprintf_doctype(f, mdata->uri_parts.doctype);
 	r += fprintf(f, "%s;%s;%s;%s;%d;%s;%d;%s;%d;%s;%d;%s\n", mdata->id + 8,
@@ -281,8 +287,21 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 	*/
 	/*
 	for (i = 0; i < mcs->nb_mcs; i++) {
-		mc = mcs->mc[i];
-		fprintf(f, "\tmc;%s\n", mc);
+		buf = mcs->mc[i];
+		fprintf(f, "\tmc;%s\n", buf);
+	}
+	 */
+	/*
+	if (*entreprise->texte_entreprise != 0 && strcmp(entreprise->texte_entreprise, "oui") == 0) {
+		fprintf(f, "\tentreprise.texte_entreprise;%s\n", entreprise->texte_entreprise);
+		for (i = 0; i < entreprise->nb_dates_effet; i++) {
+			buf = entreprise->dates_effet[i];
+			fprintf(f, "\tentreprise.date_effet;%s\n", buf);
+		}
+		for (i = 0; i < entreprise->nb_domaines; i++) {
+			buf = entreprise->domaines[i];
+			fprintf(f, "\tentreprise.domaine;%s\n", buf);
+		}
 	}
 	 */
 	return r;
@@ -440,6 +459,13 @@ struct parsed_data *allocate_parsed_data()
 		return NULL;
 	}
 	pdata->mcs->max_mcs = MAX_MCS;
+	pdata->entreprise = calloc(1, sizeof(struct entreprise));
+	if (pdata->entreprise == NULL) {
+		perror("calloc parsed_data->entreprise");
+		return NULL;
+	}
+	pdata->entreprise->max_dates_effet = MAX_DATE_EFFET;
+	pdata->entreprise->max_domaines = MAX_DOMAINES;
 
 	return pdata;
 }
@@ -466,6 +492,7 @@ void free_parsed_data(struct parsed_data *pdata)
 	free_contenu(pdata->contenu);
 	free(pdata->contenu);
 	free(pdata->mcs);
+	free(pdata->entreprise);
 	free(pdata);
 }
 
@@ -490,6 +517,8 @@ void reset_parsed_data(struct parsed_data *pdata)
 	pdata->versions->nb_versions = 0;
 	pdata->toc->nb_tocitems = 0;
 	pdata->mcs->nb_mcs = 0;
+	pdata->entreprise->nb_dates_effet = 0;
+	pdata->entreprise->nb_domaines = 0;
 	reset_contenu(pdata->contenu);
 }
 
@@ -576,7 +605,9 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 	struct lien *lien;
 	struct tocitem *tocitem;
 	struct mcs *mcs;
+	struct entreprise *entreprise;
 	char *mc;
+	char *buf;
 	int r;
 	int niv;
 	int len, len1, len2;
@@ -587,6 +618,7 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 	toc = pdata->toc;
 	contenu = pdata->contenu;
 	mcs = pdata->mcs;
+	entreprise = pdata->entreprise;
 
 	if (mdata->uri_parts.doctype == EMPTY_DOCTYPE) {
 		if (strcmp(mdata->uri_parts.base, "JORF") == 0) {
@@ -809,6 +841,48 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 			} else {
 				fprintf(stderr, "WARNING:%s: too much %s (%d)\n",
 					mdata->id, name, mcs->max_mcs);
+			}
+		}
+	} else if (xmlStrEqual(name, FIELD_NAME_DATES_EFFET)) {
+		pdata->current_dtext = NULL;
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = name;
+		pdata->parent_element = PE_DATES_EFFET;
+	} else if (xmlStrEqual(name, FIELD_NAME_DATE_EFFET)) {
+		if (pdata->parent_element == PE_DATES_EFFET) {
+			if (entreprise->nb_dates_effet < entreprise->max_dates_effet) {
+				buf = entreprise->dates_effet[entreprise->nb_dates_effet];
+				*buf = 0;
+				entreprise->nb_dates_effet++;
+				pdata->current_dtext = NULL;
+				pdata->current_field = buf;
+				pdata->current_size = FIELD_LEN_DATE;
+				pdata->current_name = name;
+			} else {
+				fprintf(stderr, "WARNING:%s: too much %s (%d)\n",
+					mdata->id, name, entreprise->max_dates_effet);
+			}
+		}
+	} else if (xmlStrEqual(name, FIELD_NAME_DOMAINES)) {
+		pdata->current_dtext = NULL;
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = name;
+		pdata->parent_element = PE_DOMAINES;
+	} else if (xmlStrEqual(name, FIELD_NAME_DOMAINE)) {
+		if (pdata->parent_element == PE_DOMAINES) {
+			if (entreprise->nb_domaines < entreprise->max_domaines) {
+				buf = entreprise->domaines[entreprise->nb_domaines];
+				*buf = 0;
+				entreprise->nb_domaines++;
+				pdata->current_dtext = NULL;
+				pdata->current_field = buf;
+				pdata->current_size = FIELD_LEN_DOMAINE;
+				pdata->current_name = name;
+			} else {
+				fprintf(stderr, "WARNING:%s: too much %s (%d)\n",
+					mdata->id, name, entreprise->max_domaines);
 			}
 		}
 	} else if (xmlStrEqual(name, FIELD_NAME_NOTICE)) {
@@ -1380,6 +1454,25 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_size = 0;
 		pdata->current_name = name;
 		pdata->parent_element = PE_STRUCT;
+	} else if (xmlStrEqual(name, FIELD_NAME_ENTREPRISE)) {
+		pdata->current_dtext = NULL;
+		pdata->current_field = NULL;
+		pdata->current_size = 0;
+		pdata->current_name = name;
+		pdata->parent_element = PE_EMPTY;
+		while (NULL != attrs && NULL != attrs[0]) {
+			r = 0;
+			if (strcmp((const char *) attrs[0], "texte_entreprise") == 0)
+				r = copy_attr_to_field(
+					mdata->id,
+					attrs[0], attrs[1],
+					xmlStrlen(attrs[1]),
+					"entreprise.texte_entreprise",
+					entreprise->texte_entreprise,
+					FIELD_LEN_ENTREPRISE);
+				// TODO: que faire quand r < 0 ?
+			attrs = &attrs[2];
+		}
 	}
 }
 
@@ -1432,6 +1525,9 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		|| xmlStrEqual(name, FIELD_NAME_CONTENU)
 		|| xmlStrEqual(name, FIELD_NAME_MCS_TXT)
 		|| xmlStrEqual(name, FIELD_NAME_MCS_ART)
+		|| xmlStrEqual(name, FIELD_NAME_ENTREPRISE)
+		|| xmlStrEqual(name, FIELD_NAME_DATES_EFFET)
+		|| xmlStrEqual(name, FIELD_NAME_DOMAINES)
 		) {
 		reset_current(pdata);
 		reset_parent(pdata);
@@ -1443,6 +1539,8 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		|| xmlStrEqual(name, FIELD_NAME_LIEN_SECTION_TA)
 		|| xmlStrEqual(name, FIELD_NAME_LIEN_ART)
 		|| xmlStrEqual(name, FIELD_NAME_MC)
+		|| xmlStrEqual(name, FIELD_NAME_DATE_EFFET)
+		|| xmlStrEqual(name, FIELD_NAME_DOMAINE)
 		) {
 		reset_current(pdata);
 	} else if (pdata->parent_element == PE_CONTENU) {
