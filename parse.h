@@ -18,11 +18,13 @@
 #define FIELD_LEN_ORIGINE 20
 #define FIELD_LEN_SENS 8
 #define FIELD_LEN_TYPELIEN 16
+#define FIELD_LEN_MC 256
 
 #define MAX_VERSIONS_A_VENIR 24
 #define MAX_VERSIONS 80 /* MAX JORF/LEGI 71 */
 #define MAX_TOCITEMS 4000 /* MAX JORF 3730 LEGI 600 (LIEN_ART) */
 #define MAX_LIENS 24000 /* MAX JORF 23325 / LEGI 8858 */
+#define MAX_MCS 1024
 
 /*
   <SECTION_TA>
@@ -126,6 +128,12 @@ struct versions {
     int max_versions;
 };
 
+struct mcs {
+    char mc[MAX_MCS+1][FIELD_LEN_MC]; /* NULL ended */
+    int nb_mcs;
+    int max_mcs;
+};
+
 struct tocitem {
     int niv;
     enum document_kind kind;
@@ -175,7 +183,6 @@ struct liens {
 /*
 LEGIVERS:
   <TP><CONTENU/></TP>
-  <NOTA><CONTENU/></NOTA>
   <ABRO><CONTENU/></ABRO>
   <RECT><CONTENU/></RECT>
 
@@ -191,7 +198,6 @@ JORFVERS:
 
 JORFARTI / LEGIARTI
   <SM><CONTENU/></SM>
-  <NOTA><CONTENU/></NOTA>
   <BLOC_TEXTUEL><CONTENU>
       <br/>   Chaque appellation d'origine contrôlée est définie par décret sur proposition de l'Institut national des appellations d'origine, sans préjudice pour les vins et eaux-de-vie, cidres, poirés, apéritifs à base de cidres, de poirés ou de vins des dispositions de l'article L. 641-15.<br/>
       <br/>   Le décret délimite l'aire géographique de production et détermine les conditions de production et d'agrément du produit.<br/>
@@ -205,6 +211,11 @@ JORFARTI / LEGIARTI
 #define INITIAL_CONTENT_VISAS 4096
 #define INITIAL_CONTENT_SIGNATAIRES 4096
 #define INITIAL_CONTENT_NOTA 4096
+#define INITIAL_CONTENT_TP 256
+#define INITIAL_CONTENT_ABRO 256
+#define INITIAL_CONTENT_RECT 256
+#define INITIAL_CONTENT_SM 256
+#define INITIAL_CONTENT_BLOC_TEXTUEL 4096
 
 struct dtext {
     size_t size;
@@ -216,6 +227,11 @@ struct contenu {
     struct dtext visas;
     struct dtext signataires;
     struct dtext nota;
+    struct dtext tp;
+    struct dtext abro;
+    struct dtext rect;
+    struct dtext sm;
+    struct dtext bloc_textuel;
 };
 
 enum parent_element {
@@ -227,6 +243,12 @@ enum parent_element {
     PE_CONTENU,
     PE_SIGNATAIRES,
     PE_NOTA,
+    PE_TP, /* Travaux préparatoires */
+    PE_ABRO, /* Abrogations */
+    PE_RECT, /* Rectificatifs */
+    PE_SM, /* Résumé LEX */
+    PE_BLOC_TEXTUEL,
+    PE_MCS, /* Mots clés: MCS_ART ou MCS_TXT */
 };
 
 struct metadata {
@@ -265,7 +287,7 @@ struct parsed_data {
     struct liens *liens;
     struct toc *toc;
     struct contenu *contenu;
-    /* struct mc *mc; */
+    struct mcs *mcs;
     struct dtext *current_dtext;
     size_t current_size;
     size_t current_oversize;

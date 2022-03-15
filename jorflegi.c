@@ -268,12 +268,12 @@ int set_date_uri(struct metadata *mdata)
 
 	date_pub = check_date(mdata->date_publi);
 	if (date_pub == NULL) {
-		fprintf(stderr, "error:%s: bad date_publi '%s'\n", mdata->id, mdata->date_publi);
+		fprintf(stderr, "ERROR:%s: bad date_publi '%s'\n", mdata->id, mdata->date_publi);
 		return -1;
 	}
 	date_sig = check_date(mdata->date_texte);
 	if (date_sig == NULL) {
-		fprintf(stderr, "error:%s: bad date_texte '%s'\n", mdata->id, mdata->date_texte);
+		fprintf(stderr, "ERROR:%s: bad date_texte '%s'\n", mdata->id, mdata->date_texte);
 		return -1;
 	}
 	if (*date_sig == 0 || (date_sig[0] == '2' && date_sig[1] == '9')) {
@@ -281,7 +281,7 @@ int set_date_uri(struct metadata *mdata)
 		date = date_pub;
 		if (*date_pub == 0 || (date_pub[0] == '2' && date_pub[1] == '9')) {
 			// *(date_pub + 2432424) = 5;
-			fprintf(stderr, "error:%s: no usable date\n", mdata->id);
+			fprintf(stderr, "ERROR:%s: no usable date\n", mdata->id);
 			return -1;
 		}
 	} else if (*date_sig != 0) {
@@ -289,7 +289,7 @@ int set_date_uri(struct metadata *mdata)
 		mdata->uri_parts.datekind = SIG_DATEKIND;
 		if (date_sig[0] == '2' && date_sig[1] == '9') {
 			// *(date_sig + 2432424) = 5;
-			fprintf(stderr, "error:%s: no usable date\n", mdata->id);
+			fprintf(stderr, "ERROR:%s: no usable date\n", mdata->id);
 			return -1;
 		}
 	}
@@ -319,12 +319,12 @@ int set_num_uri(struct metadata *mdata, char *target, enum numkind *numkind,
 	if (natural != NULL && (plen = strlen(natural)) > 0) {
 		val = remove_zeros(natural, plen, &zc);
 		if (val == NULL) {
-			fprintf(stderr, "error:%s: bad natural num '%s'\n", id, natural);
+			fprintf(stderr, "ERROR:%s: bad natural num '%s'\n", id, natural);
 			return -1;
 		}
 		plen -= zc;
 		if (plen > MAX_URI_NUMBER) {
-			fprintf(stderr, "error:%s: natural num too long '%s' (%d)\n",
+			fprintf(stderr, "ERROR:%s: natural num too long '%s' (%d)\n",
 				id, natural, plen - MAX_URI_NUMBER);
 			return -1;
 		}
@@ -339,16 +339,16 @@ int set_num_uri(struct metadata *mdata, char *target, enum numkind *numkind,
 	if (nor != NULL && (plen = strlen(nor)) > 0) {
 		val = remove_zeros(nor, plen, &zc);
 		if (val == NULL) {
-			fprintf(stderr, "error:%s: bad nor num '%s'\n", id, nor);
+			fprintf(stderr, "ERROR:%s: bad nor num '%s'\n", id, nor);
 			return -1;
 		}
-		if (strlen(val) > 12) {
-			fprintf(stderr, "warning:%s: bad nor num '%s' (>12)\n", id, nor);
+		if (strlen(val) > FIELD_LEN_NOR) {
+			fprintf(stderr, "WARNING:%s: bad nor num '%s' (>%d)\n", id, nor, FIELD_LEN_NOR);
 			//return -1;
 		}
 		plen -= zc;
 		if (plen > MAX_URI_NUMBER) {
-			fprintf(stderr, "error:%s: nor num too long '%s' (%d)\n",
+			fprintf(stderr, "ERROR:%s: nor num too long '%s' (%d)\n",
 				id, nor, plen - MAX_URI_NUMBER);
 			return -1;
 		}
@@ -363,7 +363,7 @@ int set_num_uri(struct metadata *mdata, char *target, enum numkind *numkind,
 	if (id != NULL && (plen = strlen(id)) > 0) {
 		val = remove_zeros(id + 8, plen, &zc);
 		if (val == NULL) {
-			fprintf(stderr, "error:%s: bad id num '%s'\n", id, id);
+			fprintf(stderr, "ERROR:%s: bad id num '%s'\n", id, id);
 			return -1;
 		}
 		plen -= (zc + 8);
@@ -371,7 +371,7 @@ int set_num_uri(struct metadata *mdata, char *target, enum numkind *numkind,
 			plen += strlen(idprefix);
 		}
 		if (plen > MAX_URI_NUMBER) {
-			fprintf(stderr, "error:%s: id num too long '%s' (%d)\n",
+			fprintf(stderr, "ERROR:%s: id num too long '%s' (%d)\n",
 				id, nor, plen - MAX_URI_NUMBER);
 			return -1;
 		}
@@ -390,7 +390,7 @@ int set_num_uri(struct metadata *mdata, char *target, enum numkind *numkind,
 			*numkind = ID_NUMKIND;
 		}
 	} else {
-		fprintf(stderr, "error:%s: cannot set num for URI\n", id);
+		fprintf(stderr, "ERROR:%s: cannot set num for URI\n", id);
 		return -1;
 	}
 
@@ -411,7 +411,7 @@ enum uri_kind set_text_uri(struct metadata *mdata, char *tnum_target, enum numki
 
 		cname = get_code_name(texte_cid);
 		if (cname == NULL) {
-			fprintf(stderr, "warning:%s: cannot find code name for %s\n", mdata->id, texte_cid);
+			fprintf(stderr, "WARNING:%s: cannot find code name for %s\n", mdata->id, texte_cid);
 		}
 
 		plen = set_num_uri(mdata, tnum_target,tnumkind,
@@ -428,7 +428,7 @@ enum uri_kind set_text_uri(struct metadata *mdata, char *tnum_target, enum numki
 
 		cname = get_constitution(texte_cid);
 		if (cname == NULL) {
-			fprintf(stderr, "warning:%s: cannot find constitution for %s\n", mdata->id, texte_cid);
+			fprintf(stderr, "WARNING:%s: cannot find constitution for %s\n", mdata->id, texte_cid);
 		}
 
 		plen = set_num_uri(mdata, tnum_target,tnumkind,
@@ -444,7 +444,7 @@ enum uri_kind set_text_uri(struct metadata *mdata, char *tnum_target, enum numki
 
 		plen = strlen(texte_nature);
 		if (plen > MAX_URI_NATURE) {
-			fprintf(stderr, "error:%s: nature too small for text nature '%s' (%lu)\n",
+			fprintf(stderr, "ERROR:%s: nature too small for text nature '%s' (%lu)\n",
 				mdata->id, cname, plen - MAX_URI_NATURE);
 			return EMPTY_URI_KIND;
 		}
