@@ -295,6 +295,7 @@ struct metadata {
     struct contexte contexte;
     struct uri uri_parts;
     char uri[MAX_URI];
+    char rid[FIELD_LEN_ID+1]; /* JORFVERS000037658324 + \0 */
 };
 
 struct parsed_data {

@@ -9,6 +9,7 @@
 #include "uri.h"
 #include "parse.h"
 #include "jorflegi.h"
+#include "fs.h"
 
 struct archive_info {
     enum fund fund;
@@ -624,14 +625,19 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		if (strcmp(mdata->uri_parts.base, "JORF") == 0) {
 			if (xmlStrEqual(name, ROOT_JORFCONT)) {
 				mdata->uri_parts.doctype = JORFCONT_DOCTYPE;
+				strcpy(mdata->rid, "JORFCONT");
 			} else if (xmlStrEqual(name, ROOT_JORFTEXT)) {
 				mdata->uri_parts.doctype = JORFTEXT_DOCTYPE;
+				strcpy(mdata->rid, "JORFTEXT");
 			} else if (xmlStrEqual(name, ROOT_JORFVERS)) {
 				mdata->uri_parts.doctype = JORFVERS_DOCTYPE;
+				strcpy(mdata->rid, "JORFVERS");
 			} else if (xmlStrEqual(name, ROOT_JORFSCTA)) {
 				mdata->uri_parts.doctype = JORFSCTA_DOCTYPE;
+				strcpy(mdata->rid, "JORFSCTA");
 			} else if (xmlStrEqual(name, ROOT_JORFARTI)) {
 				mdata->uri_parts.doctype = JORFARTI_DOCTYPE;
+				strcpy(mdata->rid, "JORFARTI");
 			} else {
 				fprintf(stderr, "Unknown root for XML file: %s\n",
 					(char *)name);
@@ -640,12 +646,16 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		} else if (strcmp(mdata->uri_parts.base, "LEGI") == 0) {
 			if (xmlStrEqual(name, ROOT_LEGITEXT)) {
 				mdata->uri_parts.doctype = LEGITEXT_DOCTYPE;
+				strcpy(mdata->rid, "LEGITEXT");
 			} else if (xmlStrEqual(name, ROOT_LEGIVERS)) {
 				mdata->uri_parts.doctype = LEGIVERS_DOCTYPE;
+				strcpy(mdata->rid, "LEGIVERS");
 			} else if (xmlStrEqual(name, ROOT_LEGISCTA)) {
 				mdata->uri_parts.doctype = LEGISCTA_DOCTYPE;
+				strcpy(mdata->rid, "LEGISCTA");
 			} else if (xmlStrEqual(name, ROOT_LEGIARTI)) {
 				mdata->uri_parts.doctype = LEGIARTI_DOCTYPE;
+				strcpy(mdata->rid, "LEGIARTI");
 			} else if (xmlStrEqual(name, ROOT_VERSIONS)) {
 				mdata->uri_parts.doctype = VERSIONS_DOCTYPE;
 			} else {
@@ -1606,6 +1616,7 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 	struct gen_uri_info *infos = user_data;
 	size_t size;
 	char base[5];
+	struct fs_backend fs;
 
 	fname = archive_entry_pathname(entry);
 	size = strlen(fname);
@@ -1649,6 +1660,7 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 					uri_cpy(&mdata->uri_parts, mdata->uri);
 				}
 				fprintf_parsed_data(stdout, pdata);
+				write_fs(&fs, pdata);
 			}
 			//xmlFreeParserCtxt(ctxt);
 			return 0;

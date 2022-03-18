@@ -481,6 +481,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 	enum uri_kind kind;
 
 	if (mdata->uri_parts.doctype == JORFCONT_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
 		strcpy(mdata->uri_parts.country, "fr");
 		strcpy(mdata->uri_parts.corpus, "jo");
 		len = 5;
@@ -495,6 +496,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 		len += plen + 1;
 		mdata->uri_parts.kind = URI_CORPUS_DATE_CNUM;
 	} else if (mdata->uri_parts.doctype == JORFTEXT_DOCTYPE || mdata->uri_parts.doctype == LEGITEXT_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
 		strcpy(mdata->uri_parts.country, "fr");
 		len = 2;  /* fr */
 		kind = set_text_uri(mdata, mdata->uri_parts.tnum, &mdata->uri_parts.tnumkind,
@@ -504,6 +506,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 			return -1;
 		mdata->uri_parts.kind = kind;
 	} else if (mdata->uri_parts.doctype == JORFVERS_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
 		plen = date_to_version(mdata->date_publi, mdata->uri_parts.tversion);
 		if (plen < 0)
 			return -1;
@@ -511,6 +514,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 		mdata->uri_parts.tversion_datekind = PUB_DATEKIND;
 		mdata->uri_parts.kind = PARTIAL_URI_VERSION;
 	} else if (mdata->uri_parts.doctype == JORFSCTA_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
 		plen = set_num_uri(mdata, mdata->uri_parts.snum, &mdata->uri_parts.snumkind,
 				   NULL, NULL, mdata->id, "sid");
 		if (plen < 0)
@@ -523,6 +527,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 		mdata->uri_parts.sversion_datekind = PUB_DATEKIND;
 		mdata->uri_parts.kind = PARTIAL_URI_SNUM_VERSION;
 	} else if (mdata->uri_parts.doctype == JORFARTI_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
 		plen = set_num_uri(mdata, mdata->uri_parts.anum, &mdata->uri_parts.anumkind,
 				   mdata->num, NULL, mdata->id, "aid");
 		if (plen < 0)
@@ -537,6 +542,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 		mdata->uri_parts.aversion_datekind = PUB_DATEKIND;
 		mdata->uri_parts.kind = PARTIAL_URI_ANUM_VERSION;
 	} else if (mdata->uri_parts.doctype == LEGIVERS_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
 		plen = date_to_version(mdata->date_debut, mdata->uri_parts.tversion);
 		if (plen < 0)
 			return -1;
@@ -544,6 +550,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 		mdata->uri_parts.tversion_datekind = BEG_DATEKIND;
 		mdata->uri_parts.kind = PARTIAL_URI_VERSION;
 	} else if (mdata->uri_parts.doctype == LEGISCTA_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
 		plen = set_num_uri(mdata, mdata->uri_parts.snum, &mdata->uri_parts.snumkind,
 				   NULL, NULL, mdata->id, "sid");
 		if (plen < 0)
@@ -556,6 +563,7 @@ int set_jorflegi_uri(struct metadata *mdata)
 		 * Ou alors il faudrait prendre la premiere?
 		 */
 	} else if (mdata->uri_parts.doctype == LEGIARTI_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
 		plen = set_num_uri(mdata, mdata->uri_parts.anum, &mdata->uri_parts.anumkind,
 				   mdata->num, NULL, mdata->id, "aid");
 		if (plen < 0)
