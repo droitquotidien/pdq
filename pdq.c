@@ -10,6 +10,7 @@
 #include "parse.h"
 #include "jorflegi.h"
 #include "fs.h"
+#include "buffer.h"
 
 struct archive_info {
     enum fund fund;
@@ -22,6 +23,7 @@ struct gen_uri_info {
     struct parsed_data *pdata;
     xmlSAXHandler parser_handler;
     xmlParserCtxtPtr ctxt;
+    struct write_buffer *wbuf;
 };
 
 int has_xml_suffix(const char *s, size_t size)
@@ -212,6 +214,7 @@ static const xmlChar *FIELD_NAME_DATES_EFFET = BAD_CAST "DATES_EFFET";
 static const xmlChar *FIELD_NAME_DATE_EFFET = BAD_CAST "DATE_EFFET";
 static const xmlChar *FIELD_NAME_DOMAINES = BAD_CAST "DOMAINES";
 static const xmlChar *FIELD_NAME_DOMAINE = BAD_CAST "DOMAINE";
+static const xmlChar *FIELD_NAME_COMMENTAIRE = BAD_CAST "COMMENTAIRE";
 
 int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 {
@@ -819,6 +822,11 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_field = mdata->etat;
 		pdata->current_size = FIELD_LEN_ETAT;
 		pdata->current_name = FIELD_NAME_ETAT;
+	} else if (xmlStrEqual(name, FIELD_NAME_COMMENTAIRE)) {
+		pdata->current_dtext = NULL;
+		pdata->current_field = mdata->commentaire;
+		pdata->current_size = FIELD_LEN_COMMENTAIRE;
+		pdata->current_name = FIELD_NAME_COMMENTAIRE;
 	} else if (xmlStrEqual(name, FIELD_NAME_ORIGINE)) {
 		pdata->current_dtext = NULL;
 		pdata->current_field = mdata->origine;
@@ -1659,8 +1667,11 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 				if (mdata->uri_parts.kind != EMPTY_URI_KIND) {
 					uri_cpy(&mdata->uri_parts, mdata->uri);
 				}
-				fprintf_parsed_data(stdout, pdata);
-				write_fs(&fs, pdata);
+				if (mdata->contexte.uri_parts.kind != EMPTY_URI_KIND) {
+					uri_cpy(&mdata->contexte.uri_parts, mdata->contexte.uri);
+				}
+				fprintf_parsed_data(stderr, pdata);
+				write_fs(&fs, pdata, infos->wbuf);
 			}
 			//xmlFreeParserCtxt(ctxt);
 			return 0;
@@ -1751,7 +1762,10 @@ int generate_uris(char *fname, enum fund fund)
 	if (infos.pdata == NULL) {
 		exit(EXIT_FAILURE);
 	}
-
+	infos.wbuf = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 1);
+	if (infos.wbuf == NULL) {
+		exit(EXIT_FAILURE);
+	}
 	parser_handler.startElement = start_element_callback;
 	parser_handler.endElement = end_element_callback;
 	parser_handler.characters = characters_callback;

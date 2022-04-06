@@ -21,6 +21,7 @@
 #define FIELD_LEN_MC 256
 #define FIELD_LEN_DOMAINE 256
 #define FIELD_LEN_ENTREPRISE 8
+#define FIELD_LEN_COMMENTAIRE 2048
 
 #define MAX_VERSIONS_A_VENIR 24
 #define MAX_VERSIONS 80 /* MAX JORF/LEGI 71 */
@@ -119,6 +120,8 @@ struct contexte {
     char nature[FIELD_LEN_NATURE+1];
     char nor[FIELD_LEN_NOR+1];
     char num[FIELD_LEN_NUM+1];
+    struct uri uri_parts;  /* URI du texte parent */
+    char uri[MAX_URI];
     /* Ignored: autorite, ministere, num_parution_jo */
     /* Note: pas utile, en fait.
     struct document_version versions[MAX_VERSIONS+1];
@@ -292,6 +295,7 @@ struct metadata {
     char versions_a_venir[MAX_VERSIONS_A_VENIR+1][FIELD_LEN_DATE+1]; /* NULL ended */
     int nb_versions_a_venir;
     char origine[FIELD_LEN_ORIGINE+1];
+    char commentaire[FIELD_LEN_COMMENTAIRE+1];
     struct contexte contexte;
     struct uri uri_parts;
     char uri[MAX_URI];

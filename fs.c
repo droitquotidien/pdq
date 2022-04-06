@@ -50,7 +50,7 @@ int create_cid_dirs(const char *rootname, const char *cid, char *pathbuf)
 		loc = stpncpy(loc, cidpos, 4);
 		*loc = 0;
 		r = create_dir(pathbuf);
-		if (r == 0) printf("dir: %s\n", pathbuf);
+		if (r == 0) fprintf(stderr, "dir: %s\n", pathbuf);
 		if (r == -1) return -1;
 	}
 
@@ -61,7 +61,6 @@ FILE *create_file(const char *fname)
 {
 	FILE *f;
 
-	printf("file: %s\n", fname);
 	f = fopen(fname, "w");
 	if (f == NULL) {
 		perror("ERROR: creating file");
@@ -72,7 +71,7 @@ FILE *create_file(const char *fname)
 	return f;
 }
 
-int write_fs(struct fs_backend *fs, struct parsed_data *pdata)
+int write_fs(struct fs_backend *fs, struct parsed_data *pdata, struct write_buffer *wbuf)
 {
 	int r = 0;
 	int i;
@@ -90,6 +89,7 @@ int write_fs(struct fs_backend *fs, struct parsed_data *pdata)
 	char *cid;
 	char *loc;
 	FILE *f;
+	int fildes;
 
 	/*
 	 * Création d'un répertoire .tmp
@@ -119,8 +119,19 @@ int write_fs(struct fs_backend *fs, struct parsed_data *pdata)
 	if (f == NULL) {
 		return -1;
 	}
-	write_json(f, pdata);
+	fildes = fileno(f);
+	r = write_json(pdata, fildes, wbuf);
+	if (r < 0) {
+		fclose(f);
+		return -1;
+	}
+	r = buffer_flush(fildes, wbuf);
+	if (r < 0) {
+		fclose(f);
+		return -1;
+	}
 	fclose(f);
+	printf("%s\n", fs->pathbuf);
 
 	/*
 	if (*contenu->notice.text != 0) {

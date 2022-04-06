@@ -1,4 +1,5 @@
 #include "parse.h"
+#include "buffer.h"
 
 #define MAX_PATH_BUF 1024
 
@@ -7,4 +8,4 @@ struct fs_backend {
     char pathbuf[MAX_PATH_BUF];
 };
 
-int write_fs(struct fs_backend *fs, struct parsed_data *pdata);
+int write_fs(struct fs_backend *fs, struct parsed_data *pdata, struct write_buffer *wbuf);

@@ -1,4 +1,5 @@
 #include <stdio.h>
 #include "parse.h"
+#include "buffer.h"
 
-void write_json(FILE *f, struct parsed_data *pdata);
+ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *wbuf);

@@ -13,6 +13,6 @@ if(LibXml2_FOUND)
     include_directories(${LIBXML2_INCLUDE_DIR})
     #link_directories(${LIBXML2_LIBRARIES})
 endif()
-add_executable(pdq pdq.h pdq.c uri.h uri.c parse.h jorflegi.h jorflegi.c fs.h fs.c json.h json.c)
+add_executable(pdq pdq.h pdq.c uri.h uri.c parse.h jorflegi.h jorflegi.c fs.h fs.c json.h json.c buffer.c)
 target_link_libraries(pdq ${LIBXML2_LIBRARIES} -larchive)
 
