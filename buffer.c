@@ -56,6 +56,10 @@ ssize_t buffer_copy(int fildes, const char *buf, ssize_t len, struct write_buffe
 			return -1;
 		}
 	}
+	if ((len + wbuf->current_size) > wbuf->max_size) {
+		fprintf(stderr, "ERROR: write_buffer too small (even after flush) (%zu bytes missing)\n",
+			((len + wbuf->current_size) - wbuf->max_size));
+	}
 	assert ((len + wbuf->current_size) <= wbuf->max_size);
 	memcpy(wbuf->cbuffer, buf, len);
 	wbuf->cbuffer += len;

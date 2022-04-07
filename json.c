@@ -135,7 +135,7 @@ ssize_t write_uri_parts_json(int fildes, struct uri *uri_parts, struct write_buf
 
 	OPENBLOCK(fildes, uri_parts, 9, wbuf);
 	if (uri_parts->num1kind != EMPTY_NUMKIND) {
-		JATTR(fildes, naturel, 7, uri_parts->num1, wbuf);
+		CONTENT_WRITE(fildes, naturel, 7, uri_parts->num1, wbuf);
 	}
 	if (uri_parts->num2kind != EMPTY_NUMKIND) {
 		JATTR(fildes, nor, 3, uri_parts->num2, wbuf);
@@ -295,7 +295,8 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 		case JORFARTI_DOCTYPE:
 			JATTR(fildes, cid, 3, mdata->id, wbuf);
 			JATTR(fildes, rid, 3, mdata->rid, wbuf);
-			JATTR(fildes, num, 3, mdata->num, wbuf);
+			// \n in numbers (ex: JORFARTI000019283159)
+			CONTENT_WRITE(fildes, num, 3, mdata->num, wbuf);
 			// TODO: mcs
 			JATTR(fildes, date_debut, 10, mdata->date_debut, wbuf);
 			JATTR(fildes, date_fin, 8, mdata->date_fin, wbuf);

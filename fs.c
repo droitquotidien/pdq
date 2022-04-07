@@ -1,9 +1,9 @@
 /* Filesystem backend: création de fichiers avec les données juridiques
  * sur un filesystem
  */
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <fcntl.h>
 #include <errno.h>
+#include <sys/stat.h>
 #include <string.h>
 #include "parse.h"
 #include "fs.h"
@@ -57,23 +57,27 @@ int create_cid_dirs(const char *rootname, const char *cid, char *pathbuf)
 	return 0;
 }
 
-FILE *create_file(const char *fname)
+int create_file(const char *fname)
 {
-	FILE *f;
+	int f;
 
-	f = fopen(fname, "w");
-	if (f == NULL) {
-		perror("ERROR: creating file");
-		fprintf(stderr, "ERROR: cannot create file '%s'\n", fname);
-		return NULL;
+	f = open(fname, O_CREAT | O_WRONLY | O_EXCL, S_IRUSR | S_IWUSR);
+	if (f < 0) {
+		if (errno == EEXIST) {
+			return -2;
+		} else {
+			perror("ERROR: creating file");
+			fprintf(stderr, "ERROR: cannot create file '%s'\n", fname);
+			return -1;
+		}
 	}
 
 	return f;
 }
 
-int write_fs(struct fs_backend *fs, struct parsed_data *pdata, struct write_buffer *wbuf)
+ssize_t write_fs(struct fs_backend *fs, struct parsed_data *pdata, struct write_buffer *wbuf, char force)
 {
-	int r = 0;
+	ssize_t r = 0;
 	int i;
 	struct metadata *mdata = pdata->metadata;
 	struct versions *versions = pdata->versions;
@@ -88,8 +92,7 @@ int write_fs(struct fs_backend *fs, struct parsed_data *pdata, struct write_buff
 	char *buf;
 	char *cid;
 	char *loc;
-	FILE *f;
-	int fildes;
+	int f;
 
 	/*
 	 * Création d'un répertoire .tmp
@@ -110,27 +113,30 @@ int write_fs(struct fs_backend *fs, struct parsed_data *pdata, struct write_buff
 		}
 	}
 
-	/* Create HTML file for each resource */
+	/* Create JSON file for each resource */
 	loc = fs->pathbuf + strlen(fs->pathbuf);
 	*loc++ = '/';
 	loc = stpcpy(loc, mdata->rid);
 	strcpy(loc, ".json");
 	f = create_file(fs->pathbuf);
-	if (f == NULL) {
+	if (f == -1) {
 		return -1;
+	} else if (f == -2 && !force) {
+		/* file exists */
+		return 0;
 	}
-	fildes = fileno(f);
-	r = write_json(pdata, fildes, wbuf);
+
+	r = write_json(pdata, f, wbuf);
 	if (r < 0) {
-		fclose(f);
+		close(f);
 		return -1;
 	}
-	r = buffer_flush(fildes, wbuf);
+	r = buffer_flush(f, wbuf);
 	if (r < 0) {
-		fclose(f);
+		close(f);
 		return -1;
 	}
-	fclose(f);
+	close(f);
 	printf("%s\n", fs->pathbuf);
 
 	/*

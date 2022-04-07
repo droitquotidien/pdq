@@ -13,7 +13,7 @@
           }\
           rt += r;
 
-#define MAX_SIZE_WRITE_BUFFER 65536
+#define MAX_SIZE_WRITE_BUFFER 1048576
 
 struct write_buffer {
     char *buffer;

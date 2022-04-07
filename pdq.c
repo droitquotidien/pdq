@@ -1640,14 +1640,6 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 	infos->xml_files++;
 	ctxt = infos->ctxt;
 
-	/*
-	parser_handler.startElement = start_element_callback;
-	parser_handler.endElement = end_element_callback;
-	parser_handler.characters = characters_callback;
-	*/
-	//printf("%s\n", fname);
-	//printf("%lld\n", archive_entry_size(entry));
-	// ctxt = xmlCreatePushParserCtxt(&parser_handler, &pdata, NULL, 0, NULL);
 	if (xmlCtxtResetPush(ctxt, NULL, 0, NULL, NULL) != 0) {
 		fprintf(stderr, "cannot reset parser ctxt.\n");
 		return -1;
@@ -1657,12 +1649,12 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 		if (r == ARCHIVE_EOF) {
 			uri_len = set_jorflegi_uri(mdata);
 			if (uri_len == -1) {
-				fprintf_doctype(stdout, mdata->uri_parts.doctype);
-				fprintf(stdout, "%s ERROR\n", mdata->id + 8);
+				fprintf_doctype(stderr, mdata->uri_parts.doctype);
+				fprintf(stderr, "%s ERROR\n", mdata->id + 8);
 				// return -1;
 			} else if (uri_len == 0) {
-				fprintf_doctype(stdout, mdata->uri_parts.doctype);
-				fprintf(stdout, "%s IGNORED\n", mdata->id + 8);
+				fprintf_doctype(stderr, mdata->uri_parts.doctype);
+				fprintf(stderr, "%s IGNORED\n", mdata->id + 8);
 			} else {
 				if (mdata->uri_parts.kind != EMPTY_URI_KIND) {
 					uri_cpy(&mdata->uri_parts, mdata->uri);
@@ -1671,14 +1663,12 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 					uri_cpy(&mdata->contexte.uri_parts, mdata->contexte.uri);
 				}
 				fprintf_parsed_data(stderr, pdata);
-				write_fs(&fs, pdata, infos->wbuf);
+				write_fs(&fs, pdata, infos->wbuf, 0);
 			}
-			//xmlFreeParserCtxt(ctxt);
 			return 0;
 		}
 		if (r < ARCHIVE_OK)
 			return r;
-		//printf("read len = %zu (offset = %lld)\n", len, offset);
 		r = xmlParseChunk(ctxt, buff, len, 0);
 		if (r != 0) {
 			fprintf(stderr, "error reading XML chunk.\n");
