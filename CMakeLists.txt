@@ -6,6 +6,7 @@ if(CMAKE_HOST_APPLE)
     set(LibArchive_INCLUDE_DIR /usr/local/opt/libarchive/include)
     set(LibArchive_LIBRARIES /usr/local/opt/libarchive/lib)
 endif()
+# apt-get install libarchive-dev
 include_directories(${LibArchive_INCLUDE_DIR})
 link_directories(${LibArchive_LIBRARIES})
 find_package(LibXml2 REQUIRED)

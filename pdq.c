@@ -12,11 +12,6 @@
 #include "fs.h"
 #include "buffer.h"
 
-struct archive_info {
-    enum fund fund;
-    int xml_files;
-};
-
 struct gen_uri_info {
     enum fund fund;
     int xml_files;
@@ -24,6 +19,10 @@ struct gen_uri_info {
     xmlSAXHandler parser_handler;
     xmlParserCtxtPtr ctxt;
     struct write_buffer *wbuf;
+	char bootstrap;
+	char force;
+	char *target_dir;
+	char *data_file;
 };
 
 int has_xml_suffix(const char *s, size_t size)
@@ -42,110 +41,6 @@ void set_base(const char *pathname, size_t size, char *base)
 	base[3] = pathname[size-21];
 	base[4] = 0;
 }
-
-/*
- * https://github.com/libarchive/libarchive/wiki/Examples#List_contents_of_Archive_stored_in_File
- */
-int list_files(char *fname)
-{
-	struct archive *a;
-	struct archive_entry *entry;
-	int r;
-
-	a = archive_read_new();
-	archive_read_support_filter_all(a);
-	archive_read_support_format_all(a);
-	r = archive_read_open_filename(a, fname, 10240);
-	if (r != ARCHIVE_OK)
-		return 1;
-	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-		printf("%s\n", archive_entry_pathname(entry));
-		archive_read_data_skip(a);
-	}
-	r = archive_read_free(a);
-	if (r != ARCHIVE_OK)
-		return 1;
-
-	return 0;
-}
-
-int archive_filename(struct archive *a, struct archive_entry *entry, void *user_data)
-{
-	char base[5];
-	const char *pathname;
-	struct archive_info *infos = user_data;
-	size_t size;
-
-	pathname = archive_entry_pathname(entry);
-	size = strlen(pathname);
-	if (!has_xml_suffix(pathname, size)) {
-		return 0;
-	}
-	set_base(pathname, size, base);
-	infos->xml_files++;
-	printf("%s %s\n", base, pathname);
-	archive_read_data_skip(a);
-
-	return 0;
-}
-
-/*
- * = JORFCONT_DOCTYPE
- * <STRUCTURE_TXT>
- *
- * = JORFTEXT_DOCTYPE TEXTE_VERSION
- * <MCS_TXT/>
- * <LIENS/>
- * <NOTICE>
- * <VISAS>
- * <SIGNATAIRES>
- * <TP>
- * <ABRO>
- * <RECT>
- * <SM>
- * <ENTREPRISE>
- *
- * = JORFTEXT_DOCTYPE TEXTELR
- * <VERSIONS_DOCTYPE>
- * <STRUCT>
- *
- * = JORFSCTA_DOCTYPE
- * <COMMENTAIRE/>
- * <CONTEXTE>
- * <STRUCTURE_TA>
- *
- * = JORFARTI_DOCTYPE
- * <MCS_ART>
- * <CONTEXTE>
- * <VERSIONS_DOCTYPE>
- * <SM>
- * <BLOC_TEXTUEL>
- * <LIENS>
- *
- * = LEGITEXT_DOCTYPE TEXTE_VERSION
- * <LIENS/>
- * <VISAS>
- * <SIGNATAIRES>
- * <TP>
- * <NOTA>
- * <ABRO>
- * <RECT>
- *
- * = LEGITEXT_DOCTYPE TEXTELR
- * <VERSIONS_A_VENIR>
- * <VERSIONS_DOCTYPE>
- * <STRUCT>
- *
- * = LEGISCTA_DOCTYPE
- * <CONTEXTE>
- * <STRUCTURE_TA>
- *
- * = LEGIARTI_DOCTYPE
- * <CONTEXTE>
- * <NOTA>
- * <BLOC_TEXTUEL>
- * <LIENS>
- */
 
 static const xmlChar *ROOT_JORFARTI = BAD_CAST "ARTICLE";
 static const xmlChar *ROOT_JORFCONT = BAD_CAST "JO";
@@ -1600,7 +1495,6 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 			}
 		}
 		if (can_copy) {
-			/*printf("COPY %s %d\n", pdata->current_name, len);*/
 			memcpy(pdata->current_field, chars, len);
 			pdata->current_field += len;
 			pdata->current_size -= len;
@@ -1609,7 +1503,7 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 	}
 }
 
-int archive_show(struct archive *a, struct archive_entry *entry, void *user_data)
+int archive_parse_file(struct archive *a, struct archive_entry *entry, void *user_data)
 {
 	int r;
 	int uri_len;
@@ -1625,6 +1519,8 @@ int archive_show(struct archive *a, struct archive_entry *entry, void *user_data
 	size_t size;
 	char base[5];
 	struct fs_backend fs;
+
+	fs.rootdir = infos->target_dir;
 
 	fname = archive_entry_pathname(entry);
 	size = strlen(fname);
@@ -1704,18 +1600,16 @@ int iterate_archive(char *fname, int (*f)(struct archive *, struct archive_entry
 	return 0;
 }
 
-/*int archive_read_data_block(struct archive *, const void **buff, size_t *len,
-			off_t *offset);
-*/
-
 struct params {
-	char *list_file;
-	char *show_file;
+	char *data_file;
+	char *target_dir;
+	char force;
+	char bootstrap;
 };
 
 void print_usage()
 {
-	printf("Usage: pdq [-l FILE] [-s FILE]\n");
+	printf("Usage: pdq [-f] [-b] -d data.tar.gz -t target_dir\n");
 }
 
 int set_params(int argc, char *argv[], struct params *params)
@@ -1725,13 +1619,19 @@ int set_params(int argc, char *argv[], struct params *params)
 		return 1;
 	}
 	memset(params, 0, sizeof(struct params));
-	while((c = getopt(argc, argv, "l:s:")) != -1) {
+	while((c = getopt(argc, argv, "bfd:t:")) != -1) {
 		switch(c) {
-			case 'l':
-				params->list_file = optarg;
+			case 'f':
+				params->force = 1;
 				break;
-			case 's':
-				params->show_file = optarg;
+			case 'b':
+				params->bootstrap = 1;
+				break;
+			case 'd':
+				params->data_file = optarg;
+				break;
+			case 't':
+				params->target_dir = optarg;
 				break;
 			case '?':
 			default:
@@ -1741,32 +1641,31 @@ int set_params(int argc, char *argv[], struct params *params)
 	return 0;
 }
 
-
-int generate_uris(char *fname, enum fund fund)
+int generate_uris(struct gen_uri_info *infos)
 {
 	int r;
-	struct gen_uri_info infos = {0};
 	xmlSAXHandler parser_handler = {0};
 
-	infos.pdata = allocate_parsed_data();
-	if (infos.pdata == NULL) {
+	infos->pdata = allocate_parsed_data();
+	if (infos->pdata == NULL) {
+		return -1;
+	}
+	infos->wbuf = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 1);
+	if (infos->wbuf == NULL) {
 		exit(EXIT_FAILURE);
 	}
-	infos.wbuf = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 1);
-	if (infos.wbuf == NULL) {
+
+	r = create_dir(infos->target_dir);
+	if (r < 0) {
 		exit(EXIT_FAILURE);
 	}
 	parser_handler.startElement = start_element_callback;
 	parser_handler.endElement = end_element_callback;
 	parser_handler.characters = characters_callback;
-
-	infos.ctxt = xmlCreatePushParserCtxt(&parser_handler, infos.pdata, NULL, 0, NULL);
-	infos.fund = fund;
-
-	r = iterate_archive(fname, archive_show, &infos);
-
-	xmlFreeParserCtxt(infos.ctxt);
-	free_parsed_data(infos.pdata);
+	infos->ctxt = xmlCreatePushParserCtxt(&parser_handler, infos->pdata, NULL, 0, NULL);
+	r = iterate_archive(infos->data_file, archive_parse_file, infos);
+	xmlFreeParserCtxt(infos->ctxt);
+	free_parsed_data(infos->pdata);
 
 	return r;
 }
@@ -1775,30 +1674,23 @@ int main(int argc, char **argv)
 {
 	int r = 0;
 	struct params params;
-	struct archive_info infos = {0};
-
-	infos.fund = JORFLEGI_FUND;
+	struct gen_uri_info infos = {0};
 
 	if (set_params(argc, argv, &params) == 1) {
 		print_usage();
 		return 1;
 	}
-
-	if (params.list_file != NULL) {
-		/*list_files(params.list_file);*/
-		iterate_archive(params.list_file, archive_filename, &infos);
+	if (params.target_dir == NULL || params.data_file == NULL) {
+		print_usage();
+		return 1;
 	}
-	if (params.show_file != NULL) {
-		/*list_files(params.list_file);*/
-		/*LIBXML_TEST_VERSION*/
-		/* TODO: fund should be a parameter */
-		r = generate_uris(params.show_file, JORFLEGI_FUND);
-		//r = iterate_archive(params.show_file, archive_show, &infos);
-	}
-	/*LIBXML_TEST_VERSION*/
-	/*xmlMemoryDump();*/
+	infos.target_dir = params.target_dir;
+	infos.data_file = params.data_file;
+	infos.bootstrap = params.bootstrap;
+	infos.force = params.force;
+	infos.fund = JORFLEGI_FUND;
 
-	/*fprintf(stderr, "%d xml files\n", infos.xml_files);*/
+	r = generate_uris(&infos);
 
 	return r;
 }

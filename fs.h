@@ -8,5 +8,6 @@ struct fs_backend {
     char pathbuf[MAX_PATH_BUF];
 };
 
+int create_dir(const char *dirname);
 int create_file(const char *fname);
 ssize_t write_fs(struct fs_backend *fs, struct parsed_data *pdata, struct write_buffer *wbuf, char buf);

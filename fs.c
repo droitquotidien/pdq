@@ -90,7 +90,7 @@ ssize_t write_fs(struct fs_backend *fs, struct parsed_data *pdata, struct write_
 	struct lien *lien;
 	struct tocitem *tocitem;
 	char *buf;
-	char *cid;
+	char *rid;
 	char *loc;
 	int f;
 
@@ -101,16 +101,11 @@ ssize_t write_fs(struct fs_backend *fs, struct parsed_data *pdata, struct write_
 	 */
 
 	/* Create cid directory '/tmp/JORF/TEXT/0000/0045/4567' */
-	if (mdata->uri_parts.doctype == JORFCONT_DOCTYPE) {
-		cid = mdata->id;
-	} else {
-		cid = (*mdata->contexte.cid == 0 ? (*mdata->cid == 0 ? "" : mdata->cid) : mdata->contexte.cid);
-	}
-	if (*cid != '\0') {
-		r = create_cid_dirs("/tmp", cid, fs->pathbuf);
-		if (r == -1) {
-			return -1;
-		}
+	rid = mdata->rid;
+	assert(*rid != '\0');
+	r = create_cid_dirs(fs->rootdir, rid, fs->pathbuf);
+	if (r == -1) {
+		return -1;
 	}
 
 	/* Create JSON file for each resource */

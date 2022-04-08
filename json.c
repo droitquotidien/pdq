@@ -370,7 +370,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 		case LEGIARTI_DOCTYPE:
 			JATTR(fildes, cid, 3, mdata->id, wbuf);
 			JATTR(fildes, rid, 3, mdata->rid, wbuf);
-			JATTR(fildes, num, 3, mdata->num, wbuf);
+			CONTENT_WRITE(fildes, num, 3, mdata->num, wbuf);
 			JATTR(fildes, etat, 4, mdata->etat, wbuf);
 			JATTR(fildes, date_debut, 10, mdata->date_debut, wbuf);
 			JATTR(fildes, date_fin, 8, mdata->date_fin, wbuf);
