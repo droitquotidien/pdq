@@ -4,6 +4,7 @@
 
 ```bash
 apt-get install libarchive-dev
+apt-get install libxml2-dev libxml2-utils
 ```
 
 ## Parse data, write JSON and generate actions 
