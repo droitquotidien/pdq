@@ -1,4 +1,5 @@
 cmake-build-debug
+build
 .idea
 uris_*
 unmatched_*

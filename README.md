@@ -1,4 +1,4 @@
-# C parser for "Droit Quotidien" data
+# Parseur en C pour les données juridiques de "Droit Quotidien"
 
 ## Ubuntu / Debian Linux
 
