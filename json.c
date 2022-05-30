@@ -223,6 +223,53 @@ ssize_t write_toc_json(int fildes, struct toc *toc, struct write_buffer *wbuf)
 	return rt;
 }
 
+ssize_t write_version_json(int fildes, struct document_version *version,
+			   struct write_buffer *wbuf, char last)
+{
+	ssize_t r;
+	ssize_t rt = 0;
+	char sbuf[5];
+
+	CHECK_WRITE(fildes, "{", 1, wbuf)
+	snprintf(sbuf, 4, "%d", version->kind);
+	JATTRINT(fildes, kind, 4, sbuf, wbuf);
+	JATTR(fildes, id, 2, version->id, wbuf);
+	JATTR(fildes, date_debut, 10, version->date_debut, wbuf);
+	JATTR(fildes, date_fin, 8, version->date_fin, wbuf);
+	JATTR(fildes, etat, 4, version->etat, wbuf);
+	CONTENT_WRITE(fildes, num, 3, version->num, wbuf);
+	WTYPE(fildes, "version", 7, wbuf);
+	if (last) {
+		CHECK_WRITE(fildes, "}\n", 2, wbuf);
+	} else {
+		CHECK_WRITE(fildes, "},\n", 3, wbuf);
+	}
+
+	return rt;
+}
+
+ssize_t write_versions_json(int fildes, struct versions *versions, struct write_buffer *wbuf)
+{
+	ssize_t r;
+	ssize_t rt = 0;
+	int i;
+	struct document_version *version;
+	char last;
+
+	OPENBLOCK(fildes, versions, 8, wbuf);
+	OPENLIST(fildes, versions, 8, wbuf);
+	for (i = 0; i < versions->nb_versions; i++) {
+		version = &versions->versions[i];
+		last = (i == (versions->nb_versions - 1));
+		write_version_json(fildes, version, wbuf, last);
+	}
+	CLOSELIST(fildes, wbuf);
+	WTYPE(fildes, "versions", 8, wbuf);
+	CHECK_WRITE(fildes, "},\n", 3, wbuf)
+
+	return rt;
+}
+
 ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *wbuf)
 {
 	ssize_t r;
@@ -231,7 +278,8 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 	struct mcs *mcs = pdata->mcs;
 	struct contenu *contenu = pdata->contenu;
 	struct toc *toc = pdata->toc;
-
+	struct versions *versions = pdata->versions;
+	
 	char *cid = (*mdata->contexte.cid == 0?(*mdata->cid == 0?NULL:mdata->cid):mdata->contexte.cid);
 
 	CHECK_WRITE(fildes, "{\n", 2, wbuf)
@@ -263,7 +311,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			JATTR(fildes, page_deb_publi, 14, mdata->page_deb_publi, wbuf);
 			JATTR(fildes, page_fin_publi, 14, mdata->page_fin_publi, wbuf);
 			write_toc_json(fildes, toc, wbuf);
-			// TODO: versions
+			write_versions_json(fildes, versions, wbuf);
 			break;
 		case JORFVERS_DOCTYPE:
 			// meta_texte_chronicle.dtd
@@ -301,7 +349,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			JATTR(fildes, date_debut, 10, mdata->date_debut, wbuf);
 			JATTR(fildes, date_fin, 8, mdata->date_fin, wbuf);
 			JATTR(fildes, type, 4, mdata->type, wbuf);
-			// TODO: versions->[{}, ...]
+			write_versions_json(fildes, versions, wbuf);
 			write_contexte_json(fildes, &mdata->contexte, wbuf);
 			write_contenu_json(fildes, contenu, wbuf);
 			// TODO: liens
@@ -330,7 +378,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			JATTR(fildes, page_deb_publi, 14, mdata->page_deb_publi, wbuf);
 			JATTR(fildes, page_fin_publi, 14, mdata->page_fin_publi, wbuf);
 			write_toc_json(fildes, toc, wbuf);
-			// TODO: versions
+			write_versions_json(fildes, versions, wbuf);
 			break;
 		case LEGIVERS_DOCTYPE:
 			// meta_texte_chronicle.dtd
@@ -375,7 +423,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			JATTR(fildes, date_debut, 10, mdata->date_debut, wbuf);
 			JATTR(fildes, date_fin, 8, mdata->date_fin, wbuf);
 			JATTR(fildes, type, 4, mdata->type, wbuf);
-			// TODO: versions->[{}, ...]
+			write_versions_json(fildes, versions, wbuf);
 			write_contexte_json(fildes, &mdata->contexte, wbuf);
 			write_contenu_json(fildes, contenu, wbuf);
 			// TODO: liens

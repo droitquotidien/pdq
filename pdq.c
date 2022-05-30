@@ -13,12 +13,12 @@
 #include "buffer.h"
 
 struct gen_uri_info {
-    enum fund fund;
-    int xml_files;
-    struct parsed_data *pdata;
-    xmlSAXHandler parser_handler;
-    xmlParserCtxtPtr ctxt;
-    struct write_buffer *wbuf;
+	enum fund fund;
+	int xml_files;
+	struct parsed_data *pdata;
+	xmlSAXHandler parser_handler;
+	xmlParserCtxtPtr ctxt;
+	struct write_buffer *wbuf;
 	char bootstrap;
 	char force;
 	char *target_dir;
@@ -966,13 +966,11 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		pdata->current_name = FIELD_NAME_TITRE_TXT;
 	} else if (xmlStrEqual(name, FIELD_NAME_VERSION)) {
 		/*
-		 * <CONTEXTE>
-		 *   ...
-		 *      <TITRE_TXT c_titre_court="Code rural et de la pêche maritime"
-		 *        debut="2010-05-08" fin="2999-01-01"
-		 *        id_txt="LEGITEXT000022197698">Code rural et de la pêche maritime</TITRE_TXT>
-		 *      <TITRE_TXT c_titre_court="Code rural" debut="1979-12-01" fin="2010-05-08"
-		 *        id_txt="LEGITEXT000006071367">Code rural (nouveau)</TITRE_TXT>
+		 * <VERSIONS>
+		 * <VERSION etat="">
+		 * <LIEN_TXT debut="2999-01-01" fin="2999-01-01" id="JORFTEXT000045817439" num=""/>
+		 * </VERSION>
+		 * </VERSIONS>
 		 */
 		if (versions->nb_versions < versions->max_versions) {
 			pdata->current_dtext = NULL;
@@ -1609,7 +1607,7 @@ struct params {
 
 void print_usage()
 {
-	printf("Usage: pdq [-f] [-b] -d data.tar.gz -t target_dir\n");
+  printf("Usage: pdq [-f] [-b] -d data.tar.gz -t target_dir\n");
 }
 
 int set_params(int argc, char *argv[], struct params *params)
@@ -1619,7 +1617,7 @@ int set_params(int argc, char *argv[], struct params *params)
 		return 1;
 	}
 	memset(params, 0, sizeof(struct params));
-	while((c = getopt(argc, argv, "bfd:t:")) != -1) {
+	while((c = getopt(argc, argv, "bfxd:t:")) != -1) {
 		switch(c) {
 			case 'f':
 				params->force = 1;
