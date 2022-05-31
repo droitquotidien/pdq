@@ -496,13 +496,15 @@ size_t set_jorflegi_uri(struct metadata *mdata)
 		if (plen < 0)
 			return -1;
 		len += plen + 1;
-		plen = set_num_uri(&mdata->uri_parts, mdata->uri_parts.cnum, &mdata->uri_parts.cnumkind,
-			mdata->num, NULL, mdata->id, "cid");
+		plen = set_num_uri(&mdata->uri_parts, mdata->uri_parts.cnum,
+				   &mdata->uri_parts.cnumkind,
+				   mdata->num, NULL, mdata->id, "cid");
 		if (plen < 0)
 			return -1;
 		len += plen + 1;
 		mdata->uri_parts.kind = URI_CORPUS_DATE_CNUM;
-	} else if (mdata->uri_parts.doctype == JORFTEXT_DOCTYPE || mdata->uri_parts.doctype == LEGITEXT_DOCTYPE) {
+	} else if (mdata->uri_parts.doctype == JORFTEXT_DOCTYPE
+		   || mdata->uri_parts.doctype == LEGITEXT_DOCTYPE) {
 		strcpy(mdata->rid+8, mdata->id+8);
 		strcpy(mdata->uri_parts.country, "fr");
 		len = 2;  /* fr */
@@ -527,7 +529,8 @@ size_t set_jorflegi_uri(struct metadata *mdata)
 		strcpy(mdata->contexte.uri_parts.country, "fr");
 		strcpy(mdata->contexte.cid, mdata->cid);
 		kind = set_text_uri(mdata->id, &mdata->contexte.uri_parts,
-				    mdata->contexte.uri_parts.tnum, &mdata->contexte.uri_parts.tnumkind,
+				    mdata->contexte.uri_parts.tnum,
+				    &mdata->contexte.uri_parts.tnumkind,
 				    mdata->num, mdata->nor, mdata->cid,
 				    mdata->nature,
 				    mdata->date_publi, mdata->date_texte,

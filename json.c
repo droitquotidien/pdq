@@ -88,6 +88,13 @@ ssize_t write_json_stripped_chars(
 	rt += r;\
 	CHECK_WRITE(f, "\",\n", 3, wbuf)}
 
+#define STRING_WRITE(f, a, wbuf) if (*(a) != 0) {\
+	CHECK_WRITE(f, "\"", 1, wbuf)           \
+	r = write_json_stripped_chars(f, (a), strlen(a), wbuf); \
+	if (r < 0) return -1;                                  \
+	rt += r;\
+	CHECK_WRITE(f, "\"", 1, wbuf)}
+
 ssize_t write_contenu_json(int fildes, struct contenu *contenu, struct write_buffer *wbuf)
 {
 	ssize_t r;
@@ -270,6 +277,84 @@ ssize_t write_versions_json(int fildes, struct versions *versions, struct write_
 	return rt;
 }
 
+ssize_t write_lien_json(int fildes, struct lien *lien,
+			struct write_buffer *wbuf, char last)
+{
+	ssize_t r;
+	ssize_t rt = 0;
+	char sbuf[5];
+
+	CHECK_WRITE(fildes, "{", 1, wbuf)
+	JATTR(fildes, cid_texte, 9, lien->cid_texte, wbuf);
+	JATTR(fildes, date_signature_texte, 20, lien->date_signature_texte, wbuf);
+	JATTR(fildes, nature_texte, 12, lien->nature_texte, wbuf);
+	JATTR(fildes, nor_texte, 9, lien->nor_texte, wbuf);
+	JATTR(fildes, num_texte, 9, lien->num_texte, wbuf);	
+	JATTR(fildes, id, 2, lien->id, wbuf);
+	CONTENT_WRITE(fildes, num, 3, lien->num, wbuf);
+	JATTR(fildes, sens, 4, lien->sens, wbuf);
+	JATTR(fildes, typelien, 8, lien->typelien, wbuf);
+	CONTENT_WRITE(fildes, titre, 5, lien->titre, wbuf);
+	WTYPE(fildes, "lien", 4, wbuf);
+	if (last) {
+		CHECK_WRITE(fildes, "}\n", 2, wbuf);
+	} else {
+		CHECK_WRITE(fildes, "},\n", 3, wbuf);
+	}
+
+	return rt;
+}
+
+ssize_t write_liens_json(int fildes, struct liens *liens, struct write_buffer *wbuf)
+{
+	ssize_t r;
+	ssize_t rt = 0;
+	int i;
+	struct lien *lien;
+	char last;
+
+	OPENBLOCK(fildes, liens, 5, wbuf);
+	OPENLIST(fildes, liens, 5, wbuf);
+	for (i = 0; i < liens->nb_liens; i++) {
+		lien = &liens->liens[i];
+		last = (i == (liens->nb_liens - 1));
+		write_lien_json(fildes, lien, wbuf, last);
+	}
+	CLOSELIST(fildes, wbuf);
+	WTYPE(fildes, "liens", 5, wbuf);
+	CHECK_WRITE(fildes, "},\n", 3, wbuf)
+
+	return rt;
+}
+
+ssize_t write_mcs_json(int fildes, struct mcs *mcs, struct write_buffer *wbuf)
+{
+    ssize_t r;
+    ssize_t rt = 0;
+    int i;
+    struct lien *lien;
+    char last;
+    char *mc;
+
+    OPENBLOCK(fildes, mcs, 3, wbuf);
+    OPENLIST(fildes, mcs, 3, wbuf);
+    for (i = 0; i < mcs->nb_mcs; i++) {
+        mc = mcs->mc[i];
+        STRING_WRITE(fildes, mc, wbuf);
+        last = (i == (mcs->nb_mcs - 1));
+        if (last) {
+            CHECK_WRITE(fildes, "\n", 1, wbuf);
+        } else {
+            CHECK_WRITE(fildes, ",\n", 2, wbuf);
+        }
+    }
+    CLOSELIST(fildes, wbuf);
+    WTYPE(fildes, "mcs", 3, wbuf);
+    CHECK_WRITE(fildes, "},\n", 3, wbuf)
+
+    return rt;
+}
+
 ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *wbuf)
 {
 	ssize_t r;
@@ -279,6 +364,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 	struct contenu *contenu = pdata->contenu;
 	struct toc *toc = pdata->toc;
 	struct versions *versions = pdata->versions;
+	struct liens *liens = pdata->liens;
 	
 	char *cid = (*mdata->contexte.cid == 0?(*mdata->cid == 0?NULL:mdata->cid):mdata->contexte.cid);
 
@@ -298,7 +384,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 		case JORFTEXT_DOCTYPE:
 			// meta_texte_chronicle.dtd
 			JATTR(fildes, cid, 3, mdata->cid, wbuf);
-			JATTR(fildes, rid, 3, mdata->cid, wbuf);
+			JATTR(fildes, rid, 3, mdata->rid, wbuf);
 			JATTR(fildes, num, 3, mdata->num, wbuf);
 			JATTR(fildes, num_parution, 12, mdata->num_parution, wbuf);
 			JATTR(fildes, num_sequence, 12, mdata->num_sequence, wbuf);
@@ -335,27 +421,27 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			JATTR(fildes, date_fin, 8, mdata->date_fin, wbuf);
 			CONTENT_WRITE(fildes, autorite, 8, mdata->autorite, wbuf);
 			CONTENT_WRITE(fildes, ministere, 9, mdata->ministere, wbuf);
-			// TODO: mcs
-			// TODO: liens
+            write_mcs_json(fildes, mcs, wbuf);
+			write_liens_json(fildes, liens, wbuf);
 			write_contexte_json(fildes, &mdata->contexte, wbuf);
 			write_contenu_json(fildes, contenu, wbuf);
 			break;
 		case JORFARTI_DOCTYPE:
 			JATTR(fildes, cid, 3, mdata->id, wbuf);
 			JATTR(fildes, rid, 3, mdata->rid, wbuf);
+			// Use content writer because there are
 			// \n in numbers (ex: JORFARTI000019283159)
 			CONTENT_WRITE(fildes, num, 3, mdata->num, wbuf);
-			// TODO: mcs
 			JATTR(fildes, date_debut, 10, mdata->date_debut, wbuf);
 			JATTR(fildes, date_fin, 8, mdata->date_fin, wbuf);
 			JATTR(fildes, type, 4, mdata->type, wbuf);
 			write_versions_json(fildes, versions, wbuf);
 			write_contexte_json(fildes, &mdata->contexte, wbuf);
 			write_contenu_json(fildes, contenu, wbuf);
-			// TODO: liens
+			write_liens_json(fildes, liens, wbuf);
+            write_mcs_json(fildes, mcs, wbuf);
 			break;
 		case JORFSCTA_DOCTYPE:
-			JATTR(fildes, cid, 3, mdata->id, wbuf);
 			JATTR(fildes, rid, 3, mdata->rid, wbuf);
 			CONTENT_WRITE(fildes, titrefull, 9, mdata->titrefull, wbuf);
 			CONTENT_WRITE(fildes, commentaire, 11, mdata->commentaire, wbuf);
@@ -403,12 +489,11 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			JATTR(fildes, date_fin, 8, mdata->date_fin, wbuf);
 			JATTR(fildes, autorite, 8, mdata->autorite, wbuf);
 			JATTR(fildes, ministere, 9, mdata->ministere, wbuf);
-			// TODO: liens
+			write_liens_json(fildes, liens, wbuf);
 			write_contexte_json(fildes, &mdata->contexte, wbuf);
 			write_contenu_json(fildes, contenu, wbuf);
 			break;
 		case LEGISCTA_DOCTYPE:
-			JATTR(fildes, cid, 3, mdata->id, wbuf);
 			JATTR(fildes, rid, 3, mdata->rid, wbuf);
 			CONTENT_WRITE(fildes, titrefull, 9, mdata->titrefull, wbuf);
 			CONTENT_WRITE(fildes, commentaire, 11, mdata->commentaire, wbuf);
@@ -416,7 +501,6 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			write_toc_json(fildes, toc, wbuf);
 			break;
 		case LEGIARTI_DOCTYPE:
-			JATTR(fildes, cid, 3, mdata->id, wbuf);
 			JATTR(fildes, rid, 3, mdata->rid, wbuf);
 			CONTENT_WRITE(fildes, num, 3, mdata->num, wbuf);
 			JATTR(fildes, etat, 4, mdata->etat, wbuf);
@@ -426,7 +510,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			write_versions_json(fildes, versions, wbuf);
 			write_contexte_json(fildes, &mdata->contexte, wbuf);
 			write_contenu_json(fildes, contenu, wbuf);
-			// TODO: liens
+			write_liens_json(fildes, liens, wbuf);
 			break;
 		default:
 			break;
