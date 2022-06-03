@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 project(pdq)
 include(FindLibXml2)
 if(CMAKE_HOST_APPLE)
@@ -14,6 +14,8 @@ if(LibXml2_FOUND)
     include_directories(${LIBXML2_INCLUDE_DIR})
     #link_directories(${LIBXML2_LIBRARIES})
 endif()
+find_package(PostgreSQL REQUIRED)
+
 add_executable(pdq pdq.h pdq.c uri.h uri.c parse.h jorflegi.h jorflegi.c fs.h fs.c json.h json.c buffer.h buffer.c)
-target_link_libraries(pdq ${LIBXML2_LIBRARIES} -larchive)
+target_link_libraries(pdq ${LIBXML2_LIBRARIES} -larchive PostgreSQL::PostgreSQL)
 
