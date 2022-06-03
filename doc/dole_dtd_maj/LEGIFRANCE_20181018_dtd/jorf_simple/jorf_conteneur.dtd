@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Décrit la structure d'un document de type conteneur JORF destiné aux licenciés Legifrance.
+     @title JORF simplifié : Conteneur
+     @root JO
+-->
+
+<!-- 
+Racine du conteneur JORF -->
+<!ELEMENT JO (ID, ID_ELI?, ANCIEN_ID, ORIGINE, NATURE, TITRE, NUM, DATE_PUBLI, STRUCTURE_TXT) >
+
+<!-- 
+Identifiant interne du JO. L'identifiant est également le nom du fichier xml. 
+@example JORFCONT000000755641l
+-->
+<!ELEMENT ID (#PCDATA) >
+
+<!-- Identifiant eli. Il est optionnel et concerne les conteneurs, les textes et les articles.
+    @example pour le JO publié le 27 janvier 2014 : eli/jo/2014/1/27
+-->
+<!ELEMENT ID_ELI (#PCDATA) >
+
+<!-- 
+Ancien identifiant issu de la version précédente de légifrance. 
+Cette information est conservée afin d'assurer la résolution des URL à l'ancien format du site Legifrance.
+@hidden A confirmer pour les JO
+-->
+<!ELEMENT ANCIEN_ID (#PCDATA) >
+
+<!-- 
+Origine du document. 
+@hidden Liste de valeurs à preciser lors de la reprise des directives europeennes
+@example JORF
+-->
+<!ELEMENT ORIGINE (#PCDATA) >
+
+<!-- 
+Nature du document. 
+@example JO
+-->
+<!ELEMENT NATURE (#PCDATA) >
+
+<!-- 
+Titre du JO 
+@example JORF n°110 du 12 mai 2006
+-->
+<!ELEMENT TITRE (#PCDATA) >
+
+<!-- 
+Numéro du JO 
+@example 110
+-->
+<!ELEMENT NUM (#PCDATA) >
+ 
+<!-- 
+Date de publication du JO 
+@example 2006-05-12
+-->
+<!ELEMENT DATE_PUBLI (#PCDATA) >
+
+<!-- Sommaire du JO. Definie la liste ordonnée des têtiers et des textes composants le JO. -->
+<!ELEMENT STRUCTURE_TXT (LIEN_TXT|TM)* >
+
+<!-- Têtier du sommaire. Peut contenir une liste de texte et d'autre têtier -->
+<!ELEMENT TM (TITRE_TM, (LIEN_TXT|TM)*) >
+
+<!-- 
+Niveau du têtier dans la hierarchie du sommaire 
+@example 4
+-->
+<!ATTLIST TM niv CDATA #REQUIRED>
+
+<!-- 
+Libelle du têtier 
+@example Journal officiel "Lois et Décrets"
+-->
+<!ELEMENT TITRE_TM (#PCDATA) >
+
+<!-- Lien vers le texte du JO-->
+<!ELEMENT LIEN_TXT EMPTY>
+
+<!-- 
+Titre du texte dans le JO 
+@example Décret n°2006-531 du 11 mai 2006
+-->
+<!ATTLIST  LIEN_TXT titretxt CDATA #REQUIRED>
+
+<!-- 
+Identifiant interne du texte. L'identifiant est également le nom du fichier xml.
+@example JORFTEXT000001423979
+-->
+<!ATTLIST  LIEN_TXT idtxt CDATA #REQUIRED>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Décrit la structure d'un document de type conteneur JORF destiné aux licenciés Legifrance.
+     @title JORF : Conteneur
+     @root JO
+-->
+
+<!-- Racine du conteneur JORF -->
+<!ELEMENT JO (META, STRUCTURE_TXT) >
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd"> %meta_commun;
+
+<!-- 
+Métadonnées du conteneur 
+-->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!-- 
+Métadonnées spécifique à ce type de document 
+-->
+<!ELEMENT META_SPEC (META_CONTENEUR) >
+
+<!-- 
+Métadonnées du conteneur JORF
+-->
+<!ELEMENT META_CONTENEUR (TITRE, NUM, DATE_PUBLI) >
+
+<!-- 
+Titre du JO
+@example JORF n°110 du 12 mai 2006
+-->
+<!ELEMENT TITRE (#PCDATA) >
+
+<!-- 
+Numéro du JO
+@example 0303
+-->
+<!ELEMENT NUM (#PCDATA) >
+ 
+<!-- 
+Date de publication du JO 
+@example 2004-03-05
+-->
+<!ELEMENT DATE_PUBLI (#PCDATA) >
+
+<!-- 
+Sommaire du JO. 
+Definit la liste ordonnée des têtiers et des textes composants le JO.
+-->
+<!ELEMENT STRUCTURE_TXT (LIEN_TXT|TM)* >
+
+<!-- 
+Têtier du sommaire. 
+Peut contenir une liste de textes et d'autres têtiers
+-->
+<!ELEMENT TM (TITRE_TM, (LIEN_TXT|TM)*) >
+
+<!-- 
+Niveau du têtier dans la hierarchie du sommaire
+-->
+<!ATTLIST TM niv CDATA #REQUIRED>
+
+<!-- 
+Libelle du têtier 
+@example Journal officiel "Lois et Décrets"
+-->
+<!ELEMENT TITRE_TM (#PCDATA) >
+
+<!-- Lien vers le texte du JO-->
+<!ELEMENT LIEN_TXT EMPTY>
+
+<!-- 
+Titre du texte dans le JO 
+@example Décret n°2006-531 du 11 mai 2006
+-->
+<!ATTLIST  LIEN_TXT titretxt CDATA #REQUIRED>
+
+<!-- 
+Identifiant interne du texte. L'identifiant est également le nom du fichier xml.
+@example JORFTEXT000001423979
+-->
+<!ATTLIST  LIEN_TXT idtxt CDATA #REQUIRED>
+

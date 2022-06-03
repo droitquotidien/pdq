@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Décrit la structure d'un document de type texte JORF destiné aux licenciés Legifrance.
+@title JORF simplifié : Texte
+@root TEXTE
+-->
+
+<!-- Inclusion de la redefinition du contenu html -->
+<!ENTITY % contenu SYSTEM "contenu.dtd" > 
+%contenu;
+
+<!-- Racine du texte JORF-->
+<!ELEMENT TEXTE (ID, ID_ELI?, ELI_ALIAS?, ANCIEN_ID, ORIGINE, NATURE, NUM, NUM_PARUTION, NUM_SEQUENCE, NOR, DATE_PUBLI, DATE_TEXTE, ORIGINE_PUBLI,PAGE_DEB_PUBLI, PAGE_FIN_PUBLI, TITRE, TITREFULL, AUTORITE,MINISTERE,MCS_TEXT,LIENS?,NOTICE?,VISAS,ABRO,RECT,SM,TP,STRUCT,ENTREPRISE?)>
+<!ELEMENT ELI_ALIAS (ID_ELI_ALIAS*)>
+
+<!-- 
+Identifiant interne du document. 
+L'identifiant est également le nom du fichier xml. 
+@example JORFTEXT000001422418
+-->
+<!ELEMENT ID (#PCDATA) >
+
+<!-- Identifiant eli. Il est optionnel et concerne les conteneurs, les textes et les articles.
+    @example pour le texte dont le NOR est EFIT1318746D : eli/decret/2014/1/27/EFIT1318746D/jo/texte
+-->
+<!ELEMENT ID_ELI (#PCDATA) >
+
+<!-- Alias de l'identifiant eli. Il est optionnel et concerne certains textes numérotés (lois, ordonnances, décrets) et leurs articles.
+    @example pour le texte dont le numéro est 2014-59 : eli/decret/2014/1/27/2014-59/jo/texte
+-->
+<!ELEMENT ID_ELI_ALIAS (#PCDATA) >
+
+<!-- 
+Ancien identifiant issu de la version précédente de légifrance. 
+Cette information est conservée afin d'assurer la résolution des URL à l'ancien format du site Legifrance 
+@example AFHBT
+-->
+<!ELEMENT ANCIEN_ID (#PCDATA) >
+
+<!-- 
+Origine du document. 
+@hidden Liste de valeurs à preciser lors de la reprise des directives europeennes
+@example JORF
+-->
+<!ELEMENT ORIGINE (#PCDATA) >
+
+<!-- 
+Nature du document. 
+Liste des valeurs en date du 12/06/2008 :
+ABROGATION  , 
+ACCORD  , 
+ACTE  , 
+ADDITIF  , 
+ANNEXE  , 
+APPEL  , 
+ARRANGEMENT  , 
+ARRETE  , 
+ARRETEAVIS  , 
+ARRETEAVISAVIS  , 
+ARRETEEURO  , 
+ARRETESEURO  , 
+ARRETEURO  , 
+ASSEMBLEE  , 
+ATTESTATION  , 
+AUDIENCE  , 
+AVENANT  , 
+AVIS  , 
+AVISEURO  , 
+CANDIDAT  , 
+CIRCULAIRE  , 
+CITATION  , 
+CLASSEMENT  , 
+CODE  , 
+COMMUNIQUE  , 
+COMPLEMENT  , 
+COMPOSITION  , 
+CONSTITUTION  , 
+CONSULTATION  , 
+CONTRAT  , 
+CONVENTION  , 
+DATE  , 
+DECISION  , 
+DECISIONAVIS  , 
+DECISION_CC  , 
+DECISION_EURO  , 
+DECLARATION  , 
+DECLARATIONEURO  , 
+DECRET  , 
+DECRETEURO  , 
+DECRETLOIEURO  , 
+DECRETSEURO  , 
+DECRET_LOI  , 
+DELEGATION  , 
+DELEGATIONDEGESTION  , 
+DELIBERATION  , 
+DELIBERATIONEURO  , 
+DESIGNATION  , 
+DEUXIEME  , 
+DIRECTIVE  , 
+DIRECTIVE_EURO  , 
+DISPOSITIONS  , 
+DIXIEME  , 
+DOUZIEME  , 
+ELECTION  , 
+ELECTIONDUPRESIDENTDELAREPUBLIQU  , 
+ELECTIONPRESIDENTIELLECONSEILCON  , 
+EURO  , 
+EXEQUATUR  , 
+EXTRAIT  , 
+FINEURO  , 
+HOMMAGENATIONAL  , 
+HUITIEME  , 
+ICONSTRUCTEUR66ARRETE  , 
+INCOMPATIBILITEEURO  , 
+INFORMATION  , 
+INFORMATIONEURO  , 
+INFORMATIONSEURO  , 
+INSTRUCTION  , 
+INSTRUCTIONEURO  , 
+JUGEMENTEURO  , 
+LETTRE  , 
+LETTREEURO  , 
+LISTE  , 
+LOI  , 
+LOIEURO  , 
+LOI_CONSTIT  , 
+LOI_ORGANIQUE  , 
+LOI_PROGRAMME  , 
+MEDAILLEMILITAIRE  , 
+MEMOIRE  , 
+MESSAGE  , 
+MODIFICATIF  , 
+MODIFICATION  , 
+NEUVIEME  , 
+NOMENCLATURE  , 
+NOTE  , 
+OBSERVATION  , 
+OBSERVATIONSEURO  , 
+ONZIEME  , 
+ORDONNANCE  , 
+ORDONNANCEEURO  , 
+PREMIER  , 
+PROCLAMATION  , 
+PROJET  , 
+PROMOTIONSPECIALEDUCINQUANTIEMEA  , 
+PROPOSITION  , 
+PROTOCOLE  , 
+PUBLICATION  , 
+QUATRIEME  , 
+QUESTIONEURO  , 
+RAPPORT  , 
+RECOMMANDATION  , 
+RECOMMANDATION_EURO  , 
+RECTIFICATIF  , 
+REGLEMENT  , 
+REGLEMENTEUROPEEN  , 
+RELEVE  , 
+REMISE  , 
+RESULTATS  , 
+RESULTATSDUTIRAGE  , 
+SAISINE  , 
+SENATUSCONSULTEURO  , 
+SEPTIMERAPPORT  , 
+SUSPENSION  , 
+TABLEAU  , 
+TAPISVERT  , 
+TERMES  , 
+TRAITEEURO  , 
+TROISIEME  , 
+VOCABULAIRE
+@example DECISION
+-->
+<!ELEMENT NATURE (#PCDATA) >
+
+<!-- 
+Numéro du document 
+@example 1992-05-21
+-->
+<!ELEMENT NUM (#PCDATA) >
+
+<!-- 
+Numéro de parution du JO 
+@example 0351
+-->
+<!ELEMENT NUM_PARUTION (#PCDATA) >
+
+<!-- 
+Position du texte dans le JO 
+@example 104
+-->
+<!ELEMENT NUM_SEQUENCE (#PCDATA) >
+
+<!-- 
+NOR du texte
+@example SANM0621931S
+-->
+<!ELEMENT NOR (#PCDATA) >
+
+<!-- 
+Date de publication du texte 
+@example 2006-05-12
+-->
+<!ELEMENT DATE_PUBLI (#PCDATA) >
+
+<!-- 
+Date de signature du texte 
+@example 2006-05-12
+-->
+<!ELEMENT DATE_TEXTE (#PCDATA) >
+
+<!-- 
+Titre du JO parent 
+@exemple JORF n°110 du 12 mai 2006
+-->
+<!ELEMENT ORIGINE_PUBLI (#PCDATA) >
+
+<!-- 
+Identifiant interne du conteneur JORF
+@example JORFCONT000000001681
+-->
+<!ATTLIST ORIGINE_PUBLI id CDATA #IMPLIED>
+
+<!-- 
+Numéro de la premiere page de la publication dans le JO
+@example 125
+-->
+<!ELEMENT PAGE_DEB_PUBLI (#PCDATA) >
+
+<!-- 
+Numéro de la derniere page de la publication dans le JO
+@example 154
+-->
+<!ELEMENT PAGE_FIN_PUBLI  (#PCDATA) >
+
+<!-- 
+Titre court du texte. 
+Ce titre est construit de la manière suivante : <NATURE> + (‘n° ’ <NUM> si existant) + ‘du’ <DATE>) 
+@exemple Décret n°1992-05-21 du 21 mai 1992
+-->
+<!ELEMENT TITRE (#PCDATA) >
+
+<!-- 
+Titre complet du texte. 
+@example Décret n°1992-05-21 du 21 mai 1992 fixant pour 1992 la rémunération de la garantie accordée par l'Etat aux fonds des livrets de la Caisse nationale d'épargne définis à  l'article 5 du code des caisses d'épargne
+-->
+<!ELEMENT TITREFULL (#PCDATA) >
+
+<!-- 
+Autorité émettrice. 
+Liste des autorités en date du 12/06/2008 :
+CONSEIL SUPERIEUR DE L'AUDIOVISUEL  , 
+COMMISSION POUR LA TRANSPARENCE FINANCIERE DE LA VIE POLITIQUE  , 
+BANQUE DE FRANCE - CONSEIL DE LA POLITIQUE MONETAIRE  , 
+COMMISSION GENERALE DE TERMINOLOGIE ET DE NEOLOGIE  , 
+AUTORITE DE REGULATION DES COMMUNICATIONS ELECTRONIQUES ET DES POSTES  , 
+COMMISSION NATIONALE DES COMPTES DE CAMPAGNE ET DE FINANCEMENTS POLITIQUES  , 
+COMMISSION DE CONTROLE DES ASSURANCES  , 
+AUTORITE DES MARCHES FINANCIERS  , 
+AGENCE FRANCAISE DE LUTTE CONTRE LE DOPAGE  , 
+CONSEIL DES VENTES VOLONTAIRES  , 
+CONSEIL ECONOMIQUE ET SOCIAL  , 
+COMITE DES ENTREPRISES D'ASSURANCE  , 
+AUTORITE DE REGULATION DES MESURES TECHNIQUES  , 
+MEDIATEUR NATIONAL DE L'ENERGIE  , 
+COUR DES COMPTES  , 
+COMMISSION NATIONALE DE DEONTOLOGIE DE LA SECURITE  , 
+HAUTE AUTORITE DE LUTTE CONTRE LES DISCRIMINATIONS ET POUR L'EGALITE  , 
+CONSEIL DE LA CONCURRENCE  , 
+COUR DE DISCIPLINE BUDGETAIRE ET FINANCIERE  , 
+MINISTERE DE L'ECONOMIE, DES FINANCES E/ARTICT DE L'INDUSTRIE REGLEMENTS DU COMITE DE LA REGLEMENTATION COMPTABLE  , 
+CONSEIL SUPERIEUR DE L'AUDIOVISUEL (CSA)  , 
+CONSEIL D'ETAT  , 
+COUR DE JUSTICE DE LA REPUBLIQUE  , 
+COMMISSION DE REGULATION DE L'ELECTRICITE  , 
+COMMISSION DE CONTROLE DES ASSURANCES, DES MUTUELLES ET DES INSTITUTIONS DE PREVOYANCE  , 
+CONSEIL DES VENTES VOLONTAIRES DE MEUBLES AUX ENCHERES PUBLIQUES  , 
+CONSEIL DE PREVENTION ET DE LUTTE CONTRE LE DOPAGE  , 
+CONSEIL CONSTITUTIONNEL : DECISIONS  , 
+COMMISSION NATIONALE DE L'INFORMATIQUE ET DES LIBERTES  , 
+MEDIATEUR DE LA REPUBLIQUE  , 
+COMMISSION NATIONALE DES COMPTES DE CAMPAGNE ET DES FINANCEMENTS POLITIQUES  , 
+COMMISSION CONSULTATIVE DU SECRET DE LA DEFENSE NATIONALE  , 
+CONSEIL CONSTITUTIONNEL  , 
+COMMISSION DE REGULATION DE L'ENERGIE  , 
+COMMISSION NATIONALE DU DEBAT PUBLIC  , 
+HAUTE AUTORITE DE SANTE  , 
+COMMISSION D'ACCES AUX DOCUMENTS ADMINISTRATIFS  , 
+COMMISSION NATIONALE DE CONTROLE DES INTERCEPTIONS DE SECURITE  , 
+LOIS CONSEIL CONSTITUTIONNEL  , 
+COMMISSION NATIONALE DE L'INFORMATIQUE ET DES LIBERTES (CNIL)  , 
+AUTORITE DE REGULATION DES TELECOMMUNICATIONS  , 
+COMMISSION NATIONALE DES COMPTES DE CAMPAGNE ET DES FINANCEMENTS POLITIQUES  , 
+COMMISSION DES OPERATIONS DE BOURSE  , 
+AUTORITE DE REGULATION DES COMMUNICATIONS ELECTRONIQUES ET DES POSTES  , 
+AUTORITE DE CONTROLE DES ASSURANCES ET DES MUTUELLES  , 
+COMMISSION BANCAIRE  , 
+@example CONSEIL SUPERIEUR DE L'AUDIOVISUEL (CSA)
+-->
+<!ELEMENT AUTORITE (#PCDATA) >
+
+<!-- 
+Ministère émetteur 
+@exemple MINISTERE DE L'EMPLOI ET DE LA SOLIDARITE
+-->
+<!ELEMENT MINISTERE (#PCDATA) >
+
+<!-- 
+Liste des mots clé du texte 
+-->
+<!ELEMENT MCS_TEXT (MC*) >
+
+<!-- 
+Libellé du mot clé
+@example DETTE COMMERCIALE
+-->
+<!ELEMENT MC (#PCDATA) >
+
+<!-- 
+Liste des liens entrants ou sortant 
+-->
+<!ELEMENT LIENS (LIEN*) >
+
+<!-- 
+Libellé du lien entrant ou sortant vers un autre texte.
+-->
+<!ELEMENT LIEN (#PCDATA) >
+
+<!-- 
+Numéro de l'article si le lien porte sur un article 
+@example 2-4
+-->
+<!ATTLIST LIEN num CDATA #REQUIRED>
+
+<!-- 
+Identifiant interne de l'article ou du texte 
+@example JORFTEXT000001422418
+-->
+<!ATTLIST LIEN id CDATA #REQUIRED>
+
+<!-- 
+Type du lien 
+@hidden Liste de valeurs à preciser 
+-->
+<!ATTLIST LIEN typelien CDATA #REQUIRED>
+
+<!-- 
+Sens du lien.
+Peut prendre les valeurs "cible" ou "source".
+@example cible
+-->
+<!ATTLIST LIEN sens (cible|source) "cible">
+
+<!-- 
+Identifiant interne de la version d'origine du texte. 
+@example JORFTEXT000004585864
+-->
+<!ATTLIST LIEN cidtexte CDATA #REQUIRED>
+
+<!-- 
+Nature du texte. 
+@hidden Liste de valeurs à preciser 
+@example DECRET
+-->
+<!ATTLIST LIEN naturetexte CDATA #REQUIRED>
+
+<!-- 
+Numéro du texte 
+@example 2001-1369
+-->
+<!ATTLIST LIEN numtexte CDATA #REQUIRED>
+
+<!-- 
+NOR du texte 
+@example PRMX0105298D
+-->
+<!ATTLIST LIEN nortexte CDATA #REQUIRED>
+
+<!-- 
+Date de signature du texte 
+@example 2001-12-31
+-->
+<!ATTLIST LIEN datesignatexte CDATA #REQUIRED>
+
+<!-- 
+Notice du texte. 
+Contenu formaté en HTML. 
+-->
+<!ELEMENT NOTICE (CONTENU) >
+
+<!-- 
+Visas du texte. 
+Contenu formaté en HTML. 
+-->
+<!ELEMENT VISAS (CONTENU) >
+
+<!-- 
+Signataires du texte 
+Contenu formaté en HTML. 
+-->
+<!ELEMENT SIGNATAIRES (CONTENU) >
+
+<!-- 
+Abrogations du texte 
+Contenu formaté en HTML. 
+-->
+<!ELEMENT ABRO (CONTENU) >
+
+<!-- 
+Rectifications du texte 
+Contenu formaté en HTML. 
+-->
+<!ELEMENT RECT (CONTENU) >
+
+<!-- 
+Résumé LEX  
+Contenu formaté en HTML. 
+-->
+<!ELEMENT SM (CONTENU)>
+
+<!-- 
+Travaux préparatoires du texte 
+Contenu formaté en HTML. 
+-->
+<!ELEMENT TP (CONTENU)>
+
+<!-- 
+Structure du texte. 
+Contient la liste des sections et des articles composant ce texte. 
+-->
+<!ELEMENT STRUCT ((SECTION_TA|ARTICLE)*,SIGNATAIRES)>
+
+<!-- 
+Section du sommaire du texte 
+-->
+<!ELEMENT SECTION_TA (ID, TITRE_TA, COMMENTAIRE?, (SECTION_TA | ARTICLE)*)> 
+
+<!-- 
+Libelle de la section
+@example TITRE Ier :   DISPOSITIONS GENERALES
+-->
+<!ELEMENT TITRE_TA (#PCDATA)>
+
+<!-- 
+Commentaire sur la section
+@example Le présent chapitre ne comporte pas de dispositions réglementaires
+-->
+<!ELEMENT COMMENTAIRE (#PCDATA)>
+
+<!-- 
+Article du texte 
+-->
+<!ELEMENT ARTICLE (ID, ID_ELI?, ELI_ALIAS?, ANCIEN_ID, NUM, MCS_ART, DATE_DEBUT, DATE_FIN, SM, BLOC_TEXTUEL, LIENS?) >
+
+<!-- 
+Liste des mots clés de l'article
+-->
+<!ELEMENT MCS_ART (MC*) >
+
+<!-- 
+Date d'entrée en vigueur de l'article 
+@example 2003-08-23
+-->
+<!ELEMENT DATE_DEBUT (#PCDATA) >
+
+<!-- 
+Date de fin de vigueur de l'article 
+@example 2999-01-01
+-->
+<!ELEMENT DATE_FIN (#PCDATA) >
+
+<!-- 
+Contenu textuel de l'article 
+Contenu formaté en HTML. 
+-->
+<!ELEMENT BLOC_TEXTUEL (CONTENU) >
+
+<!--
+Rubrique entreprise
+-->
+<!ELEMENT ENTREPRISE (DATES_EFFET?, DOMAINES?)>
+
+<!--
+Texte entreprise
+-->
+<!ATTLIST ENTREPRISE texte_entreprise CDATA #REQUIRED>
+
+<!--
+Dates d'effet (entreprise)
+-->
+<!ELEMENT DATES_EFFET (DATE_EFFET*)>
+
+<!--
+Date d'effet (entreprise)
+-->
+<!ELEMENT DATE_EFFET (#PCDATA)>
+
+<!--
+Domaines (entreprise)
+-->
+<!ELEMENT DOMAINES (DOMAINE*)>
+
+<!--
+Domaine (entreprise)
+-->
+<!ELEMENT DOMAINE (#PCDATA)>

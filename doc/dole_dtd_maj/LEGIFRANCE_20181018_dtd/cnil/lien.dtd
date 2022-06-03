@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Definie un lien entrant ou sortant vers un texte ou un article Legifrance
+     @title Lien vers un texte ou un article
+     @root LIEN
+-->
+
+<!-- Racine du descripteur de lien -->
+<!ELEMENT LIEN (#PCDATA) >
+
+<!-- Numéro de l'article si le lien porte sur un article -->
+<!ATTLIST LIEN num CDATA #REQUIRED>
+
+<!-- Identifiant interne de l'article ou du texte -->
+<!ATTLIST LIEN id CDATA #REQUIRED>
+
+<!-- Type du lien 
+@hidden Liste de valeurs à preciser 
+-->
+<!ATTLIST LIEN typelien CDATA #REQUIRED>
+
+<!-- Sens du lien 
+    @hidden Liste de valeurs à preciser 
+-->
+<!ATTLIST LIEN sens CDATA #REQUIRED>
+
+<!-- Identifiant interne de la version d'origine du texte. -->
+<!ATTLIST LIEN cidtexte CDATA #REQUIRED>
+
+<!-- Nature du texte. 
+    @hidden Liste de valeurs à preciser 
+-->
+<!ATTLIST LIEN naturetexte CDATA #REQUIRED>
+
+<!-- Numéro du texte -->
+<!ATTLIST LIEN numtexte CDATA #REQUIRED>
+
+<!-- NOR du texte -->
+<!ATTLIST LIEN nortexte CDATA #REQUIRED>
+
+<!-- Date de signature du texte -->
+<!ATTLIST LIEN datesignatexte CDATA #REQUIRED>

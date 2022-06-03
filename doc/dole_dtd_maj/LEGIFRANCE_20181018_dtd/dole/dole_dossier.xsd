@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Décrit un dossier legislatif
+  @title DOLE : Dossier legislatif
+  @root DOSSIER_LEGISLATIF
+-->
+<!-- Racine d'un dossier legislatif -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:element name="DOSSIER_LEGISLATIF">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="META" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="CONTENU" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="META">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="META_COMMUN" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="META_DOSSIER_LEGISLATIF" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="META_COMMUN">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ID" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="ANCIEN_ID" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="ORIGINE" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="URL" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="NATURE" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="META_DOSSIER_LEGISLATIF">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ID_TEXTE_1" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="ID_TEXTE_2" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="ID_TEXTE_3" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="ID_TEXTE_4" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="ID_TEXTE_5" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="TITRE" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="TYPE" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="DATE_CREATION" type="formattedDateType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="DATE_DERNIERE_MODIFICATION" type="formattedDateType" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="LEGISLATURE" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="LEGISLATURE">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="NUMERO" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="DATE_DEBUT" type="formattedDateType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="DATE_FIN" type="formattedDateType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="LIBELLE" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="CONTENU">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="LIBELLE_TEXTE_1" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="LIBELLE_TEXTE_2" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="LIBELLE_TEXTE_3" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="LIBELLE_TEXTE_4" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="LIBELLE_TEXTE_5" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="ECHEANCIER" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="EXPOSE_MOTIF" type="xs:anyType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="CONTENU_DOSSIER_1" type="xs:anyType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="CONTENU_DOSSIER_2" type="xs:anyType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="CONTENU_DOSSIER_3" type="xs:anyType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="CONTENU_DOSSIER_4" type="xs:anyType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="CONTENU_DOSSIER_5" type="xs:anyType" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="ARBORESCENCE" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ECHEANCIER">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="LIGNE" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="derniere_maj" type="formattedDateType" use="optional" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="LIGNE">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="NUMERO_ORDRE" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="ARTICLE" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="LIEN_ARTICLE" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="BASE_LEGALE" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="OBJET" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="DECRET" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="CID_LOI_CIBLE" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="DATE_PREVUE" type="formattedDateType" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="LIEN_ARTICLE">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="id" type="xs:string" use="required"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ARBORESCENCE">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element ref="NIVEAU" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element ref="LIEN" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="LIEN">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="id" type="xs:string" use="required"/>
+          <xs:attribute name="libelle" type="xs:string" use="required"/>
+          <xs:attribute name="lien" type="xs:string" use="required"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="NIVEAU">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element ref="NIVEAU" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element ref="LIEN" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:string" use="required"/>
+      <xs:attribute name="libelle" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:simpleType name="formattedDateType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="|\d{4}\-\d{2}\-\d{2}" />
+      <xs:maxLength value="10" />
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

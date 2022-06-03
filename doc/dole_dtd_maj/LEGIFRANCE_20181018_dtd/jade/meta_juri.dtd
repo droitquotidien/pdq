@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+Metadonnees des jurisprudences 
+@title Metadonnees des jurisprudences 
+@root META_JURI
+-->
+
+<!-- Racine des métadonnées jurisprudensielle -->
+<!ELEMENT META_JURI (TITRE, DATE_DEC, JURIDICTION, NUMERO, SOLUTION) > 
+
+<!-- Titre du texte -->
+<!ELEMENT TITRE (#PCDATA) >
+
+<!-- Date de décision -->
+<!ELEMENT DATE_DEC (#PCDATA) >
+
+<!-- Provenance de la décision
+Les valeurs possibles sont : 
+"caa", "Conseil d'état", "Conseil constitutionnel", "Chambre de l'instruction de la cour d'appel",
+"Conseil de prud'hommes","Cour administrative dappel","Cour administrative","Cour d'appel",
+"Cour de discipline budgetaire et financiere","Cour d'assises speciale en matiere de terrorisme",
+"Cour d'assises","Cour de cassation","Tribunal administratif","Tribunal de commerce",
+"Tribunal de grande instance","Tribunal des affaires de sécurite sociale","Tribunal des conflits",
+"Tribunal d'instance"
+suivit du siège de la juridiction
+-->
+<!ELEMENT JURIDICTION (#PCDATA) >
+
+<!-- Numéro de la décision -->
+<!ELEMENT NUMERO (#PCDATA) >
+
+<!-- Solution de la décision -->
+<!ELEMENT SOLUTION (#PCDATA) >
+
+

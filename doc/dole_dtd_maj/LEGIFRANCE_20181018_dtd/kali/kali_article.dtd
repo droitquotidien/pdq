@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Décrit toutes les informations relatives à un article KALI
+@title KALI : Article
+@root ARTICLE
+-->
+
+<!-- Racine de l'article-->
+<!ELEMENT ARTICLE (META, CONTEXTE, VERSIONS, BLOC_TEXTUEL, NOTA?, CONDITION_DIFFERE?, LIENS)>
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd" > %meta_commun;
+<!ENTITY % lien_art SYSTEM "lien_art.dtd" > %lien_art;
+<!ENTITY % lien SYSTEM "lien.dtd" > %lien;
+<!ENTITY % contenu SYSTEM "contenu.dtd" > %contenu;
+
+<!-- Métadonnées de l'article -->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!-- Métadonnées spécifique à ce type de document -->
+<!ELEMENT META_SPEC (META_ARTICLE) >
+
+<!-- Metadonnees specifique aux articles -->
+<!ELEMENT META_ARTICLE (NUM, TITRE?, ETAT, CALIPSOS, HISTORIQUE, DATE_DEBUT,  DATE_FIN, DATE_DEB_EXT, DATE_FIN_EXT,TYPE)>
+
+<!-- 
+Numéro de l'article 
+@example 13
+-->
+<!ELEMENT NUM (#PCDATA)>
+
+<!-- 
+Titre de l'article 
+@example Formation, santé et sécurité au travail
+-->
+<!ELEMENT TITRE (#PCDATA)>
+
+<!-- 
+Etat juridique de l'article.
+Les valeurs possibles sont : ABROGE, DENONCE, MODIFIE, PERIME, REMPLACE, SOUMIS_A_EXT, VIGUEUR , VIGUEUR_ETEN , VIGUEUR_NON_ETEN 
+@example VIGUEUR
+-->
+<!ELEMENT ETAT (#PCDATA)>
+
+<!-- Liste des questions usuelles associées à cet article -->
+<!ELEMENT CALIPSOS (CALIPSO*)>
+
+<!-- 
+Libellé de la question usuelle 
+@example SALAIRES
+-->
+<!ELEMENT CALIPSO (#PCDATA)>
+
+<!--
+Référence à la dernière modification de l'article 
+@example B(Accord 2000-07-05 BO conventions collectives 2000-40)
+-->
+<!ELEMENT HISTORIQUE (#PCDATA)>
+
+<!-- 
+Date d'entrée en vigueur de l'article 
+@example 2005-05-12
+-->
+<!ELEMENT DATE_DEBUT (#PCDATA) >
+
+<!-- 
+Date de fin de vigueur de l'article 
+@example 2999-12-31
+-->
+<!ELEMENT DATE_FIN (#PCDATA) >
+
+<!-- Date de début d'extension de l'article -->
+<!ELEMENT DATE_DEB_EXT (#PCDATA) >
+
+<!-- Date de fin d'extension de l'article -->
+<!ELEMENT DATE_FIN_EXT (#PCDATA) >
+
+<!-- Définie le type de l'article
+@hidden liste de valeurs à préciser 
+-->
+<!ELEMENT TYPE (#PCDATA) >
+
+<!-- Rappel du contexte de l'article courant. Cite le texte parent et ses différentes versions. -->
+<!ELEMENT CONTEXTE (TEXTE, CONTENEUR)>
+
+<!-- Rappel du texte parent et de ses différentes versions-->
+<!ELEMENT TEXTE (TITRE_TXT*, TM*)>
+
+<!-- Identifiant interne commun à toute les versions du texte -->
+<!ATTLIST TEXTE cid CDATA #REQUIRED >
+
+<!-- Numéro du texte -->
+<!ATTLIST TEXTE num CDATA #REQUIRED>
+
+<!-- NOR du texte -->
+<!ATTLIST TEXTE nor CDATA #REQUIRED>
+
+<!-- Numéro de parution du JO
+    Ex : 0158
+-->
+<!ATTLIST TEXTE num_parution_jo CDATA #IMPLIED>
+
+<!-- 
+Nature du document. 
+@hidden Liste de valeurs à preciser 
+-->
+<!ATTLIST TEXTE nature CDATA #REQUIRED>
+
+<!-- Date de publication du texte -->
+<!ATTLIST TEXTE date_publi CDATA #REQUIRED>
+
+<!-- Date de signature du texte-->
+<!ATTLIST TEXTE date_signature CDATA #REQUIRED>
+
+<!-- Titre du texte parent -->
+<!ELEMENT TITRE_TXT (#PCDATA) >
+
+<!-- identifiant interne du texte dans cette version -->
+<!ATTLIST TITRE_TXT id_txt CDATA #REQUIRED>
+
+<!-- Titre court du texte -->
+<!ATTLIST TITRE_TXT c_titre_court CDATA #REQUIRED>
+
+<!-- Date de validité pour cette version du texte -->
+<!ATTLIST TITRE_TXT debut CDATA #REQUIRED>
+
+<!-- Date de fin de validité pour cette version du texte -->
+<!ATTLIST TITRE_TXT fin CDATA  #REQUIRED>
+
+<!-- Têtier parent -->
+<!ELEMENT TM (TITRE_TM*,TM?)>
+
+<!-- Libellé du têtier.   -->
+<!ELEMENT TITRE_TM (#PCDATA)>
+
+<!-- Identifiant interne de la section -->
+<!ATTLIST TITRE_TM  id CDATA #REQUIRED>
+
+<!-- Date de validité de la section -->
+<!ATTLIST TITRE_TM debut CDATA #REQUIRED>
+ 
+ <!-- Date de fin de validité de la section -->
+<!ATTLIST TITRE_TM fin CDATA #REQUIRED>
+
+<!-- Rappel de la publication d'où provient cet article-->
+<!ELEMENT CONTENEUR EMPTY >
+ 
+ <!-- Identifiant interne de la publication -->
+<!ATTLIST CONTENEUR cid CDATA #REQUIRED >
+
+<!-- 
+Nature du conteneur 
+@example IDCC
+-->
+<!ATTLIST CONTENEUR nature CDATA #REQUIRED>
+
+<!-- Etat juridique du conteneur -->
+<!ATTLIST CONTENEUR etat CDATA #REQUIRED>
+
+<!-- Date de publication du conteneur-->
+<!ATTLIST CONTENEUR date_publi CDATA #REQUIRED>
+
+<!-- Numéro du conteneur -->
+<!ATTLIST CONTENEUR num CDATA #REQUIRED>
+
+<!-- 
+Titre du conteneur 
+@example Convention collective nationale du personnel de la restauration publique
+-->
+<!ATTLIST CONTENEUR titre CDATA #REQUIRED>
+
+<!-- 
+Adresse physique relative du fichier Légifrance représentant conteneur 
+@example /conteneur/KALI/CONT/00/00/07/21/55/KALICONT000007215595.xml
+-->
+<!ATTLIST CONTENEUR url CDATA #REQUIRED>
+
+<!-- Versions de l'article courant -->
+<!ELEMENT VERSIONS (VERSION*)>
+
+<!-- Version de l'article -->
+<!ELEMENT VERSION (LIEN_ART)>
+
+<!-- Etat juridique de l'article dans cette version 
+Les valeurs possibles sont : ABROGE, DENONCE, MODIFIE, PERIME, REMPLACE, SOUMIS_A_EXT, VIGUEUR , VIGUEUR_ETEN , VIGUEUR_NON_ETEN 
+@example VIGUEUR
+-->
+<!ATTLIST VERSION etat CDATA #REQUIRED>
+
+<!-- Contenu textuel -->
+<!ELEMENT BLOC_TEXTUEL (CONTENU) >
+
+<!--
+Nota de l'article 
+Contenu formaté en HTML. 
+-->
+<!ELEMENT NOTA (CONTENU) >
+
+<!--
+Condition du différé.
+@example applicable à compter du 1er jour du mois suivant la publication au Journal officiel de l'arrêté d'extension.
+-->
+<!ELEMENT CONDITION_DIFFERE (#PCDATA) >
+
+<!-- Liens -->
+<!ELEMENT LIENS (LIEN*) >
+
+

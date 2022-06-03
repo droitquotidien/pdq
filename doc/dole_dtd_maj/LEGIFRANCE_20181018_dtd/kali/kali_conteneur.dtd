@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Décrit la structure d'un document de type conteneur KALI destiné aux licenciés Legifrance.
+     @title KALI : Conteneur
+     @root IDCC
+-->
+
+<!-- Racine du conteneur KALI -->
+<!ELEMENT IDCC (META, STRUCTURE_TXT, TXTS_ISO,ACTS_PRO,NUMS_BROCH) >
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd"> %meta_commun;
+
+<!-- Métadonnées du conteneur -->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!-- Métadonnées spécifique à ce type de document -->
+<!ELEMENT META_SPEC (META_CONTENEUR) >
+
+<!-- Métadonnées du conteneur KALI -->
+<!ELEMENT META_CONTENEUR (TITRE, ETAT, NUM, DATE_PUBLI) >
+
+<!-- Titre du conteneur KALI-->
+<!ELEMENT TITRE (#PCDATA) >
+
+<!-- Etat juridique du conteneur KALI  -->
+<!ELEMENT ETAT (#PCDATA) >
+
+<!-- Numéro IDCC du conteneur KALI -->
+<!ELEMENT NUM (#PCDATA) >
+ 
+<!-- Date de publication du conteneur KALI -->
+<!ELEMENT DATE_PUBLI (#PCDATA) >
+
+<!-- Sommaire de la convention collective. Definie la liste ordonnée des têtiers et des textes composants le convention. -->
+<!ELEMENT STRUCTURE_TXT (LIEN_TXT|TM)* >
+
+<!-- Têtier du sommaire. Peut contenir une liste de texte et d'autre têtier -->
+<!ELEMENT TM (TITRE_TM, (LIEN_TXT|TM)*) >
+
+<!-- Niveau du têtier dans la hierarchie du sommaire -->
+<!ATTLIST TM niv CDATA #REQUIRED>
+
+<!-- Libelle du têtier -->
+<!ELEMENT TITRE_TM (#PCDATA) >
+
+<!-- Lien vers un texte -->
+<!ELEMENT LIEN_TXT EMPTY>
+
+<!-- Titre du texte dans  -->
+<!ATTLIST  LIEN_TXT titretxt CDATA #REQUIRED>
+
+<!-- Identifiant interne du texte. L'identifiant est également le nom du fichier xml.-->
+<!ATTLIST  LIEN_TXT idtxt CDATA #REQUIRED>
+
+<!-- Liste des textes isoles -->
+<!ELEMENT TXTS_ISO (LIEN_TXT*)>
+
+<!-- Liste des activites professionnelles -->
+<!ELEMENT ACTS_PRO (ACT_PRO*) >
+
+<!-- Libellé de l'activité professionnelle -->
+<!ELEMENT ACT_PRO (#PCDATA) >
+
+<!-- Liste des numeros de brochures associées à ce contenur-->
+<!ELEMENT NUMS_BROCH (NUM_BROCH*) >
+
+<!-- Numéro de brochure -->
+<!ELEMENT NUM_BROCH (#PCDATA) >
+
+
+

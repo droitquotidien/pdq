@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+Décrit un texte de decision constitutionnelle
+@title CONSTIT : Texte de decision constitutionnelle
+@root TEXTE_JURI_CONSTIT
+-->
+
+<!-- Racine d'un texte de decision constitutionnelle -->
+<!ELEMENT TEXTE_JURI_CONSTIT (META,  TEXTE) >
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd" > %meta_commun;
+<!ENTITY % meta_juri SYSTEM "meta_juri.dtd"> %meta_juri;
+<!ENTITY % contenu SYSTEM "contenu.dtd"> %contenu;
+
+<!-- Métadonnées -->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!-- Métadonnées spécifique à ce document -->
+<!ELEMENT META_SPEC (META_JURI, META_JURI_CONSTIT) >
+
+<!-- Métadonnées specifiques aux jurisprudences constitutionnelles || Fev 230 : ajout du code ECLI -->
+<!ELEMENT META_JURI_CONSTIT (NOR, NATURE_QUALIFIEE, LOI_DEF, TITRE_JO,URL_CC, ECLI?) >
+
+<!-- 
+NOR du texte
+@example CSCL0104966S
+-->
+<!ELEMENT NOR (#PCDATA) >
+
+<!-- 
+Code de la jurisprudence constitutionnelle
+@example DC04
+-->
+<!ELEMENT NATURE_QUALIFIEE (#PCDATA) >
+
+<!-- 
+Titre de la loi déférée
+@example Loi relative à l'interruption volontaire de grossesse et à la contraception
+-->
+<!ELEMENT LOI_DEF (#PCDATA) >
+
+<!-- 
+NOR de la loi déférée
+@example MESX0000140L
+-->
+<!ATTLIST LOI_DEF nor CDATA #REQUIRED>
+
+<!-- 
+Numéro de la loi déférée
+@example 2001-588
+-->
+<!ATTLIST LOI_DEF num CDATA #REQUIRED>
+
+<!-- 
+Date de publication de la loi déférée
+@example 2001-07-04
+-->
+<!ATTLIST LOI_DEF date CDATA #REQUIRED>
+
+<!-- 
+Titre du JO où a été publié ce texte
+@example Journal officiel du 7 juillet 2001, p. 10835
+-->
+<!ELEMENT TITRE_JO ( #PCDATA) >
+
+<!--
+URL du texte sur le site internet du conseil constitutionel
+@example http://www.conseil-constitutionnel.fr/decision/2001/2001449/index.htm 
+-->
+<!ELEMENT URL_CC ( #PCDATA) >
+
+<!--
+FEV 230 : ajout du code ECLI
+-->
+<!ELEMENT ECLI (#PCDATA)>
+
+<!ELEMENT TEXTE (BLOC_TEXTUEL, SAISINES, OBSERVATIONS) >
+
+<!-- 
+Contenu textuel
+Contenu formaté en HTML
+-->
+<!ELEMENT BLOC_TEXTUEL (CONTENU) >
+
+<!-- 
+Saisines du texte 
+Contenu formaté en HTML
+-->
+<!ELEMENT SAISINES (CONTENU) >
+
+<!-- 
+Observations sur le texte 
+Contenu formaté en HTML
+-->
+<!ELEMENT OBSERVATIONS (CONTENU) >

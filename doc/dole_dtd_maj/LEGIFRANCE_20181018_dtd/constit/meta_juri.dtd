@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+Metadonnees des jurisprudences 
+@title Metadonnees des jurisprudences 
+@root META_JURI
+-->
+
+<!-- Racine des métadonnées jurisprudensielle -->
+<!ELEMENT META_JURI (TITRE, DATE_DEC, JURIDICTION, NUMERO, SOLUTION) > 
+
+<!-- Titre du texte -->
+<!ELEMENT TITRE (#PCDATA) >
+
+<!-- Date de décision -->
+<!ELEMENT DATE_DEC (#PCDATA) >
+
+<!-- Provenance de la décision -->
+<!ELEMENT JURIDICTION (#PCDATA) >
+
+<!-- Numéro de la décision -->
+<!ELEMENT NUMERO (#PCDATA) >
+
+<!-- Solution de la décision -->
+<!ELEMENT SOLUTION (#PCDATA) >
+
+

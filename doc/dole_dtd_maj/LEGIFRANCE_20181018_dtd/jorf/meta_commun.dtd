@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Métadonnées communes à tous les documents Legifrance 
+    @title Métadonnées communes
+    @root META_COMMUN
+-->
+
+<!-- Racine du document -->
+<!ELEMENT META_COMMUN (ID, ID_ELI?, ELI_ALIAS?, ANCIEN_ID, ORIGINE, URL, NATURE)>
+<!ELEMENT ELI_ALIAS (ID_ELI_ALIAS*)>
+
+<!-- Identifiant interne. L'identifiant est également le nom du fichier xml. 
+    @example JORFCONT000000755641
+-->
+<!ELEMENT ID (#PCDATA) >
+
+<!-- Identifiant eli. Il est optionnel et concerne les conteneurs, les textes et les articles.
+    @example pour le texte dont le NOR est EFIT1318746D : eli/decret/2014/1/27/EFIT1318746D/jo/texte
+-->
+<!ELEMENT ID_ELI (#PCDATA) >
+
+<!-- Alias de l'identifiant eli. Il est optionnel et concerne certains textes numérotés (lois, ordonnances, décrets) et leurs articles.
+    @example pour le texte dont le numéro est 2014-59 : eli/decret/2014/1/27/2014-59/jo/texte
+-->
+<!ELEMENT ID_ELI_ALIAS (#PCDATA) >
+
+<!-- Ancien identifiant issu de la version précédente de légifrance. Cette information est conservée afin d'assurer la résolution des URL à l'ancien format du site Legifrance -->
+<!ELEMENT ANCIEN_ID (#PCDATA) >
+
+<!-- Origine du document. 
+    @hidden Liste de valeurs à preciser 
+-->
+<!ELEMENT ORIGINE (#PCDATA) >
+
+<!-- Adresse physique relative du document dans la hierachie Legifrance -->
+<!ELEMENT URL (#PCDATA) >
+
+<!-- 
+Nature du document. 
+Liste des valeurs en date du 12/06/2008 :
+ABROGATION  , 
+ACCORD  , 
+ACTE  , 
+ADDITIF  , 
+ANNEXE  , 
+APPEL  , 
+ARRANGEMENT  , 
+ARRETE  , 
+ARRETEAVIS  , 
+ARRETEAVISAVIS  , 
+ARRETEEURO  , 
+ARRETESEURO  , 
+ARRETEURO  , 
+ASSEMBLEE  , 
+ATTESTATION  , 
+AUDIENCE  , 
+AVENANT  , 
+AVIS  , 
+AVISEURO  , 
+CANDIDAT  , 
+CIRCULAIRE  , 
+CITATION  , 
+CLASSEMENT  , 
+CODE  , 
+COMMUNIQUE  , 
+COMPLEMENT  , 
+COMPOSITION  , 
+CONSTITUTION  , 
+CONSULTATION  , 
+CONTRAT  , 
+CONVENTION  , 
+DATE  , 
+DECISION  , 
+DECISIONAVIS  , 
+DECISION_CC  , 
+DECISION_EURO  , 
+DECLARATION  , 
+DECLARATIONEURO  , 
+DECRET  , 
+DECRETEURO  , 
+DECRETLOIEURO  , 
+DECRETSEURO  , 
+DECRET_LOI  , 
+DELEGATION  , 
+DELEGATIONDEGESTION  , 
+DELIBERATION  , 
+DELIBERATIONEURO  , 
+DESIGNATION  , 
+DEUXIEME  , 
+DIRECTIVE  , 
+DIRECTIVE_EURO  , 
+DISPOSITIONS  , 
+DIXIEME  , 
+DOUZIEME  , 
+ELECTION  , 
+ELECTIONDUPRESIDENTDELAREPUBLIQU  , 
+ELECTIONPRESIDENTIELLECONSEILCON  , 
+EURO  , 
+EXEQUATUR  , 
+EXTRAIT  , 
+FINEURO  , 
+HOMMAGENATIONAL  , 
+HUITIEME  , 
+ICONSTRUCTEUR66ARRETE  , 
+INCOMPATIBILITEEURO  , 
+INFORMATION  , 
+INFORMATIONEURO  , 
+INFORMATIONSEURO  , 
+INSTRUCTION  , 
+INSTRUCTIONEURO  , 
+JUGEMENTEURO  , 
+LETTRE  , 
+LETTREEURO  , 
+LISTE  , 
+LOI  , 
+LOIEURO  , 
+LOI_CONSTIT  , 
+LOI_ORGANIQUE  , 
+LOI_PROGRAMME  , 
+MEDAILLEMILITAIRE  , 
+MEMOIRE  , 
+MESSAGE  , 
+MODIFICATIF  , 
+MODIFICATION  , 
+NEUVIEME  , 
+NOMENCLATURE  , 
+NOTE  , 
+OBSERVATION  , 
+OBSERVATIONSEURO  , 
+ONZIEME  , 
+ORDONNANCE  , 
+ORDONNANCEEURO  , 
+PREMIER  , 
+PROCLAMATION  , 
+PROJET  , 
+PROMOTIONSPECIALEDUCINQUANTIEMEA  , 
+PROPOSITION  , 
+PROTOCOLE  , 
+PUBLICATION  , 
+QUATRIEME  , 
+QUESTIONEURO  , 
+RAPPORT  , 
+RECOMMANDATION  , 
+RECOMMANDATION_EURO  , 
+RECTIFICATIF  , 
+REGLEMENT  , 
+REGLEMENTEUROPEEN  , 
+RELEVE  , 
+REMISE  , 
+RESULTATS  , 
+RESULTATSDUTIRAGE  , 
+SAISINE  , 
+SENATUSCONSULTEURO  , 
+SEPTIMERAPPORT  , 
+SUSPENSION  , 
+TABLEAU  , 
+TAPISVERT  , 
+TERMES  , 
+TRAITEEURO  , 
+TROISIEME  , 
+VOCABULAIRE, 
+Article,
+JO
+-->
+<!ELEMENT NATURE (#PCDATA) >
+

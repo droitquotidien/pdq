@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Décrit toutes les informations relatives à un article JORF destiné aux licenciés Legifrance.
+@title JORF : Article
+@root ARTICLE
+-->
+
+<!-- Racine de l'article-->
+<!ELEMENT ARTICLE (META, CONTEXTE, VERSIONS, SM, BLOC_TEXTUEL, LIENS?)>
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd" > %meta_commun;
+<!ENTITY % lien_art SYSTEM "lien_art.dtd" > %lien_art;
+<!ENTITY % lien SYSTEM "lien.dtd" > %lien;
+<!ENTITY % contenu SYSTEM "contenu.dtd" > %contenu;
+
+<!-- 
+Métadonnées de l'article
+-->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!-- 
+Métadonnées spécifiques à ce type de document 
+-->
+<!ELEMENT META_SPEC (META_ARTICLE) >
+
+<!-- 
+Metadonnees specifiques aux articles 
+-->
+<!ELEMENT META_ARTICLE (NUM, MCS_ART, DATE_DEBUT,  DATE_FIN, TYPE)>
+
+<!-- 
+Numéro de l'article 
+@example 2-4
+-->
+<!ELEMENT NUM (#PCDATA)>
+
+<!-- 
+Liste des mots clés de l'article 
+-->
+<!ELEMENT MCS_ART (MC*) >
+
+<!-- 
+Libellé du mot clé 
+@example PNEUMO-PHTISIOLOGUE
+-->
+ <!ELEMENT MC (#PCDATA)>
+
+<!-- 
+Date d'entrée en vigueur de l'article 
+@example 2004-08-23
+-->
+<!ELEMENT DATE_DEBUT (#PCDATA) >
+
+<!-- 
+Date de fin de vigueur de l'article 
+@example 2006-09-20
+-->
+<!ELEMENT DATE_FIN (#PCDATA) >
+
+<!-- Définie le type de l'article
+@hidden liste de valeurs à préciser 
+-->
+<!ELEMENT TYPE (#PCDATA) >
+
+<!-- 
+Rappel du contexte de l'article courant. 
+Cite le texte parent et ses différentes versions.
+-->
+<!ELEMENT CONTEXTE (TEXTE)>
+
+<!-- 
+Rappel du texte parent et de ses différentes versions
+-->
+<!ELEMENT TEXTE (TITRE_TXT*, TM*)>
+
+<!-- 
+Identifiant interne commun à toute les versions du texte
+@example JORFTEXT000004585864
+-->
+<!ATTLIST TEXTE cid CDATA #REQUIRED >
+
+<!-- 
+Numéro du texte 
+@example 1992-05-21
+-->
+<!ATTLIST TEXTE num CDATA #REQUIRED>
+
+<!-- 
+NOR du texte
+@example SANM0621931S
+-->
+<!ATTLIST TEXTE nor CDATA #REQUIRED>
+
+<!-- 
+Nature du document. 
+Liste des valeurs en date du 12/06/2008 :
+ABROGATION  , 
+ACCORD  , 
+ACTE  , 
+ADDITIF  , 
+ANNEXE  , 
+APPEL  , 
+ARRANGEMENT  , 
+ARRETE  , 
+ARRETEAVIS  , 
+ARRETEAVISAVIS  , 
+ARRETEEURO  , 
+ARRETESEURO  , 
+ARRETEURO  , 
+ASSEMBLEE  , 
+ATTESTATION  , 
+AUDIENCE  , 
+AVENANT  , 
+AVIS  , 
+AVISEURO  , 
+CANDIDAT  , 
+CIRCULAIRE  , 
+CITATION  , 
+CLASSEMENT  , 
+CODE  , 
+COMMUNIQUE  , 
+COMPLEMENT  , 
+COMPOSITION  , 
+CONSTITUTION  , 
+CONSULTATION  , 
+CONTRAT  , 
+CONVENTION  , 
+DATE  , 
+DECISION  , 
+DECISIONAVIS  , 
+DECISION_CC  , 
+DECISION_EURO  , 
+DECLARATION  , 
+DECLARATIONEURO  , 
+DECRET  , 
+DECRETEURO  , 
+DECRETLOIEURO  , 
+DECRETSEURO  , 
+DECRET_LOI  , 
+DELEGATION  , 
+DELEGATIONDEGESTION  , 
+DELIBERATION  , 
+DELIBERATIONEURO  , 
+DESIGNATION  , 
+DEUXIEME  , 
+DIRECTIVE  , 
+DIRECTIVE_EURO  , 
+DISPOSITIONS  , 
+DIXIEME  , 
+DOUZIEME  , 
+ELECTION  , 
+ELECTIONDUPRESIDENTDELAREPUBLIQU  , 
+ELECTIONPRESIDENTIELLECONSEILCON  , 
+EURO  , 
+EXEQUATUR  , 
+EXTRAIT  , 
+FINEURO  , 
+HOMMAGENATIONAL  , 
+HUITIEME  , 
+ICONSTRUCTEUR66ARRETE  , 
+INCOMPATIBILITEEURO  , 
+INFORMATION  , 
+INFORMATIONEURO  , 
+INFORMATIONSEURO  , 
+INSTRUCTION  , 
+INSTRUCTIONEURO  , 
+JUGEMENTEURO  , 
+LETTRE  , 
+LETTREEURO  , 
+LISTE  , 
+LOI  , 
+LOIEURO  , 
+LOI_CONSTIT  , 
+LOI_ORGANIQUE  , 
+LOI_PROGRAMME  , 
+MEDAILLEMILITAIRE  , 
+MEMOIRE  , 
+MESSAGE  , 
+MODIFICATIF  , 
+MODIFICATION  , 
+NEUVIEME  , 
+NOMENCLATURE  , 
+NOTE  , 
+OBSERVATION  , 
+OBSERVATIONSEURO  , 
+ONZIEME  , 
+ORDONNANCE  , 
+ORDONNANCEEURO  , 
+PREMIER  , 
+PROCLAMATION  , 
+PROJET  , 
+PROMOTIONSPECIALEDUCINQUANTIEMEA  , 
+PROPOSITION  , 
+PROTOCOLE  , 
+PUBLICATION  , 
+QUATRIEME  , 
+QUESTIONEURO  , 
+RAPPORT  , 
+RECOMMANDATION  , 
+RECOMMANDATION_EURO  , 
+RECTIFICATIF  , 
+REGLEMENT  , 
+REGLEMENTEUROPEEN  , 
+RELEVE  , 
+REMISE  , 
+RESULTATS  , 
+RESULTATSDUTIRAGE  , 
+SAISINE  , 
+SENATUSCONSULTEURO  , 
+SEPTIMERAPPORT  , 
+SUSPENSION  , 
+TABLEAU  , 
+TAPISVERT  , 
+TERMES  , 
+TRAITEEURO  , 
+TROISIEME  , 
+VOCABULAIRE
+@example DECISION
+-->
+<!ATTLIST TEXTE nature CDATA #REQUIRED>
+
+<!-- 
+Date de publication du texte 
+@example 2006-12-28
+-->
+<!ATTLIST TEXTE date_publi CDATA #REQUIRED>
+
+<!-- 
+Date de signature du texte
+@example 2006-12-23
+-->
+<!ATTLIST TEXTE date_signature CDATA #REQUIRED>
+
+<!-- 
+Numéro de parution du JO
+@example 0301
+-->
+<!ATTLIST TEXTE num_parution_jo CDATA #IMPLIED>
+
+<!-- 
+Autorité émettrice. 
+Liste des autorités en date du 12/06/2008 :
+CONSEIL SUPERIEUR DE L'AUDIOVISUEL  , 
+COMMISSION POUR LA TRANSPARENCE FINANCIERE DE LA VIE POLITIQUE  , 
+BANQUE DE FRANCE - CONSEIL DE LA POLITIQUE MONETAIRE  , 
+COMMISSION GENERALE DE TERMINOLOGIE ET DE NEOLOGIE  , 
+AUTORITE DE REGULATION DES COMMUNICATIONS ELECTRONIQUES ET DES POSTES  , 
+COMMISSION NATIONALE DES COMPTES DE CAMPAGNE ET DE FINANCEMENTS POLITIQUES  , 
+COMMISSION DE CONTROLE DES ASSURANCES  , 
+AUTORITE DES MARCHES FINANCIERS  , 
+AGENCE FRANCAISE DE LUTTE CONTRE LE DOPAGE  , 
+CONSEIL DES VENTES VOLONTAIRES  , 
+CONSEIL ECONOMIQUE ET SOCIAL  , 
+COMITE DES ENTREPRISES D'ASSURANCE  , 
+AUTORITE DE REGULATION DES MESURES TECHNIQUES  , 
+MEDIATEUR NATIONAL DE L'ENERGIE  , 
+COUR DES COMPTES  , 
+COMMISSION NATIONALE DE DEONTOLOGIE DE LA SECURITE  , 
+HAUTE AUTORITE DE LUTTE CONTRE LES DISCRIMINATIONS ET POUR L'EGALITE  , 
+CONSEIL DE LA CONCURRENCE  , 
+COUR DE DISCIPLINE BUDGETAIRE ET FINANCIERE  , 
+MINISTERE DE L'ECONOMIE, DES FINANCES ET DE L'INDUSTRIE REGLEMENTS DU COMITE DE LA REGLEMENTATION COMPTABLE  , 
+CONSEIL SUPERIEUR DE L'AUDIOVISUEL (CSA)  , 
+CONSEIL D'ETAT  , 
+COUR DE JUSTICE DE LA REPUBLIQUE  , 
+COMMISSION DE REGULATION DE L'ELECTRICITE  , 
+COMMISSION DE CONTROLE DES ASSURANCES, DES MUTUELLES ET DES INSTITUTIONS DE PREVOYANCE  , 
+CONSEIL DES VENTES VOLONTAIRES DE MEUBLES AUX ENCHERES PUBLIQUES  , 
+CONSEIL DE PREVENTION ET DE LUTTE CONTRE LE DOPAGE  , 
+CONSEIL CONSTITUTIONNEL : DECISIONS  , 
+COMMISSION NATIONALE DE L'INFORMATIQUE ET DES LIBERTES  , 
+MEDIATEUR DE LA REPUBLIQUE  , 
+COMMISSION NATIONALE DES COMPTES DE CAMPAGNE ET DES FINANCEMENTS POLITIQUES  , 
+COMMISSION CONSULTATIVE DU SECRET DE LA DEFENSE NATIONALE  , 
+CONSEIL CONSTITUTIONNEL  , 
+COMMISSION DE REGULATION DE L'ENERGIE  , 
+COMMISSION NATIONALE DU DEBAT PUBLIC  , 
+HAUTE AUTORITE DE SANTE  , 
+COMMISSION D'ACCES AUX DOCUMENTS ADMINISTRATIFS  , 
+COMMISSION NATIONALE DE CONTROLE DES INTERCEPTIONS DE SECURITE  , 
+LOIS CONSEIL CONSTITUTIONNEL  , 
+COMMISSION NATIONALE DE L'INFORMATIQUE ET DES LIBERTES (CNIL)  , 
+AUTORITE DE REGULATION DES TELECOMMUNICATIONS  , 
+COMMISSION NATIONALE DES COMPTES DE CAMPAGNE ET DES FINANCEMENTS POLITIQUES  , 
+COMMISSION DES OPERATIONS DE BOURSE  , 
+AUTORITE DE REGULATION DES COMMUNICATIONS ELECTRONIQUES ET DES POSTES  , 
+AUTORITE DE CONTROLE DES ASSURANCES ET DES MUTUELLES  , 
+COMMISSION BANCAIRE  , 
+@example CONSEIL SUPERIEUR DE L'AUDIOVISUEL (CSA)
+-->
+<!ELEMENT AUTORITE (#PCDATA) >
+
+<!-- 
+Ministère émetteur 
+@exemple MINISTERE DE L'EMPLOI ET DE LA SOLIDARITE
+-->
+<!ELEMENT MINISTERE (#PCDATA) >
+
+<!-- 
+Titre long du texte parent 
+@example Décret n°1992-05-21 du 21 mai 1992 fixant pour 1992 la rémunération de la garantie accordée par l'Etat aux fonds des livrets de la Caisse nationale d'épargne définis à  l'article 5 du code des caisses d'épargne
+-->
+<!ELEMENT TITRE_TXT (#PCDATA) >
+
+<!-- 
+Identifiant interne du texte dans cette version 
+@example JORFTEXT000001422418
+-->
+<!ATTLIST TITRE_TXT id_txt CDATA #REQUIRED>
+
+<!-- 
+Titre court du texte
+@example Décret n°1992-05-21 du 21 mai 1992
+-->
+<!ATTLIST TITRE_TXT c_titre_court CDATA #REQUIRED>
+
+<!-- 
+Date de validité pour cette version du texte 
+@example 2003-05-12
+-->
+<!ATTLIST TITRE_TXT debut CDATA #REQUIRED>
+
+<!-- 
+Date de fin de validité pour cette version du texte 
+@example 2009-06-12
+-->
+<!ATTLIST TITRE_TXT fin CDATA  #REQUIRED>
+
+<!-- 
+Têtier parent 
+-->
+<!ELEMENT TM (TITRE_TM*,TM?)>
+
+<!-- 
+Libellé du têtier.  
+@example TITRE IV :   DISPOSITIONS TRANSITOIRES
+-->
+<!ELEMENT TITRE_TM (#PCDATA)>
+
+<!-- 
+Identifiant interne de la section -
+@example JORFSCTA000005063415
+-->
+<!ATTLIST TITRE_TM  id CDATA #REQUIRED>
+
+<!--
+Date de validité de la section 
+@example 2003-12-05
+-->
+<!ATTLIST TITRE_TM debut CDATA #REQUIRED>
+ 
+ <!-- 
+ Date de fin de validité de la section 
+ @example 2999-01-01
+ -->
+<!ATTLIST TITRE_TM fin CDATA #REQUIRED>
+
+<!-- 
+Liste des versions de cet article.
+@hidden Les autres versions d'un texte JORF sont issu du fond LEGI
+-->
+<!ELEMENT VERSIONS (VERSION*)>
+
+<!-- 
+Version de l'article. 
+-->
+<!ELEMENT VERSION (LIEN_ART)>
+
+<!-- 
+Etat juridique de l'article dans cette version;
+@example ABROGE
+-->
+<!ATTLIST VERSION etat CDATA #REQUIRED>
+
+<!-- 
+Contenu textuel;
+Contenu formaté en HTML. 
+-->
+<!ELEMENT BLOC_TEXTUEL (CONTENU) >
+
+<!-- 
+Liens 
+-->
+<!ELEMENT LIENS (LIEN*) >
+
+<!-- 
+Résumé LEX.
+Contenu formaté en HTML. 
+-->
+<!ELEMENT SM (CONTENU)>
+

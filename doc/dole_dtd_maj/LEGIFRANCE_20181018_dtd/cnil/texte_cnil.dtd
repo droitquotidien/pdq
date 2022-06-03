@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+Decrit un texte CNIL.
+@title CNIL : Texte 
+@root TEXTE_CNIL
+-->
+
+<!-- Racine d'un texte CNIL -->
+<!ELEMENT TEXTE_CNIL (META, BLOC_TEXTUEL, LIENS) >
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd"> %meta_commun;
+<!ENTITY % contenu SYSTEM "contenu.dtd" > %contenu;
+<!ENTITY % lien SYSTEM "lien.dtd" > %lien;
+
+<!-- Metadonnees -->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!-- Métadonnées spécifiques à ce document -->
+<!ELEMENT META_SPEC (META_CNIL)>
+
+<!-- Metadonnees d'un texte CNIL -->
+<!ELEMENT META_CNIL (TITRE, TITREFULL, NUMERO, NOR, NATURE_DELIB, DATE_TEXTE, ORIGINE_PUBLI, PAGE_DEB_PUBLI, PAGE_FIN_PUBLI, NUM_SEQUENCE, DATE_PUBLI, ETAT_JURIDIQUE)>
+
+<!-- 
+Titre court du texte. Le titre est calculé de la manière suivante : "NATURE NUMERO du DATE"
+@example Délibération 88-53 du 24 mai 1988
+-->
+<!ELEMENT TITRE (#PCDATA) >
+
+<!-- 
+Titre long du texte
+@example Délibération portant sur une vérification sur place
+-->
+<!ELEMENT TITREFULL (#PCDATA) >
+
+<!--
+Numéro de délibération
+@example 88-53
+-->
+<!ELEMENT NUMERO (#PCDATA) >
+
+<!-- 
+NOR du texte
+@example CNIA0600004X
+-->
+<!ELEMENT NOR (#PCDATA) >
+
+<!-- 
+Nature de la délibération. Ce champ est multivalué. Les différentes valeurs sont séparées par des points.
+@example Avis conforme. Avis favorable
+-->
+<!ELEMENT NATURE_DELIB (#PCDATA) >
+
+<!-- 
+Date de délibération
+@example 1988-05-24
+-->
+<!ELEMENT DATE_TEXTE (#PCDATA) >
+
+<!-- 
+Titre du JO 
+-->
+<!ELEMENT ORIGINE_PUBLI (#PCDATA) >
+
+<!-- 
+Numéro de la premiere page de la publication au JO
+-->
+<!ELEMENT PAGE_DEB_PUBLI (#PCDATA) >
+
+<!-- 
+Numéro de la derniere page de la publication au JO
+-->
+<!ELEMENT PAGE_FIN_PUBLI (#PCDATA) >
+
+<!-- 
+Numéro du texte dans le JO
+-->
+<!ELEMENT NUM_SEQUENCE (#PCDATA) >
+
+<!-- 
+Date de publication du texte
+-->
+<!ELEMENT DATE_PUBLI (#PCDATA) >
+
+<!-- 
+Etat juridique du texte. Peut prendre les valeurs VIGUEUR, ANNULE, MODIFIE ou ABROGE.
+-->
+<!ELEMENT ETAT_JURIDIQUE (#PCDATA) >
+
+<!-- 
+Contenu textuel
+Contenu formaté en HTML.
+-->
+<!ELEMENT BLOC_TEXTUEL (CONTENU) >
+
+<!-- Liens vers d'autres textes -->
+<!ELEMENT LIENS (LIEN*) >

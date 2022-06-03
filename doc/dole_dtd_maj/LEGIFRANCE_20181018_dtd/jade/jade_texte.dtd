@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+Décrit un texte de jurisprudence administrative 
+@title JADE : Texte de jurisprudence administrative 
+@root TEXTE_JURI_ADMIN
+-->
+
+<!-- Racine du texte de jurisprudence administrative -->
+<!ELEMENT TEXTE_JURI_ADMIN (META,  TEXTE, LIENS) >
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd"> %meta_commun;
+<!ENTITY % meta_juri SYSTEM "meta_juri.dtd"> %meta_juri;
+<!ENTITY % contenu SYSTEM "contenu.dtd" > %contenu;
+<!ENTITY % lien SYSTEM "lien.dtd" > %lien;
+
+<!-- Metadonnees -->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!-- Métadonnées spécifique à ce document -->
+<!ELEMENT META_SPEC (META_JURI, META_JURI_ADMIN) >
+
+<!-- Métadonnées spécifique aux textes de jurisprudence administrative -->
+<!ELEMENT META_JURI_ADMIN (FORMATION, TYPE_REC, PUBLI_RECUEIL, DEMANDEUR, DEFENDEUR, PRESIDENT, AVOCATS, RAPPORTEUR, COMMISSAIRE_GVT, ECLI?) >
+
+<!-- 
+Formation dont est issue la decision 
+@example 3EME CHAMBRE
+-->
+<!ELEMENT FORMATION (#PCDATA) >
+
+<!-- 
+Type de recours 
+@example plein contentieux
+-->
+<!ELEMENT TYPE_REC (#PCDATA) >
+
+<!-- 
+Code de publication au recueil Lebon. Les valeurs possibles sont A,B ou C suivant que la décision est Publiée, Mentionnée ou Inédite au recueil Lebon 
+@example C
+-->
+<!ELEMENT PUBLI_RECUEIL (#PCDATA) >
+
+<!-- 
+Demandeur 
+@example COMMUNE D'HERBLAY
+-->
+<!ELEMENT DEMANDEUR (#PCDATA)>
+
+<!-- 
+Defendeur 
+@example SOCIETE B.E.T EDIFICAT
+-->
+<!ELEMENT DEFENDEUR (#PCDATA)>
+
+<!-- 
+Président de la cour
+@example Mme BRIN
+-->
+<!ELEMENT PRESIDENT (#PCDATA)>
+
+<!-- 
+Liste des avocats en présence. Les noms des différents avocats sont séparés par des virgules.
+@example NGO, MIGUÉRÈS & ASSOCIÉS
+-->
+<!ELEMENT AVOCATS (#PCDATA)>
+
+<!-- 
+Rapporteur 
+@example M. Sébastien DAVESNE
+-->
+<!ELEMENT RAPPORTEUR (#PCDATA)>
+
+<!-- 
+Commissaire du gouvernement 
+@example M. Sébastien DAVESNE
+-->
+<!ELEMENT COMMISSAIRE_GVT (#PCDATA)>
+
+<!ELEMENT ECLI (#PCDATA)>
+
+<!ELEMENT TEXTE (BLOC_TEXTUEL, SOMMAIRE, CITATION_JP) >
+
+<!-- Contenu textuel -->
+<!ELEMENT BLOC_TEXTUEL (CONTENU) >
+
+<!-- Resumé du texte -->
+<!ELEMENT SOMMAIRE (SCT|ANA)* >
+
+<!-- Résumé -->
+<!ELEMENT ANA (#PCDATA|P)* >
+
+<!-- Identifiant commun avec le titrage correspondant -->
+<!ATTLIST ANA ID CDATA #REQUIRED>
+
+<!-- Titrage -->
+<!ELEMENT SCT (#PCDATA) >
+
+<!-- Identifiant commun avec le resumé correspondant -->
+<!ATTLIST SCT ID CDATA #REQUIRED>
+
+<!-- 
+Type de titrage : PRINCIPAL ou REFERENCE 
+@example PRINCIPAL
+-->
+<!ATTLIST SCT TYPE (PRINCIPAL|REFERENCE) "PRINCIPAL">
+
+<!-- Citations des précédents jurisprudentielsl -->
+<!ELEMENT CITATION_JP (CONTENU?) >
+
+<!-- 
+Liens vers des textes en rapport
+-->
+<!ELEMENT LIENS (LIEN*) >

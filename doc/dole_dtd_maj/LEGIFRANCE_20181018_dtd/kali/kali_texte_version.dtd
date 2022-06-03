@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+Décrit une version particulière d'un texte de convention collective.
+@title KALI : Version de texte de convention collective
+@root TEXTE_VERSION
+-->
+
+<!-- Racine -->
+<!ELEMENT TEXTE_VERSION (META, VISAS, SIGNATAIRES, NOTA?, CONDITION_DIFFERE?)>
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd"> %meta_commun;
+<!ENTITY % meta_texte_chronicle SYSTEM "meta_texte_chronicle.dtd"> %meta_texte_chronicle;
+<!ENTITY % lien SYSTEM "lien.dtd"> %lien;
+<!ENTITY % contenu SYSTEM "contenu.dtd"> %contenu;
+
+<!-- Métadonnées du texte -->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!-- Métadonnées spécifique à ce type de document -->
+<!ELEMENT META_SPEC (META_TEXTE_CHRONICLE,META_TEXTE_VERSION) >
+
+<!ELEMENT META_TEXTE_VERSION (TITRE, TITREFULL, APPLI_GEO, CODES_NOMENCLATURES, LIBELLE_EXTENSION?, LIBELLE_ELARGISSEMENT?, ETAT, DATE_DEBUT, DATE_FIN, MCS_TXT) >
+
+<!-- Etat juridique du texte
+Les valeurs possibles sont : ABROGE, DENONCE, PERIME, REMPLACE, SOUMIS_A_EXT, VIGUEUR , VIGUEUR_ETEN , VIGUEUR_NON_ETEN  
+@example VIGUEUR
+-->
+<!ELEMENT ETAT ( #PCDATA) >
+
+<!-- Date d'entrée en vigueur du texte -->
+<!ELEMENT DATE_DEBUT (#PCDATA) >
+
+<!-- Date de fin de vigueur du texte -->
+<!ELEMENT DATE_FIN (#PCDATA) > 
+
+<!-- Liste des mots clé du texte -->
+<!ELEMENT MCS_TXT (MC*) >
+
+<!-- Mot clé du texte -->
+<!ELEMENT MC (#PCDATA) >
+
+<!-- Titre court du texte. Ce titre est construit de la manière suivante : <NATURE> + (‘n° ’ <NUM> si existant) + ‘du’ <DATE>) -->
+<!ELEMENT TITRE (#PCDATA) >
+
+<!-- Titre complet du texte.  -->
+<!ELEMENT TITREFULL (#PCDATA) >
+
+<!-- Libellé d'extension  -->
+<!ELEMENT LIBELLE_EXTENSION (#PCDATA) >
+
+<!-- Libellé d'élargissement  -->
+<!ELEMENT LIBELLE_ELARGISSEMENT (#PCDATA) >
+
+<!-- 
+Portée de l'application géographique.  La valeur du champ est construit sous la forme : A NATIONAL ou B REGIONAL suivit du nom de la région ou C DEPARTEMENTAL suivit du nom du département
+@example B REGIONAL PROVENCE-ALPES-COTE D'AZUR
+-->
+<!ELEMENT APPLI_GEO (#PCDATA)  > 
+
+<!-- Liste des codes INSEE, NAF etc associes -->
+<!ELEMENT CODES_NOMENCLATURES (CODE*) >
+
+<!-- Code associe -->
+<!ELEMENT CODE (#PCDATA) >
+
+<!-- Visas du texte -->
+<!ELEMENT VISAS (CONTENU) >
+
+<!-- Signataires du texte -->
+<!ELEMENT SIGNATAIRES (SIGNPATRON?, SIGNSYNDIC?, ORGADHERE?, ORGDENONCE?,SIGNEXT?,EXECUTION?)>
+
+<!-- Signataires patronat -->
+<!ELEMENT SIGNPATRON (CONTENU)>
+
+<!-- Signataires syndicat -->
+<!ELEMENT SIGNSYNDIC (CONTENU)>
+
+<!-- 
+Nota sur le texte
+Contenu formaté en HTML. 
+-->
+<!ELEMENT NOTA (CONTENU) >
+
+<!--
+Condition du différé.
+@example applicable à compter du 1er jour du mois suivant la publication au Journal officiel de l'arrêté d'extension.
+-->
+<!ELEMENT CONDITION_DIFFERE (#PCDATA) >
+
+<!-- Signataires des organisations qui adherent -->
+<!ELEMENT ORGADHERE (CONTENU)>
+
+<!-- Signataires des organisations qui dénoncent -->
+<!ELEMENT ORGDENONCE (CONTENU)>
+
+<!-- Signataires des arrets d'extension -->
+<!ELEMENT SIGNEXT (CONTENU)>
+
+<!-- Signataires execution -->
+<!ELEMENT EXECUTION (CONTENU)>
+

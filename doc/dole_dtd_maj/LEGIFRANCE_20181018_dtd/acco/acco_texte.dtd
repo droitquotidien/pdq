@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+    Décrit toutes les informations relatives à un texte ACCO destiné aux licenciés Legifrance.
+    @title ACCO : Texte
+    @root ACCO
+-->
+
+<!-- Racine du texte -->
+<!ELEMENT TEXTE_ACCO (META) >
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd" > %meta_commun;
+
+<!-- Métadonnées du texte  -->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!-- Métadonnées spécifiques à ce type de document -->
+<!ELEMENT META_SPEC (META_ACCO) >
+
+<!-- Métadonnées spécifiques aux textes ACCO -->
+<!ELEMENT META_ACCO (TITRE_TXT, DOCUMENT_BUREAUTIQUE, NUMERO, SIRET, CODE_UNITE_SIGNATAIRE, DATE_MAJ, DATE_DEPOT, DATE_TEXTE, DATE_EFFET, DATE_FIN, DATE_DIFFUSION, CODE_APE, CODE_IDCC, RAISON_SOCIALE, CONFORME_VERSION_INTEGRALE, SECTEUR, THEMES, SYNDICATS, SIGNATAIRES, ADRESSES_POSTALES) >
+
+<!-- 
+    Titre du texte
+    @example TEST sans suppression des images d'anonymisation + tableau
+-->
+<!ELEMENT TITRE_TXT (#PCDATA) >
+
+<!-- 
+    Chemin vers le fichier bureautique
+    @example /2017/08/02/T02217000001-30411025700025.docx
+-->
+<!ELEMENT DOCUMENT_BUREAUTIQUE (#PCDATA) >
+
+<!-- 
+    Numéro du texte
+    @example T02217000001
+-->
+<!ELEMENT NUMERO (#PCDATA) >
+
+<!-- 
+    Siret de l'entreprise
+    @example 30411025700025
+-->
+<!ELEMENT SIRET (#PCDATA) >
+
+<!-- 
+    Code de l'unité signataire
+    @example 05
+-->
+<!ELEMENT CODE_UNITE_SIGNATAIRE (#PCDATA) >
+
+<!-- 
+    Date de mise à jour
+    @example 2017-08-02
+-->
+<!ELEMENT DATE_MAJ (#PCDATA) >
+
+<!-- 
+    Date de dépôt
+    @example 2017-08-02
+-->
+<!ELEMENT DATE_DEPOT (#PCDATA) >
+
+<!-- 
+    Date du texte
+    @example 2017-08-02
+-->
+<!ELEMENT DATE_TEXTE (#PCDATA) >
+
+<!-- 
+    Date d'effet
+    @example 2017-08-02
+-->
+<!ELEMENT DATE_EFFET (#PCDATA) >
+
+<!-- 
+    Date de fin
+    @example 2017-08-02
+-->
+<!ELEMENT DATE_FIN (#PCDATA) >
+
+<!-- 
+    Date de diffusion
+    @example 2017-12-04
+-->
+<!ELEMENT DATE_DIFFUSION (#PCDATA) >
+
+<!-- 
+    Code APE
+    @example CODE_APE
+-->
+<!ELEMENT CODE_APE (#PCDATA) >
+
+<!-- 
+    Code IDCC
+    @example 1621
+-->
+<!ELEMENT CODE_IDCC (#PCDATA) >
+
+<!-- 
+    Code Raison sociale de l'entreprise
+    @example LE LAOUENAN JEAN JACQUES
+-->
+<!ELEMENT RAISON_SOCIALE (#PCDATA) >
+
+<!-- 
+    Texte conforme à la version intégrale (true : texte conforme, false : texte non intégral)
+    @example false
+-->
+<!ELEMENT CONFORME_VERSION_INTEGRALE (#PCDATA) >
+
+<!-- 
+    Secteur
+    @example Transports routiers de fret de proximité
+-->
+<!ELEMENT SECTEUR (#PCDATA) >
+
+<!--
+    Code
+-->
+<!ELEMENT CODE (#PCDATA) >
+
+<!--
+    Libellé
+-->
+<!ELEMENT LIBELLE (#PCDATA) >
+
+<!-- 
+    Liste des thèmes
+    @example Evolution des primes, Calendrier des négociations
+-->
+<!ELEMENT THEMES (THEME*) >
+
+<!--
+    Contenu d'un thème
+    @example (083, Autres dispositions Egalité professionnelle, 06)
+-->
+<!ELEMENT THEME (CODE, LIBELLE, GROUPE) >
+
+<!--
+    Groupe du thème
+    @example 05
+-->
+<!ELEMENT GROUPE (#PCDATA) >
+
+<!-- 
+    Liste des syndicats
+    @example CGT, CFE-CGC
+-->
+<!ELEMENT SYNDICATS (SYNDICAT*) >
+
+<!--
+    Contenu d'un syndicat
+    @example (1, CGT)
+-->
+<!ELEMENT SYNDICAT (CODE, LIBELLE) >
+
+<!-- 
+    Liste des signataires
+    @example 01,02
+-->
+<!ELEMENT SIGNATAIRES (SIGNATAIRE*) >
+
+<!--
+    Contenu d'un syndicat
+    @example (1, CGT)
+-->
+<!ELEMENT SIGNATAIRE (#PCDATA) >
+
+<!-- 
+    Liste des adresses
+    @example 01,02
+-->
+<!ELEMENT ADRESSES_POSTALES (ADRESSE_POSTALE*) >
+
+<!--
+    Contenu d'une adresse postale
+-->
+<!ELEMENT ADRESSE_POSTALE (TYPE_ADRESSE, REPETITION, TYPE_VOIE, LIBELLE_VOIE, COMPLEMENT_VOIE, NUMERO_VOIE, CODE_POSTAL, CODE_COMMUNE, VILLE) >
+
+<!--
+    Type de l'adresse (P = Postale, S = Siège)
+    @example P
+-->
+<!ELEMENT TYPE_ADRESSE (#PCDATA) >
+
+<!--
+    Répetition
+    @example A
+-->
+<!ELEMENT REPETITION (#PCDATA) >
+
+<!--
+    Type de la voie
+    @example RUE
+-->
+<!ELEMENT TYPE_VOIE (#PCDATA) >
+
+<!--
+    Libellé de la voie
+    @example des arcs-enc-iel
+-->
+<!ELEMENT LIBELLE_VOIE (#PCDATA) >
+
+<!--
+    Complément de la voie
+    @example Bâtiment 9
+-->
+<!ELEMENT COMPLEMENT_VOIE (#PCDATA) >
+
+<!--
+    Numéro de la voie
+    @example 56
+-->
+<!ELEMENT NUMERO_VOIE (#PCDATA) >
+
+<!--
+    Code postal
+    @example 69370
+-->
+<!ELEMENT CODE_POSTAL (#PCDATA) >
+
+<!--
+    Code de la commune
+    @example 194
+-->
+<!ELEMENT CODE_COMMUNE (#PCDATA) >
+
+<!--
+    Ville
+    @example Saint-Didier au Mont d'Or
+-->
+<!ELEMENT VILLE (#PCDATA) >

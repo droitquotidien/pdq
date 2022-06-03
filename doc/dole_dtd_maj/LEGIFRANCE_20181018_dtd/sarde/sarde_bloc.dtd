@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+Décrit un bloc SARDE
+@title SARDE : Bloc
+@root BLOC_SARDE
+-->
+
+<!-- Racine d'un élément SARDE -->
+<!ELEMENT BLOC_SARDE (ID, TITRE, NATURE_TEXTE, CONTENU_SARDE) >
+<!ENTITY % contenu SYSTEM "contenu.dtd" > %contenu;
+<!ATTLIST BLOC_SARDE idparent CDATA #IMPLIED libelleparent CDATA #IMPLIED>
+
+<!ELEMENT CONTENU_SARDE (CONTENU) >
+
+<!ELEMENT ID (#PCDATA) >
+<!ELEMENT TITRE (#PCDATA) >
+<!ELEMENT NATURE_TEXTE (#PCDATA) >
+

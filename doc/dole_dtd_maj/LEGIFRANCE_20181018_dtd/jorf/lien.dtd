@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Definie un lien entrant ou sortant vers un texte ou un article Legifrance
+     @title Lien vers un texte ou un article
+     @root LIEN
+-->
+
+<!-- Racine du descripteur de lien -->
+<!ELEMENT LIEN (#PCDATA) >
+
+<!-- Numéro de l'article si le lien porte sur un article -->
+<!ATTLIST LIEN num CDATA #REQUIRED>
+
+<!-- Identifiant interne de l'article ou du texte -->
+<!ATTLIST LIEN id CDATA #REQUIRED>
+
+<!-- Type du lien 
+@hidden Liste de valeurs à preciser 
+-->
+<!ATTLIST LIEN typelien CDATA #REQUIRED>
+
+<!-- Sens du lien 
+    @hidden Liste de valeurs à preciser 
+-->
+<!ATTLIST LIEN sens CDATA #REQUIRED>
+
+<!-- Identifiant interne de la version d'origine du texte. -->
+<!ATTLIST LIEN cidtexte CDATA #REQUIRED>
+
+<!-- 
+Nature du texte. 
+Liste des valeurs en date du 12/06/2008 :
+ABROGATION  , 
+ACCORD  , 
+ACTE  , 
+ADDITIF  , 
+ANNEXE  , 
+APPEL  , 
+ARRANGEMENT  , 
+ARRETE  , 
+ARRETEAVIS  , 
+ARRETEAVISAVIS  , 
+ARRETEEURO  , 
+ARRETESEURO  , 
+ARRETEURO  , 
+ASSEMBLEE  , 
+ATTESTATION  , 
+AUDIENCE  , 
+AVENANT  , 
+AVIS  , 
+AVISEURO  , 
+CANDIDAT  , 
+CIRCULAIRE  , 
+CITATION  , 
+CLASSEMENT  , 
+CODE  , 
+COMMUNIQUE  , 
+COMPLEMENT  , 
+COMPOSITION  , 
+CONSTITUTION  , 
+CONSULTATION  , 
+CONTRAT  , 
+CONVENTION  , 
+DATE  , 
+DECISION  , 
+DECISIONAVIS  , 
+DECISION_CC  , 
+DECISION_EURO  , 
+DECLARATION  , 
+DECLARATIONEURO  , 
+DECRET  , 
+DECRETEURO  , 
+DECRETLOIEURO  , 
+DECRETSEURO  , 
+DECRET_LOI  , 
+DELEGATION  , 
+DELEGATIONDEGESTION  , 
+DELIBERATION  , 
+DELIBERATIONEURO  , 
+DESIGNATION  , 
+DEUXIEME  , 
+DIRECTIVE  , 
+DIRECTIVE_EURO  , 
+DISPOSITIONS  , 
+DIXIEME  , 
+DOUZIEME  , 
+ELECTION  , 
+ELECTIONDUPRESIDENTDELAREPUBLIQU  , 
+ELECTIONPRESIDENTIELLECONSEILCON  , 
+EURO  , 
+EXEQUATUR  , 
+EXTRAIT  , 
+FINEURO  , 
+HOMMAGENATIONAL  , 
+HUITIEME  , 
+ICONSTRUCTEUR66ARRETE  , 
+INCOMPATIBILITEEURO  , 
+INFORMATION  , 
+INFORMATIONEURO  , 
+INFORMATIONSEURO  , 
+INSTRUCTION  , 
+INSTRUCTIONEURO  , 
+JUGEMENTEURO  , 
+LETTRE  , 
+LETTREEURO  , 
+LISTE  , 
+LOI  , 
+LOIEURO  , 
+LOI_CONSTIT  , 
+LOI_ORGANIQUE  , 
+LOI_PROGRAMME  , 
+MEDAILLEMILITAIRE  , 
+MEMOIRE  , 
+MESSAGE  , 
+MODIFICATIF  , 
+MODIFICATION  , 
+NEUVIEME  , 
+NOMENCLATURE  , 
+NOTE  , 
+OBSERVATION  , 
+OBSERVATIONSEURO  , 
+ONZIEME  , 
+ORDONNANCE  , 
+ORDONNANCEEURO  , 
+PREMIER  , 
+PROCLAMATION  , 
+PROJET  , 
+PROMOTIONSPECIALEDUCINQUANTIEMEA  , 
+PROPOSITION  , 
+PROTOCOLE  , 
+PUBLICATION  , 
+QUATRIEME  , 
+QUESTIONEURO  , 
+RAPPORT  , 
+RECOMMANDATION  , 
+RECOMMANDATION_EURO  , 
+RECTIFICATIF  , 
+REGLEMENT  , 
+REGLEMENTEUROPEEN  , 
+RELEVE  , 
+REMISE  , 
+RESULTATS  , 
+RESULTATSDUTIRAGE  , 
+SAISINE  , 
+SENATUSCONSULTEURO  , 
+SEPTIMERAPPORT  , 
+SUSPENSION  , 
+TABLEAU  , 
+TAPISVERT  , 
+TERMES  , 
+TRAITEEURO  , 
+TROISIEME  , 
+VOCABULAIRE, 
+-->
+<!ATTLIST LIEN naturetexte CDATA #REQUIRED>
+
+<!-- Numéro du texte -->
+<!ATTLIST LIEN numtexte CDATA #REQUIRED>
+
+<!-- NOR du texte -->
+<!ATTLIST LIEN nortexte CDATA #REQUIRED>
+
+<!-- Date de signature du texte -->
+<!ATTLIST LIEN datesignatexte CDATA #REQUIRED>

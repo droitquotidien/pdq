@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Décrit un texte de jurisprudence judiciaire
+@title JURI : Texte de jurisprudence judiciaire
+@root TEXTE_JURI_JUDI
+-->
+
+<!-- Racine d'un texte de jurisprudence judiciaire -->
+<!ELEMENT TEXTE_JURI_JUDI (META, TEXTE, LIENS) >
+
+<!ENTITY % meta_commun SYSTEM "meta_commun.dtd" > %meta_commun;
+<!ENTITY % contenu SYSTEM "contenu.dtd" > %contenu;
+<!ENTITY % meta_juri SYSTEM "meta_juri.dtd"> %meta_juri;
+<!ENTITY % lien SYSTEM "lien.dtd" > %lien;
+
+<!-- Metadonnees -->
+<!ELEMENT META (META_COMMUN, META_SPEC) >
+
+<!ELEMENT META_SPEC (META_JURI, META_JURI_JUDI) > 
+
+<!-- Metadonnees des jurisprudences judiciaires -->
+<!ELEMENT META_JURI_JUDI (NUMEROS_AFFAIRES,PUBLI_BULL,FORMATION, FORM_DEC_ATT, DATE_DEC_ATT, SIEGE_APPEL, JURI_PREM, LIEU_PREM,DEMANDEUR,DEFENDEUR,PRESIDENT,AVOCAT_GL,AVOCATS,RAPPORTEUR,ECLI?) >
+
+<!-- 
+Liste des numéros d'affaires 
+-->
+<!ELEMENT NUMEROS_AFFAIRES (NUMERO_AFFAIRE*) >
+
+<!-- 
+Numéro d'affaire 
+@example 57-10.110
+-->
+<!ELEMENT NUMERO_AFFAIRE (#PCDATA) >
+
+<!-- 
+Numéro au bulletin 
+@example Bulletin des arrêts Cour de Cassation Chambre civile 1 N. 419 p. 347
+-->
+<!ELEMENT PUBLI_BULL (#PCDATA) >
+
+<!-- 'oui' si la décision a été publiée au recueil, 'non' sinon-->
+<!ATTLIST PUBLI_BULL publie (oui|non) "non">
+
+<!-- 
+Formation de la décision
+@example CHAMBRE_CIVILE_1
+-->
+<!ELEMENT FORMATION (#PCDATA) >
+
+<!-- 
+Formation de la decision attaquee 
+@example Cour d'Appel Riom 1956-12-10
+-->
+<!ELEMENT FORM_DEC_ATT (#PCDATA) >
+
+<!--  
+Date de la decision attaquée 
+@example 1956-12-10
+-->
+<!ELEMENT DATE_DEC_ATT (#PCDATA) >
+
+<!-- Siege de la cour d'appel -->
+<!ELEMENT SIEGE_APPEL (#PCDATA) >
+
+<!-- Juridiction de 1er degré -->
+<!ELEMENT JURI_PREM (#PCDATA) >
+
+<!-- Lieu de la juridiction de 1er degré -->
+<!ELEMENT LIEU_PREM (#PCDATA) >
+
+<!-- 
+Demandeur 
+@example Société de production d'énergie électrique de la Sioule
+-->
+<!ELEMENT DEMANDEUR (#PCDATA) >
+
+<!-- 
+Défendeur 
+@example Consorts Pradon
+-->
+<!ELEMENT DEFENDEUR (#PCDATA) >
+
+<!-- 
+Président de la cours. Les valeurs peuvent être préfixées par "PDT", "PRESIDENT", "Pdt. :" ou d'autres valeurs non normalisées.
+@example P.Pdt M. Battestini
+-->
+<!ELEMENT PRESIDENT (#PCDATA) >
+
+<!-- 
+Avocat géneral. Les valeurs peuvent être préfixées par "Av.Gén", "AV.GEN.", "PROC.GEN", "Avocat général :" ou d'autres valeurs non normalisées.
+@example Av.Gén. M. Jodelet
+-->
+<!ELEMENT AVOCAT_GL (#PCDATA) >
+
+<!--  
+Liste des avocats en présence. Les valeurs peuvent être préfixées par "Demandeur", "Avocats", "Av. Demandeur" ou d'autres valeurs non normalisées.
+@example Demandeur : Me Goutet
+-->
+<!ELEMENT AVOCATS (#PCDATA) >
+
+<!-- 
+Rapporteur. Les valeurs peuvent être préfixées par "Rpr", "RPR", "RR", "Rapp", "Rapporteur" ou d'autres valeurs non normalisées.
+@example Rpr M. Holleaux
+-->
+<!ELEMENT RAPPORTEUR (#PCDATA) >
+
+<!-- Code ECLI -->
+<!ELEMENT ECLI (#PCDATA )>
+
+<!ELEMENT TEXTE (BLOC_TEXTUEL, SOMMAIRE, CITATION_JP) >
+
+<!-- Contenu textuel -->
+<!ELEMENT BLOC_TEXTUEL (CONTENU) >
+
+<!-- Resumé du texte -->
+<!ELEMENT SOMMAIRE (SCT|ANA)* >
+
+<!-- Résumé -->
+<!ELEMENT ANA (#PCDATA|P)* >
+
+<!-- Identifiant commun avec le titrage correspondant -->
+<!ATTLIST ANA ID CDATA #REQUIRED>
+
+<!-- Titrage -->
+<!ELEMENT SCT (#PCDATA) >
+
+<!-- Identifiant commun avec le resumé correspondant -->
+<!ATTLIST SCT ID CDATA #REQUIRED>
+
+<!-- 
+Type de titrage : PRINCIPAL ou REFERENCE 
+@example PRINCIPAL
+-->
+<!ATTLIST SCT TYPE (PRINCIPAL|REFERENCE) "PRINCIPAL">
+
+<!-- Citations des précédents jurisprudentielsl -->
+<!ELEMENT CITATION_JP (CONTENU?) >
+
+<!-- 
+Liens vers les textes appliqués
+-->
+<!ELEMENT LIENS (LIEN*) >

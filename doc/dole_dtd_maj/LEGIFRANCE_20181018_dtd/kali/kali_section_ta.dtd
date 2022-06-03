@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Decrit le sommaire d'un texte en terme de têtier et d'article
+     @title KALI : Section Texte Article 
+     @root SECTION_TA
+-->
+
+<!-- Racine de la section -->
+<!ELEMENT SECTION_TA (ID?,TITRE_TA,COMMENTAIRE?,STRUCTURE_TA, CONTEXTE)>
+
+<!ENTITY % lien_art SYSTEM "lien_art.dtd"> %lien_art;
+<!ENTITY % lien_section_ta SYSTEM "lien_section_ta.dtd"> %lien_section_ta;
+
+<!-- Identifiant interne. L'identifiant est également le nom du fichier xml. 
+@example KALISCTA000000755641
+-->
+<!ELEMENT ID (#PCDATA) >
+
+<!-- Titre de la section -->
+<!ELEMENT TITRE_TA (#PCDATA)>
+
+<!-- 
+Commentaire sur la section
+@example Le présent chapitre ne comporte pas de dispositions réglementaires
+-->
+<!ELEMENT COMMENTAIRE (#PCDATA)>
+
+<!-- Structure de la section. Présente la succession des sections filles et des articles de la section courante -->
+<!ELEMENT STRUCTURE_TA (LIEN_SECTION_TA|LIEN_ART)*>
+	
+<!-- Contexte de la section. Rappelle la succession des sections parentes pour arriver à l'élément courant -->
+<!ELEMENT CONTEXTE (TEXTE)>
+
+<!-- Reprend les principaux attributs du texte pointé et la liste des titres du texte dans ses différentes versions-->
+<!ELEMENT TEXTE (TITRE_TXT*, TM*)>
+
+<!-- Identifiant interne commun à toute les versions du texte -->
+<!ATTLIST TEXTE cid CDATA #REQUIRED >
+
+<!-- Numéro du texte -->
+<!ATTLIST TEXTE num CDATA #REQUIRED>
+
+<!-- NOR du texte -->
+<!ATTLIST TEXTE nor CDATA #REQUIRED>
+
+<!-- Numéro de parution du JO
+    Ex : 0158
+-->
+<!ATTLIST TEXTE num_parution_jo CDATA #IMPLIED>
+
+<!-- Nature du document. 
+    @hidden Liste de valeurs à preciser 
+-->
+<!ATTLIST TEXTE nature CDATA #REQUIRED>
+
+<!-- Date de publication du texte -->
+<!ATTLIST TEXTE date_publi CDATA #REQUIRED>
+
+<!-- Date de signature du texte-->
+<!ATTLIST TEXTE date_signature CDATA #REQUIRED>
+
+<!-- Titre du texte. -->
+<!ELEMENT TITRE_TXT (#PCDATA) >
+
+<!-- identifiant interne du texte dans cette version -->
+<!ATTLIST TITRE_TXT id_txt CDATA #REQUIRED>
+
+<!-- Titre court du texte -->
+<!ATTLIST TITRE_TXT c_titre_court CDATA #REQUIRED>
+
+<!-- Date de validité pour cette version du texte -->
+<!ATTLIST TITRE_TXT debut CDATA #REQUIRED>
+
+<!-- Date de fin de validité pour cette version du texte -->
+<!ATTLIST TITRE_TXT fin CDATA  #REQUIRED>
+
+<!-- Têtier parent -->
+<!ELEMENT TM (TITRE_TM*,TM?)>
+
+<!-- Libellé du têtier.   -->
+<!ELEMENT TITRE_TM (#PCDATA)>
+
+<!-- Identifiant interne de la section -->
+<!ATTLIST TITRE_TM  id CDATA #REQUIRED>
+
+<!-- Date de validité de la section -->
+<!ATTLIST TITRE_TM debut CDATA #REQUIRED>
+ 
+ <!-- Date de fin de validité de la section -->
+<!ATTLIST TITRE_TM fin CDATA #IMPLIED>
+
+    
