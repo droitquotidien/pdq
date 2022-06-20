@@ -38,3 +38,9 @@ sys	3m52.437s
 ```
 
 Le problème avec cette approche est qu'elle génère beaucoup de fichiers, épuisant le nombre d'inodes du FS.
+
+## PG DB
+
+```bash
+./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata
+```

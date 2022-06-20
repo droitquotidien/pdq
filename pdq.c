@@ -11,6 +11,7 @@
 #include "jorflegi.h"
 #include "fs.h"
 #include "buffer.h"
+#include "db.h"
 
 struct gen_uri_info {
 	enum fund fund;
@@ -19,10 +20,13 @@ struct gen_uri_info {
 	xmlSAXHandler parser_handler;
 	xmlParserCtxtPtr ctxt;
 	struct write_buffer *wbuf;
+    struct write_buffer *json_buf;
+    struct write_buffer *json_buf_2;
 	char bootstrap;
 	char force;
 	char *target_dir;
 	char *data_file;
+    PGconn *pg_conn;
 };
 
 int has_xml_suffix(const char *s, size_t size)
@@ -1556,8 +1560,9 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 				if (mdata->contexte.uri_parts.kind != EMPTY_URI_KIND) {
 					uri_cpy(&mdata->contexte.uri_parts, mdata->contexte.uri);
 				}
-				fprintf_parsed_data(stderr, pdata);
-				write_fs(&fs, pdata, infos->wbuf, 0);
+				/*fprintf_parsed_data(stderr, pdata);*/
+				/*write_fs(&fs, pdata, infos->wbuf, 0);*/
+                db_import(infos->pg_conn, pdata, infos->json_buf, infos->json_buf_2);
 			}
 			return 0;
 		}
@@ -1601,6 +1606,7 @@ int iterate_archive(char *fname, int (*f)(struct archive *, struct archive_entry
 struct params {
 	char *data_file;
 	char *target_dir;
+    char *conninfo;
 	char force;
 	char bootstrap;
 };
@@ -1617,7 +1623,7 @@ int set_params(int argc, char *argv[], struct params *params)
 		return 1;
 	}
 	memset(params, 0, sizeof(struct params));
-	while((c = getopt(argc, argv, "bfxd:t:")) != -1) {
+	while((c = getopt(argc, argv, "bfxc:d:t:")) != -1) {
 		switch(c) {
 			case 'f':
 				params->force = 1;
@@ -1628,6 +1634,9 @@ int set_params(int argc, char *argv[], struct params *params)
 			case 'd':
 				params->data_file = optarg;
 				break;
+            case 'c':
+                params->conninfo = optarg;
+                break;
 			case 't':
 				params->target_dir = optarg;
 				break;
@@ -1652,6 +1661,14 @@ int generate_uris(struct gen_uri_info *infos)
 	if (infos->wbuf == NULL) {
 		exit(EXIT_FAILURE);
 	}
+    infos->json_buf = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 0);
+    if (infos->json_buf == NULL) {
+        exit(EXIT_FAILURE);
+    }
+    infos->json_buf_2 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER/4, 0);
+    if (infos->json_buf_2 == NULL) {
+        exit(EXIT_FAILURE);
+    }
 
 	r = create_dir(infos->target_dir);
 	if (r < 0) {
@@ -1673,12 +1690,17 @@ int main(int argc, char **argv)
 	int r = 0;
 	struct params params;
 	struct gen_uri_info infos = {0};
+    PGconn *conn = NULL;
 
 	if (set_params(argc, argv, &params) == 1) {
 		print_usage();
 		return 1;
 	}
-	if (params.target_dir == NULL || params.data_file == NULL) {
+    if (params.conninfo != NULL) {
+        conn = db_connect(params.conninfo);
+        /*exit_nicely(conn);*/
+    }
+    if (params.target_dir == NULL || params.data_file == NULL) {
 		print_usage();
 		return 1;
 	}
@@ -1687,8 +1709,10 @@ int main(int argc, char **argv)
 	infos.bootstrap = params.bootstrap;
 	infos.force = params.force;
 	infos.fund = JORFLEGI_FUND;
-
+    infos.pg_conn = conn;
 	r = generate_uris(&infos);
+    fprintf(stderr, "INFO::bye\n");
+    PQfinish(conn);
 
 	return r;
 }

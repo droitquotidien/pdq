@@ -81,3 +81,9 @@ ssize_t buffer_transfer(int fildes, struct write_buffer *sbuf, struct write_buff
 
 	return rt;
 }
+
+void buffer_reset(struct write_buffer *buf)
+{
+    buf->cbuffer = buf->buffer;
+    buf->current_size = 0;
+}

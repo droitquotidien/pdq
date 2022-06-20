@@ -27,5 +27,6 @@ struct write_buffer *allocate_write_buffer(ssize_t max_size, char flushable);
 ssize_t buffer_copy(int fildes, const char *buf, ssize_t len, struct write_buffer *wbuf);
 ssize_t buffer_flush(int fildes, struct write_buffer *wbuf);
 ssize_t buffer_transfer(int fildes, struct write_buffer *sbuf, struct write_buffer *wbuf);
+void buffer_reset(struct write_buffer *buf);
 
 #endif //PDQ_BUFFER_H

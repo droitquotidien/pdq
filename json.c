@@ -134,13 +134,18 @@ ssize_t write_contenu_json(int fildes, struct contenu *contenu, struct write_buf
 	return rt;
 }
 
-ssize_t write_uri_parts_json(int fildes, struct uri *uri_parts, struct write_buffer *wbuf)
+ssize_t write_uri_parts_json(int fildes, struct uri *uri_parts, struct write_buffer *wbuf,
+        char standalone)
 {
 	ssize_t r;
 	ssize_t rt = 0;
 	char skind[5];
 
-	OPENBLOCK(fildes, uri_parts, 9, wbuf);
+    if (standalone) {
+        CHECK_WRITE(fildes, "{\n", 2, wbuf)
+    } else {
+        OPENBLOCK(fildes, uri_parts, 9, wbuf);
+    }
 	if (uri_parts->num1kind != EMPTY_NUMKIND) {
 		CONTENT_WRITE(fildes, naturel, 7, uri_parts->num1, wbuf);
 	}
@@ -153,7 +158,11 @@ ssize_t write_uri_parts_json(int fildes, struct uri *uri_parts, struct write_buf
 	snprintf(skind, 4, "%d", uri_parts->kind);
 	JATTRINT(fildes, kind, 4, skind, wbuf);
 	WTYPE(fildes, "uri", 3, wbuf);
-	CHECK_WRITE(fildes, "},\n", 3, wbuf)
+    if (standalone) {
+        CHECK_WRITE(fildes, "}\n", 2, wbuf)
+    } else {
+        CHECK_WRITE(fildes, "},\n", 3, wbuf)
+    }
 
 	return rt;
 }
@@ -170,7 +179,7 @@ ssize_t write_contexte_json(int fildes, struct contexte *contexte, struct write_
 	JATTR(fildes, nature, 6, contexte->nature, wbuf);
 	JATTR(fildes, nor, 3, contexte->nor, wbuf);
 	JATTR(fildes, num, 3, contexte->num, wbuf);
-	r = write_uri_parts_json(fildes, &contexte->uri_parts, wbuf);
+	r = write_uri_parts_json(fildes, &contexte->uri_parts, wbuf, 0);
 	if (r < 0) return -1;
 	rt += r;
 	JATTR(fildes, uri, 3, contexte->uri, wbuf);
@@ -208,7 +217,7 @@ ssize_t write_tocitem_json(int fildes, struct tocitem *tocitem, struct write_buf
 	return rt;
 }
 
-ssize_t write_toc_json(int fildes, struct toc *toc, struct write_buffer *wbuf)
+ssize_t write_toc_json(int fildes, struct toc *toc, struct write_buffer *wbuf, char standalone)
 {
 	ssize_t r;
 	ssize_t rt = 0;
@@ -216,17 +225,24 @@ ssize_t write_toc_json(int fildes, struct toc *toc, struct write_buffer *wbuf)
 	struct tocitem *tocitem;
 	char last;
 
-	OPENBLOCK(fildes, toc, 3, wbuf);
-	OPENLIST(fildes, tocitems, 8, wbuf);
+    if (standalone) {
+        CHECK_WRITE(fildes, "[\n", 2, wbuf)
+    } else {
+        OPENBLOCK(fildes, toc, 3, wbuf);
+        OPENLIST(fildes, tocitems, 8, wbuf);
+    }
 	for (i = 0; i < toc->nb_tocitems; i++) {
 		tocitem = &toc->tocitems[i];
 		last = (i == (toc->nb_tocitems - 1));
 		write_tocitem_json(fildes, tocitem, wbuf, last);
 	}
-	CLOSELIST(fildes, wbuf);
-	WTYPE(fildes, "toc", 3, wbuf);
-	CHECK_WRITE(fildes, "},\n", 3, wbuf)
-
+    if (standalone) {
+        CHECK_WRITE(fildes, "]\n", 2, wbuf)
+    } else {
+        CLOSELIST(fildes, wbuf);
+        WTYPE(fildes, "toc", 3, wbuf);
+        CHECK_WRITE(fildes, "},\n", 3, wbuf)
+    }
 	return rt;
 }
 
@@ -375,11 +391,11 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 	switch (mdata->uri_parts.doctype) {
 		case JORFCONT_DOCTYPE:
 			JATTR(fildes, rid, 3, mdata->rid, wbuf);
-			JATTR(fildes, cid, 3, mdata->id, wbuf);
+			/*JATTR(fildes, cid, 3, mdata->id, wbuf);*/
 			CONTENT_WRITE(fildes, titre, 5, mdata->titre, wbuf);
 			JATTR(fildes, num, 3, mdata->num, wbuf);
 			JATTR(fildes, date_publi, 10, mdata->date_publi, wbuf);
-			write_toc_json(fildes, toc, wbuf);
+			write_toc_json(fildes, toc, wbuf, 0);
 			break;
 		case JORFTEXT_DOCTYPE:
 			// meta_texte_chronicle.dtd
@@ -396,7 +412,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			JATTR(fildes, origine_publi, 13, mdata->origine_publi, wbuf);
 			JATTR(fildes, page_deb_publi, 14, mdata->page_deb_publi, wbuf);
 			JATTR(fildes, page_fin_publi, 14, mdata->page_fin_publi, wbuf);
-			write_toc_json(fildes, toc, wbuf);
+			write_toc_json(fildes, toc, wbuf, 0);
 			write_versions_json(fildes, versions, wbuf);
 			break;
 		case JORFVERS_DOCTYPE:
@@ -446,7 +462,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			CONTENT_WRITE(fildes, titrefull, 9, mdata->titrefull, wbuf);
 			CONTENT_WRITE(fildes, commentaire, 11, mdata->commentaire, wbuf);
 			write_contexte_json(fildes, &mdata->contexte, wbuf);
-			write_toc_json(fildes, toc, wbuf);
+			write_toc_json(fildes, toc, wbuf, 0);
 			break;
 		case LEGITEXT_DOCTYPE:
 			// meta_texte_chronicle.dtd
@@ -463,7 +479,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			JATTR(fildes, origine_publi, 13, mdata->origine_publi, wbuf);
 			JATTR(fildes, page_deb_publi, 14, mdata->page_deb_publi, wbuf);
 			JATTR(fildes, page_fin_publi, 14, mdata->page_fin_publi, wbuf);
-			write_toc_json(fildes, toc, wbuf);
+			write_toc_json(fildes, toc, wbuf, 0);
 			write_versions_json(fildes, versions, wbuf);
 			break;
 		case LEGIVERS_DOCTYPE:
@@ -498,7 +514,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 			CONTENT_WRITE(fildes, titrefull, 9, mdata->titrefull, wbuf);
 			CONTENT_WRITE(fildes, commentaire, 11, mdata->commentaire, wbuf);
 			write_contexte_json(fildes, &mdata->contexte, wbuf);
-			write_toc_json(fildes, toc, wbuf);
+			write_toc_json(fildes, toc, wbuf, 0);
 			break;
 		case LEGIARTI_DOCTYPE:
 			JATTR(fildes, rid, 3, mdata->rid, wbuf);
@@ -515,7 +531,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes, struct write_buffer *w
 		default:
 			break;
 	}
-	write_uri_parts_json(fildes, &mdata->uri_parts, wbuf);
+	write_uri_parts_json(fildes, &mdata->uri_parts, wbuf, 0);
 	WTYPE(fildes, mdata->rid, 8, wbuf);
 	CHECK_WRITE(fildes, "}\n", 2, wbuf)
 
