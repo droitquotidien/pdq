@@ -12,6 +12,7 @@
 #include "fs.h"
 #include "buffer.h"
 #include "db.h"
+#include "tag.h"
 
 struct gen_uri_info {
 	enum fund fund;
@@ -27,6 +28,7 @@ struct gen_uri_info {
 	char *target_dir;
 	char *data_file;
     PGconn *pg_conn;
+    struct tm tag;
 };
 
 int has_xml_suffix(const char *s, size_t size)
@@ -1521,6 +1523,7 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 	size_t size;
 	char base[5];
 	struct fs_backend fs;
+    double time_taken;
 
 	fs.rootdir = infos->target_dir;
 
@@ -1562,7 +1565,10 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 				}
 				/*fprintf_parsed_data(stderr, pdata);*/
 				/*write_fs(&fs, pdata, infos->wbuf, 0);*/
-                db_import(infos->pg_conn, pdata, infos->json_buf, infos->json_buf_2);
+                r = db_import(infos->pg_conn, &infos->tag, pdata, infos->json_buf, infos->json_buf_2,
+                          &time_taken);
+                if (r > 0)
+                    fprintf(stderr, "%f\n", time_taken);
 			}
 			return 0;
 		}
@@ -1691,6 +1697,7 @@ int main(int argc, char **argv)
 	struct params params;
 	struct gen_uri_info infos = {0};
     PGconn *conn = NULL;
+    regex_t tag_re;
 
 	if (set_params(argc, argv, &params) == 1) {
 		print_usage();
@@ -1704,6 +1711,14 @@ int main(int argc, char **argv)
 		print_usage();
 		return 1;
 	}
+    r = init_tag_re(&tag_re);
+    if (r < 0) return 1;
+    r = parse_tag(params.data_file, &tag_re, &infos.tag);
+    if (r < 0) return 1;
+    if (r == 0) {
+        fprintf(stderr, "No tag found in %s\n", params.data_file);
+        return 1;
+    }
 	infos.target_dir = params.target_dir;
 	infos.data_file = params.data_file;
 	infos.bootstrap = params.bootstrap;

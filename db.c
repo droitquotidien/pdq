@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "db.h"
 
 /*
@@ -46,14 +47,20 @@ PGconn *db_connect(char *conninfo)
     return conn;
 }
 
-int db_import(PGconn *conn, struct parsed_data *pdata,
-        struct write_buffer *wbuf, struct write_buffer *alt_buf)
+int db_import(PGconn *conn, struct tm *tag, struct parsed_data *pdata,
+        struct write_buffer *wbuf, struct write_buffer *alt_buf, double *tt)
 {
     ssize_t r;
     struct metadata *mdata = pdata->metadata;
     struct toc *toc = pdata->toc;
     PGresult *res;
     const char *param_values[16];
+    clock_t ct;
+    char stag[20];
+
+    sprintf(stag, "%04d-%02d-%02d %02d:%02d:%02d",
+            tag->tm_year, tag->tm_mon, tag->tm_mday,
+            tag->tm_hour, tag->tm_min, tag->tm_sec);
 
     switch (mdata->uri_parts.doctype) {
         case JORFCONT_DOCTYPE:
@@ -67,6 +74,7 @@ int db_import(PGconn *conn, struct parsed_data *pdata,
              * mdata->uri : uri (char)
              * mdata->uri_parts : uri_parts (json)
              */
+            ct = clock();
             r = write_toc_json(-1, toc, wbuf, 1);
             if (r < 0) exit_nicely(conn);
             wbuf->buffer[wbuf->current_size] = 0;
@@ -82,8 +90,8 @@ int db_import(PGconn *conn, struct parsed_data *pdata,
             param_values[4] = mdata->uri;
             param_values[5] = wbuf->buffer;
             param_values[6] = alt_buf->buffer;
-            param_values[7] = "2022-05-20 00:44:44";
-            param_values[8] = mdata->id;
+            param_values[7] = stag;
+            param_values[8] = "abc";
             param_values[9] = NULL;
             /* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
             res = PQexecParams(conn,
@@ -107,6 +115,9 @@ int db_import(PGconn *conn, struct parsed_data *pdata,
             buffer_reset(wbuf);
             buffer_reset(alt_buf);
             PQclear(res);
+            ct = clock() - ct;
+            *tt = ((double)ct) / CLOCKS_PER_SEC;
+            return 1;
             break;
         default:
             break;

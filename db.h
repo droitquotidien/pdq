@@ -6,6 +6,6 @@
 #include "json.h"
 void exit_nicely(PGconn *conn);
 PGconn *db_connect(char *conninfo);
-int db_import(PGconn *conn, struct parsed_data *pdata, struct write_buffer *buf,
-        struct write_buffer *alt_buf);
+int db_import(PGconn *conn, struct tm *tag, struct parsed_data *pdata, struct write_buffer *buf,
+        struct write_buffer *alt_buf, double *tt);
 #endif //PDQ_DB_H
