@@ -15,9 +15,9 @@ if(LibXml2_FOUND)
     #link_directories(${LIBXML2_LIBRARIES})
 endif()
 find_package(PostgreSQL REQUIRED)
-
+find_package(OpenSSL REQUIRED)
 add_executable(pdq pdq.h pdq.c uri.h uri.c parse.h
         jorflegi.h jorflegi.c fs.h fs.c json.h json.c buffer.h buffer.c
-        db.c db.h tag.c tag.h)
-target_link_libraries(pdq ${LIBXML2_LIBRARIES} -larchive PostgreSQL::PostgreSQL)
+        db.c db.h tag.c tag.h sig.c sig.h)
+target_link_libraries(pdq ${LIBXML2_LIBRARIES} -larchive PostgreSQL::PostgreSQL OpenSSL::SSL)
 

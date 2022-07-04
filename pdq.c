@@ -13,6 +13,8 @@
 #include "buffer.h"
 #include "db.h"
 #include "tag.h"
+#include "sig.h"
+#include "timings.h"
 
 struct gen_uri_info {
 	enum fund fund;
@@ -21,19 +23,26 @@ struct gen_uri_info {
 	xmlSAXHandler parser_handler;
 	xmlParserCtxtPtr ctxt;
 	struct write_buffer *wbuf;
-    struct write_buffer *json_buf;
-    struct write_buffer *json_buf_2;
+	struct write_buffer *dbbuf1;
+	struct write_buffer *dbbuf2;
+	struct write_buffer *dbbuf3;
+    	struct write_buffer *dbbuf4;
+    	struct write_buffer *dbbuf5;
+	    struct write_buffer *dbbuf6;
 	char bootstrap;
 	char force;
 	char *target_dir;
 	char *data_file;
-    PGconn *pg_conn;
-    struct tm tag;
+	PGconn *pg_conn;
+	const EVP_MD *md;
+	struct tm tag;
+	struct timings tt;
 };
 
 int has_xml_suffix(const char *s, size_t size)
 {
-	return s != NULL && size >= 5 && s[size-5] != 's' && s[size-4] == '.' && s[size-3] == 'x'
+	return s != NULL && size >= 5 && s[size-5] != 's'
+		&& s[size-4] == '.' && s[size-3] == 'x'
 		&& s[size-2] == 'm' && s[size-1] == 'l';
 }
 
@@ -1523,7 +1532,6 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 	size_t size;
 	char base[5];
 	struct fs_backend fs;
-    double time_taken;
 
 	fs.rootdir = infos->target_dir;
 
@@ -1565,10 +1573,20 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 				}
 				/*fprintf_parsed_data(stderr, pdata);*/
 				/*write_fs(&fs, pdata, infos->wbuf, 0);*/
-                r = db_import(infos->pg_conn, &infos->tag, pdata, infos->json_buf, infos->json_buf_2,
-                          &time_taken);
-                if (r > 0)
-                    fprintf(stderr, "%f\n", time_taken);
+				r = db_import(infos->pg_conn, infos->md,
+					      &infos->tag, pdata,
+					      infos->dbbuf1,
+					      infos->dbbuf2,
+					      infos->dbbuf3,
+					      infos->dbbuf4,
+					      infos->dbbuf5,
+					      infos->dbbuf6,
+					      &infos->tt);
+				if (r > 0) {
+					/*fprintf(stderr, "DB insert: %f\n", infos->tt.db_insert_tm);
+					fprintf(stderr, "SIG comp.: %f\n", infos->tt.sig_comp_tm);
+					*/
+				}
 			}
 			return 0;
 		}
@@ -1612,14 +1630,14 @@ int iterate_archive(char *fname, int (*f)(struct archive *, struct archive_entry
 struct params {
 	char *data_file;
 	char *target_dir;
-    char *conninfo;
+	char *conninfo;
 	char force;
 	char bootstrap;
 };
 
 void print_usage()
 {
-  printf("Usage: pdq [-f] [-b] -d data.tar.gz -t target_dir\n");
+	printf("Usage: pdq [-f] [-b] -d data.tar.gz -t target_dir\n");
 }
 
 int set_params(int argc, char *argv[], struct params *params)
@@ -1640,9 +1658,9 @@ int set_params(int argc, char *argv[], struct params *params)
 			case 'd':
 				params->data_file = optarg;
 				break;
-            case 'c':
-                params->conninfo = optarg;
-                break;
+            		case 'c':
+                		params->conninfo = optarg;
+                		break;
 			case 't':
 				params->target_dir = optarg;
 				break;
@@ -1667,14 +1685,30 @@ int generate_uris(struct gen_uri_info *infos)
 	if (infos->wbuf == NULL) {
 		exit(EXIT_FAILURE);
 	}
-    infos->json_buf = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 0);
-    if (infos->json_buf == NULL) {
-        exit(EXIT_FAILURE);
-    }
-    infos->json_buf_2 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER/4, 0);
-    if (infos->json_buf_2 == NULL) {
-        exit(EXIT_FAILURE);
-    }
+	infos->dbbuf1 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 0);
+	if (infos->dbbuf1 == NULL) {
+		exit(EXIT_FAILURE);
+	}
+	infos->dbbuf2 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER*8, 0);
+	if (infos->dbbuf2 == NULL) {
+		exit(EXIT_FAILURE);
+	}
+	infos->dbbuf3 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 0);
+	if (infos->dbbuf3 == NULL) {
+		exit(EXIT_FAILURE);
+	}
+	infos->dbbuf4 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER*4, 0);
+	if (infos->dbbuf4 == NULL) {
+		exit(EXIT_FAILURE);
+	}
+	infos->dbbuf5 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 0);
+	if (infos->dbbuf5 == NULL) {
+		exit(EXIT_FAILURE);
+	}
+	infos->dbbuf6 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER/4, 0);
+	if (infos->dbbuf6 == NULL) {
+		exit(EXIT_FAILURE);
+	}
 
 	r = create_dir(infos->target_dir);
 	if (r < 0) {
@@ -1696,38 +1730,40 @@ int main(int argc, char **argv)
 	int r = 0;
 	struct params params;
 	struct gen_uri_info infos = {0};
-    PGconn *conn = NULL;
-    regex_t tag_re;
+	PGconn *conn = NULL;
+	regex_t tag_re;
 
 	if (set_params(argc, argv, &params) == 1) {
 		print_usage();
 		return 1;
 	}
-    if (params.conninfo != NULL) {
-        conn = db_connect(params.conninfo);
-        /*exit_nicely(conn);*/
-    }
-    if (params.target_dir == NULL || params.data_file == NULL) {
+	if (params.conninfo != NULL) {
+		conn = db_connect(params.conninfo);
+		/*exit_nicely(conn);*/
+	}
+	if (params.target_dir == NULL || params.data_file == NULL) {
 		print_usage();
 		return 1;
 	}
-    r = init_tag_re(&tag_re);
-    if (r < 0) return 1;
-    r = parse_tag(params.data_file, &tag_re, &infos.tag);
-    if (r < 0) return 1;
-    if (r == 0) {
-        fprintf(stderr, "No tag found in %s\n", params.data_file);
-        return 1;
-    }
+	r = init_tag_re(&tag_re);
+	if (r < 0) return 1;
+	r = parse_tag(params.data_file, &tag_re, &infos.tag);
+	if (r < 0) return 1;
+	if (r == 0) {
+		fprintf(stderr, "No tag found in %s\n", params.data_file);
+		return 1;
+	}
 	infos.target_dir = params.target_dir;
 	infos.data_file = params.data_file;
 	infos.bootstrap = params.bootstrap;
 	infos.force = params.force;
 	infos.fund = JORFLEGI_FUND;
-    infos.pg_conn = conn;
+	infos.pg_conn = conn;
+	infos.md = init_signature_system();
 	r = generate_uris(&infos);
-    fprintf(stderr, "INFO::bye\n");
-    PQfinish(conn);
+	fprintf(stderr, "INFO::bye\n");
+	PQfinish(conn);
+	cleanup_signature_system();
 
 	return r;
 }
