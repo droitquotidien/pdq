@@ -1536,6 +1536,7 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 	fs.rootdir = infos->target_dir;
 
 	fname = archive_entry_pathname(entry);
+	fprintf(stderr, "%s\n",fname);
 	size = strlen(fname);
 	if (!has_xml_suffix(fname, size)) {
 		return 0;
@@ -1571,21 +1572,25 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 				if (mdata->contexte.uri_parts.kind != EMPTY_URI_KIND) {
 					uri_cpy(&mdata->contexte.uri_parts, mdata->contexte.uri);
 				}
-				/*fprintf_parsed_data(stderr, pdata);*/
-				/*write_fs(&fs, pdata, infos->wbuf, 0);*/
-				r = db_import(infos->pg_conn, infos->md,
-					      &infos->tag, pdata,
-					      infos->dbbuf1,
-					      infos->dbbuf2,
-					      infos->dbbuf3,
-					      infos->dbbuf4,
-					      infos->dbbuf5,
-					      infos->dbbuf6,
-					      &infos->tt);
-				if (r > 0) {
-					/*fprintf(stderr, "DB insert: %f\n", infos->tt.db_insert_tm);
-					fprintf(stderr, "SIG comp.: %f\n", infos->tt.sig_comp_tm);
-					*/
+				if (infos->pg_conn != NULL) {
+					r = db_import(infos->pg_conn,
+						      infos->md,
+						      &infos->tag, pdata,
+						      infos->dbbuf1,
+						      infos->dbbuf2,
+						      infos->dbbuf3,
+						      infos->dbbuf4,
+						      infos->dbbuf5,
+						      infos->dbbuf6,
+						      &infos->tt);
+					if (r > 0) {
+						/*fprintf(stderr, "DB insert: %f\n", infos->tt.db_insert_tm);
+						fprintf(stderr, "SIG comp.: %f\n", infos->tt.sig_comp_tm);
+						*/
+					}
+				} else {
+					fprintf_parsed_data(stderr, pdata);
+					write_fs(&fs, pdata, infos->wbuf, 0);
 				}
 			}
 			return 0;
@@ -1611,8 +1616,10 @@ int iterate_archive(char *fname, int (*f)(struct archive *, struct archive_entry
 	archive_read_support_filter_all(a);
 	archive_read_support_format_all(a);
 	r = archive_read_open_filename(a, fname, 10240);
-	if (r != ARCHIVE_OK)
+	if (r != ARCHIVE_OK) {
+		fprintf(stderr, "ERROR: cannot open archive.\n");
 		return 1;
+	}
 	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
 		r = f(a, entry, user_data);
 		if (r != 0)
@@ -1681,6 +1688,7 @@ int generate_uris(struct gen_uri_info *infos)
 	if (infos->pdata == NULL) {
 		return -1;
 	}
+
 	infos->wbuf = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 1);
 	if (infos->wbuf == NULL) {
 		exit(EXIT_FAILURE);
@@ -1714,6 +1722,7 @@ int generate_uris(struct gen_uri_info *infos)
 	if (r < 0) {
 		exit(EXIT_FAILURE);
 	}
+
 	parser_handler.startElement = start_element_callback;
 	parser_handler.endElement = end_element_callback;
 	parser_handler.characters = characters_callback;
@@ -1762,7 +1771,8 @@ int main(int argc, char **argv)
 	infos.md = init_signature_system();
 	r = generate_uris(&infos);
 	fprintf(stderr, "INFO::bye\n");
-	PQfinish(conn);
+	if (conn != NULL)
+		PQfinish(conn);
 	cleanup_signature_system();
 
 	return r;
