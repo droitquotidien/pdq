@@ -12,8 +12,8 @@
 #include "fs.h"
 #include "buffer.h"
 #include "db.h"
-#include "tag.h"
-#include "sig.h"
+#include "timestamp.h"
+#include "signature.h"
 #include "timings.h"
 
 struct gen_uri_info {
@@ -34,8 +34,8 @@ struct gen_uri_info {
 	char *target_dir;
 	char *data_file;
 	PGconn *pg_conn;
-	const EVP_MD *md;
-	struct tm tag;
+	const EVP_MD *sig_gen;
+	struct tm ts;
 	struct timings tt;
 };
 
@@ -1574,8 +1574,8 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 				}
 				if (infos->pg_conn != NULL) {
 					r = db_import(infos->pg_conn,
-						      infos->md,
-						      &infos->tag, pdata,
+						      infos->sig_gen,
+						      &infos->ts, pdata,
 						      infos->dbbuf1,
 						      infos->dbbuf2,
 						      infos->dbbuf3,
@@ -1644,7 +1644,8 @@ struct params {
 
 void print_usage()
 {
-	printf("Usage: pdq [-f] [-b] -d data.tar.gz -t target_dir\n");
+	printf("Usage: pdq [-f] [-b] -d data.tar.gz [-t target_dir]\n");
+	printf("           [-c pg_conninfo]\n");
 }
 
 int set_params(int argc, char *argv[], struct params *params)
@@ -1679,7 +1680,7 @@ int set_params(int argc, char *argv[], struct params *params)
 	return 0;
 }
 
-int generate_uris(struct gen_uri_info *infos)
+int import_files_from_archive(struct gen_uri_info *infos)
 {
 	int r;
 	xmlSAXHandler parser_handler = {0};
@@ -1726,8 +1727,11 @@ int generate_uris(struct gen_uri_info *infos)
 	parser_handler.startElement = start_element_callback;
 	parser_handler.endElement = end_element_callback;
 	parser_handler.characters = characters_callback;
-	infos->ctxt = xmlCreatePushParserCtxt(&parser_handler, infos->pdata, NULL, 0, NULL);
-	r = iterate_archive(infos->data_file, archive_parse_file, infos);
+	infos->ctxt = xmlCreatePushParserCtxt(&parser_handler,
+					      infos->pdata,
+					      NULL, 0, NULL);
+	r = iterate_archive(infos->data_file,
+			    archive_parse_file, infos);
 	xmlFreeParserCtxt(infos->ctxt);
 	free_parsed_data(infos->pdata);
 
@@ -1740,7 +1744,9 @@ int main(int argc, char **argv)
 	struct params params;
 	struct gen_uri_info infos = {0};
 	PGconn *conn = NULL;
-	regex_t tag_re;
+	regex_t ts_re;
+
+	/* TODO: cleanly defines backends: JSON in FS, JSON in DB, ... */
 
 	if (set_params(argc, argv, &params) == 1) {
 		print_usage();
@@ -1754,22 +1760,42 @@ int main(int argc, char **argv)
 		print_usage();
 		return 1;
 	}
-	r = init_tag_re(&tag_re);
+
+	/*
+	 * Retrieve timestamp in the filename of the Archive
+	 */
+	r = init_timestamp_re(&ts_re);
 	if (r < 0) return 1;
-	r = parse_tag(params.data_file, &tag_re, &infos.tag);
+	r = parse_timestamp(params.data_file, &ts_re, &infos.ts);
 	if (r < 0) return 1;
 	if (r == 0) {
-		fprintf(stderr, "No tag found in %s\n", params.data_file);
+		fprintf(stderr, "No timestamp found in %s\n",
+			params.data_file);
 		return 1;
 	}
+
+	/*
+	 * TODO
+	 * If: update_set table in DB in empty => Bootstrap mode
+	 * Else: update mode
+	 */
+
+	/*
+	 * TODO: If in update mode, check if params.data_file
+	 *       is already in PG DB
+	 * If true: do not import
+	 */
+
 	infos.target_dir = params.target_dir;
 	infos.data_file = params.data_file;
-	infos.bootstrap = params.bootstrap;
-	infos.force = params.force;
+	infos.bootstrap = params.bootstrap; /* TODO: TO BE REMOVED (infered) */
+	infos.force = params.force; /* TODO: what for? */
 	infos.fund = JORFLEGI_FUND;
 	infos.pg_conn = conn;
-	infos.md = init_signature_system();
-	r = generate_uris(&infos);
+	infos.sig_gen = init_signature_system();
+
+	r = import_files_from_archive(&infos);
+
 	fprintf(stderr, "INFO::bye\n");
 	if (conn != NULL)
 		PQfinish(conn);

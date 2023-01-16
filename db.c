@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "db.h"
-#include "sig.h"
+#include "signature.h"
 
 /*
  * https://gist.github.com/ictlyh/12fe787ec265b33fd7e4b0bd08bc27cb
@@ -137,7 +137,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 				   " (cid, rid, num,"
 				   "  date_debut, date_fin, type,"
 				   "  mcs, liens, contexte, contenu, versions,"
-				   "  id, uri, uri_parts, tag, sig, mod_tm)"
+				   "  id, uri, uri_parts, ts, sig, mod_tm)"
 				   " VALUES"
 				   " ($1, $2, $3,"
 				   "  $4, $5, $6,"
@@ -199,7 +199,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 				   "INSERT INTO raw_jorflegi.import_jorf_scta"
 				   " (rid, titrefull, commentaire,"
 				   "  contexte, toc,"
-				   "  id, uri, uri_parts, tag, sig, mod_tm)"
+				   "  id, uri, uri_parts, ts, sig, mod_tm)"
 				   " VALUES"
 				   " ($1, $2, $3, $4, $5,"
 				   "  $6, $7, $8, $9, $10, NOW()::timestamp)"
@@ -273,7 +273,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 				   "  ministere,"
 				   "  date_debut, date_fin, mcs, liens,"
 				   "  contexte, contenu,"
-				   "  id, uri, uri_parts, tag, sig, mod_tm)"
+				   "  id, uri, uri_parts, ts, sig, mod_tm)"
 				   " VALUES"
 				   " ($1, $2, $3, $4, $5,"
 				   "  $6,"
@@ -363,7 +363,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 				   " (cid, rid, nature, num, nor, num_parution, num_sequence,"
 				   "  origine_publi, page_deb_publi, page_fin_publi, date_publi,"
 				   "  date_texte, derniere_modification, toc, versions,"
-				   "  id, uri, uri_parts, tag, sig, mod_tm)"
+				   "  id, uri, uri_parts, ts, sig, mod_tm)"
 				   " VALUES"
 				   " ($1, $2, $3, $4, $5, $6, $7,"
 				   "  $8, $9, $10, $11,"
@@ -421,7 +421,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 		res = PQexecParams(conn,
 				   "INSERT INTO raw_jorflegi.import_jorf_cont"
-				   " (titre, num, date_publi, toc, id, uri, uri_parts, tag, sig, mod_tm)"
+				   " (titre, num, date_publi, toc, id, uri, uri_parts, ts, sig, mod_tm)"
 				   " VALUES"
 				   " ($1, $2, $3, $4, "
 				   "  $5, $6, $7, $8, $9, NOW()::timestamp)"

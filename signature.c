@@ -1,5 +1,5 @@
 #include <string.h>
-#include "sig.h"
+#include "signature.h"
 
 const EVP_MD *init_signature_system()
 {

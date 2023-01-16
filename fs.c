@@ -7,7 +7,6 @@
 #include <string.h>
 #include "parse.h"
 #include "fs.h"
-#include "html.h"
 #include "json.h"
 
 /* Returns -1 in case of error, 0 if it creates the directory, 1 if the directory exists.

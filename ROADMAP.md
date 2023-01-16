@@ -1,5 +1,7 @@
 # Roadmap
 
+## 0.1
+
 - [X] Mécanisme de multi-URI (uri, uri_bis, uri_ter)
     - [X] textes: stocker NUM, NOR, ID commes id alters
     - [X] articles: stocker NUM, ID commes id alters
@@ -15,3 +17,6 @@
 - [ ] Support MCS_ART
 - [ ] Support MCS_TXT
 - [ ] Identifiants de section s1.2.3
+
+## 0.2
+

@@ -1,5 +1,5 @@
-#ifndef PDQ_SIG_H
-#define PDQ_SIG_H
+#ifndef PDQ_SIGNATURE_H
+#define PDQ_SIGNATURE_H
 #include <openssl/evp.h>
 #include "timings.h"
 const EVP_MD *init_signature_system();

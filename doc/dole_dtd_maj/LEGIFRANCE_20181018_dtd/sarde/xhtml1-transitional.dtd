@@ -842,7 +842,7 @@
   name        CDATA          #IMPLIED
   >
   
-<!--doc: Defines a region in an image map. This element is always nested inside a MAP tag. This element has no content but specify the geometric region of the image map and the link associated with the region. Note that user agents do not generally render AREA elements. Therefore, authors must provide alternate text for each AREA with the alt attribute.-->
+<!--doc: Defines a region in an image map. This element is always nested inside a MAP ts. This element has no content but specify the geometric region of the image map and the link associated with the region. Note that user agents do not generally render AREA elements. Therefore, authors must provide alternate text for each AREA with the alt attribute.-->
 <!--doc:Defines a region in an image map. This element is always nested inside a MAP element. This element has no content but specify the geometric region of the image map and the link associated with the region. Note that user agents do not generally render AREA elements. Therefore, authors must provide alternate text for each AREA with the alt attribute.-->
 <!ELEMENT area EMPTY>
 <!ATTLIST area
