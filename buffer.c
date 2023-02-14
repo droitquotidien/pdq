@@ -51,7 +51,9 @@ ssize_t buffer_copy(int fildes, const char *buf, ssize_t len, struct write_buffe
 			if (r < 0) return -1;
 			rt += r;
 		} else {
-			fprintf(stderr, "ERROR: write_buffer too small (%zu)\n",
+			fprintf(stderr,
+				"ERROR: write_buffer too small (max: %zu, exceed: %zu)\n",
+				wbuf->max_size,
 				((len + wbuf->current_size) - wbuf->max_size));
 			return -1;
 		}

@@ -1694,7 +1694,7 @@ int import_files_from_archive(struct gen_uri_info *infos)
 	if (infos->wbuf == NULL) {
 		exit(EXIT_FAILURE);
 	}
-	infos->dbbuf1 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 0);
+	infos->dbbuf1 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER*4, 0);
 	if (infos->dbbuf1 == NULL) {
 		exit(EXIT_FAILURE);
 	}
@@ -1702,7 +1702,7 @@ int import_files_from_archive(struct gen_uri_info *infos)
 	if (infos->dbbuf2 == NULL) {
 		exit(EXIT_FAILURE);
 	}
-	infos->dbbuf3 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER, 0);
+	infos->dbbuf3 = allocate_write_buffer(MAX_SIZE_WRITE_BUFFER*3, 0);
 	if (infos->dbbuf3 == NULL) {
 		exit(EXIT_FAILURE);
 	}
