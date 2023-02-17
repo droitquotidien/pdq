@@ -28,7 +28,7 @@ struct gen_uri_info {
 	struct write_buffer *dbbuf3;
     	struct write_buffer *dbbuf4;
     	struct write_buffer *dbbuf5;
-	    struct write_buffer *dbbuf6;
+	struct write_buffer *dbbuf6;
 	char bootstrap;
 	char force;
 	char *target_dir;
@@ -1415,6 +1415,7 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		|| xmlStrEqual(name, FIELD_NAME_NUM)
 		|| xmlStrEqual(name, FIELD_NAME_TITRE)
 		|| xmlStrEqual(name, FIELD_NAME_TITRE_TA)
+		|| xmlStrEqual(name, FIELD_NAME_COMMENTAIRE)
 		|| xmlStrEqual(name, FIELD_NAME_DATE_PUBLI)
 		|| xmlStrEqual(name, FIELD_NAME_CID)
 		|| xmlStrEqual(name, FIELD_NAME_NOR)
@@ -1536,7 +1537,7 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 	fs.rootdir = infos->target_dir;
 
 	fname = archive_entry_pathname(entry);
-	fprintf(stderr, "%s\n",fname);
+	/*fprintf(stderr, "%s\n",fname);*/
 	size = strlen(fname);
 	if (!has_xml_suffix(fname, size)) {
 		return 0;
@@ -1582,11 +1583,11 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 						      infos->dbbuf4,
 						      infos->dbbuf5,
 						      infos->dbbuf6,
-						      &infos->tt);
+						      &infos->tt,
+						      infos->bootstrap);
 					if (r > 0) {
-						/*fprintf(stderr, "DB insert: %f\n", infos->tt.db_insert_tm);
+						fprintf(stderr, "DB insert: %f\n", infos->tt.db_insert_tm);
 						fprintf(stderr, "SIG comp.: %f\n", infos->tt.sig_comp_tm);
-						*/
 					}
 				} else {
 					fprintf_parsed_data(stderr, pdata);

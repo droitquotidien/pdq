@@ -42,5 +42,7 @@ Le problème avec cette approche est qu'elle génère beaucoup de fichiers, épu
 ## PG DB
 
 ```bash
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata
+./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata \
+  -t ~/dq \
+  -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/Freemium_jorf_global_20220417-170000.tar.gz
 ```
