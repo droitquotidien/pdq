@@ -1586,8 +1586,8 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 						      &infos->tt,
 						      infos->bootstrap);
 					if (r > 0) {
-						fprintf(stderr, "DB insert: %f\n", infos->tt.db_insert_tm);
-						fprintf(stderr, "SIG comp.: %f\n", infos->tt.sig_comp_tm);
+						fprintf(stderr, "STAT:DBinsert: %f\n", infos->tt.db_insert_tm);
+						fprintf(stderr, "STAT:SIGcomp: %f\n", infos->tt.sig_comp_tm);
 					}
 				} else {
 					fprintf_parsed_data(stderr, pdata);
