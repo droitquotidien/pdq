@@ -15,35 +15,21 @@
 #include "timestamp.h"
 #include "signature.h"
 #include "timings.h"
-
-struct gen_uri_info {
-	enum fund fund;
-	int xml_files;
-	struct parsed_data *pdata;
-	xmlSAXHandler parser_handler;
-	xmlParserCtxtPtr ctxt;
-	struct write_buffer *wbuf;
-	struct write_buffer *dbbuf1;
-	struct write_buffer *dbbuf2;
-	struct write_buffer *dbbuf3;
-    	struct write_buffer *dbbuf4;
-    	struct write_buffer *dbbuf5;
-	struct write_buffer *dbbuf6;
-	char bootstrap;
-	char force;
-	char *target_dir;
-	char *data_file;
-	PGconn *pg_conn;
-	const EVP_MD *sig_gen;
-	struct tm ts;
-	struct timings tt;
-};
+#include "delete.h"
+#include "readarcfile.h"
 
 int has_xml_suffix(const char *s, size_t size)
 {
 	return s != NULL && size >= 5 && s[size-5] != 's'
 		&& s[size-4] == '.' && s[size-3] == 'x'
 		&& s[size-2] == 'm' && s[size-1] == 'l';
+}
+
+int is_dat_file(const char *s, size_t size)
+{
+	return s != NULL && size >= 5
+	       && s[size-4] == '.' && s[size-3] == 'd'
+	       && s[size-2] == 'a' && s[size-1] == 't';
 }
 
 void set_base(const char *pathname, size_t size, char *base)
@@ -1537,11 +1523,24 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 	fs.rootdir = infos->target_dir;
 
 	fname = archive_entry_pathname(entry);
-	/*fprintf(stderr, "%s\n",fname);*/
+	//fprintf(stdout, "%s\n",fname);
 	size = strlen(fname);
+
 	if (!has_xml_suffix(fname, size)) {
+		//fprintf(stderr, "%s\n", fname);
+		if (is_dat_file(fname, size)) {
+			r = read_archive_file(a, infos->wbuf);
+			r = apply_deletions(infos->wbuf, infos->pg_conn,
+					    &infos->ts);
+			buffer_reset(infos->wbuf);
+			if (r != 0) return -1;
+			/* GASWASHERE */
+		}
 		return 0;
 	}
+
+	/* TEST */
+	return 0;
 
 	pdata = infos->pdata;
 	reset_parsed_data(pdata);
@@ -1761,6 +1760,11 @@ int main(int argc, char **argv)
 		print_usage();
 		return 1;
 	}
+
+	r = init_delete_re();
+	if (r != 0) return 1;
+	//free_delete_re();
+	//return 0;
 
 	/*
 	 * Retrieve timestamp in the filename of the Archive

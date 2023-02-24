@@ -89,3 +89,23 @@ void buffer_reset(struct write_buffer *buf)
     buf->cbuffer = buf->buffer;
     buf->current_size = 0;
 }
+
+ssize_t copy_to_buffer(const char *buf, ssize_t len, struct write_buffer *wbuf)
+{
+	ssize_t r;
+	ssize_t rt = 0;
+
+	if ((len + wbuf->current_size) > wbuf->max_size) {
+		fprintf(stderr,
+			"ERROR: write_buffer too small"
+			" (max: %zu, exceed: %zu)\n",
+			wbuf->max_size,
+			((len + wbuf->current_size) - wbuf->max_size));
+		return -1;
+	}
+	memcpy(wbuf->cbuffer, buf, len);
+	wbuf->cbuffer += len;
+	wbuf->current_size += len;
+
+	return rt;
+}

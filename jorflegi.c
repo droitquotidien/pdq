@@ -115,6 +115,9 @@ const char *codes_in_force[] = {
  	"LEGITEXT000006070667", "voirie_routiere", "C. voirie routière", "Code de la voirie routière",
  	"LEGITEXT000037701019", "commande_publique", "CCP", "Code de la commande publique",
  	"LEGITEXT000039086952", "justice_penale_mineurs", "C. just. pen. min.", "Code de la justice pénale des mineurs",
+	"LEGITEXT000044595989", "impositions_biens_services", "CIBS", "Code des impositions sur les biens et services",
+ 	"LEGITEXT000044416551", "fonction_publique", "CGFP", "Code général de la fonction publique",
+ 	"LEGITEXT000045476241", "penitentiaire", "C. pénit.", "Code pénitentiaire",
  	NULL
 };
 

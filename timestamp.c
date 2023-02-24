@@ -49,12 +49,12 @@ int parse_timestamp(char *s, regex_t *ts_re, struct tm *tag)
         return -1;
     }
 
-	get_match_group(&matches[1], &tag->tm_year, s);
-	get_match_group(&matches[2], &tag->tm_mon, s);
-	get_match_group(&matches[3], &tag->tm_mday, s);
-	get_match_group(&matches[4], &tag->tm_hour, s);
-	get_match_group(&matches[5], &tag->tm_min, s);
-	get_match_group(&matches[6], &tag->tm_sec, s);
+    get_match_group(&matches[1], &tag->tm_year, s);
+    get_match_group(&matches[2], &tag->tm_mon, s);
+    get_match_group(&matches[3], &tag->tm_mday, s);
+    get_match_group(&matches[4], &tag->tm_hour, s);
+    get_match_group(&matches[5], &tag->tm_min, s);
+    get_match_group(&matches[6], &tag->tm_sec, s);
 
     return 1;
 }

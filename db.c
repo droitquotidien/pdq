@@ -156,6 +156,174 @@ int get_document_signature(PGconn *conn, enum doctype doctype, char id[],
 	return nb_tuples;
 }
 
+int get_document_tags(PGconn *conn, enum doctype doctype, char id[],
+		      char tag[], char ltag[])
+{
+	int nb_tuples;
+	PGresult *res;
+	const char *param_values[2];
+	static char *requests[] = {
+		NULL,
+		NULL,
+		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_cont"
+		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
+		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_text"
+		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
+		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_vers"
+		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
+		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_scta"
+		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
+		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_arti"
+		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
+		("SELECT tag, ltag FROM raw_jorflegi.import_legi_text"
+		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
+		("SELECT tag, ltag FROM raw_jorflegi.import_legi_vers"
+		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
+		("SELECT tag, ltag FROM raw_jorflegi.import_legi_scta"
+		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
+		("SELECT tag, ltag FROM raw_jorflegi.import_legi_arti"
+		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
+	};
+
+	param_values[0] = id;
+	param_values[1] = NULL;
+
+	res = PQexecParams(conn, requests[doctype],
+			   1, NULL,
+			   param_values, NULL,
+			   NULL, 0);
+	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+		fprintf(stderr, "SELECT failed %d: %s\n",
+			PQresultStatus(res),
+			PQresultErrorMessage(res));
+		PQclear(res);
+		exit_nicely(conn);
+	}
+	nb_tuples = PQntuples(res);
+	if (nb_tuples > 0) {
+		strcpy(tag,
+		       PQgetvalue(res, 0, 0));
+		strcpy(ltag,
+		       PQgetvalue(res, 0, 1));
+	}
+	PQclear(res);
+	return nb_tuples;
+}
+
+int delete(PGconn *conn, enum doctype doctype, char id[], char tag[])
+{
+	int nb_tuples;
+	PGresult *res;
+	const char *param_values[4];
+	char c_tag[64];
+	char c_ltag[64];
+	static char *upd_requests[] = {
+		NULL,
+		NULL,
+		("INSERT INTO raw_jorflegi.updated_jorf_cont"
+		 "(id, tag, ltag, updates, mod_tm)"
+		 "VALUES"
+		 "($1, $2, $3, 'DEL', NOW()::timestamp)"),
+		 /*JORFCONT_DOCTYPE*/
+		("INSERT INTO raw_jorflegi.updated_jorf_text"
+		 "(id, tag, ltag, updates, mod_tm)"
+		 "VALUES"
+		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFTEXT_DOCTYPE*/
+		("INSERT INTO raw_jorflegi.updated_jorf_vers"
+		 "(id, tag, ltag, updates, mod_tm)"
+		 "VALUES"
+		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFVERS_DOCTYPE*/
+		("INSERT INTO raw_jorflegi.updated_jorf_scta"
+		 "(id, tag, ltag, updates, mod_tm)"
+		 "VALUES"
+		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFSCTA_DOCTYPE*/
+		("INSERT INTO raw_jorflegi.updated_jorf_arti"
+		 "(id, tag, ltag, updates, mod_tm)"
+		 "VALUES"
+		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFARTI_DOCTYPE*/
+		("INSERT INTO raw_jorflegi.updated_legi_text"
+		 "(id, tag, ltag, updates, mod_tm)"
+		 "VALUES"
+		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGITEXT_DOCTYPE*/
+		("INSERT INTO raw_jorflegi.updated_legi_vers"
+		 "(id, tag, ltag, updates, mod_tm)"
+		 "VALUES"
+		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGIVERS_DOCTYPE*/
+		("INSERT INTO raw_jorflegi.updated_legi_scta"
+		 "(id, tag, ltag, updates, mod_tm)"
+		 "VALUES"
+		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGISCTA_DOCTYPE*/
+		("INSERT INTO raw_jorflegi.updated_legi_arti"
+		 "(id, tag, ltag, updates, mod_tm)"
+		 "VALUES"
+		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGIARTI_DOCTYPE*/
+	};
+	static char *del_requests[] = {
+		NULL,
+		NULL,
+		("DELETE FROM raw_jorflegi.import_jorf_cont"
+		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
+		("DELETE FROM raw_jorflegi.import_jorf_text"
+		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
+		("DELETE FROM raw_jorflegi.import_jorf_vers"
+		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
+		("DELETE FROM raw_jorflegi.import_jorf_scta"
+		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
+		("DELETE FROM raw_jorflegi.import_jorf_arti"
+		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
+		("DELETE FROM raw_jorflegi.import_legi_text"
+		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
+		("DELETE FROM raw_jorflegi.import_legi_vers"
+		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
+		("DELETE FROM raw_jorflegi.import_legi_scta"
+		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
+		("DELETE FROM raw_jorflegi.import_legi_arti"
+		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
+	};
+
+	if (get_document_tags(conn, doctype, id,c_tag,c_ltag) == 0) {
+		/* Document does not exists */
+		return 0;
+	}
+
+	/* Create an updated doc with DEL as the "updates" field */
+	param_values[0] = id;
+	param_values[1] = tag; /* tag */
+	param_values[2] = c_ltag; /* ltag */
+	param_values[3] = NULL;
+	res = PQexecParams(conn, upd_requests[doctype],
+			   3, NULL,
+			   param_values, NULL,
+			   NULL, 0);
+	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+		fprintf(stderr,
+			"UPDATE with DEL failed %d: %s\n",
+			PQresultStatus(res),
+			PQresultErrorMessage(res));
+		PQclear(res);
+		exit_nicely(conn);
+	}
+	PQclear(res);
+
+	/* Delete the document */
+	param_values[0] = id;
+	param_values[1] = NULL;
+	res = PQexecParams(conn, del_requests[doctype],
+			   1, NULL,
+			   param_values, NULL,
+			   NULL, 0);
+	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+		fprintf(stderr,
+			"UPDATE with DEL failed %d: %s\n",
+			PQresultStatus(res),
+			PQresultErrorMessage(res));
+		PQclear(res);
+		exit_nicely(conn);
+	}
+	PQclear(res);
+
+	return 1;
+}
 
 char *has_been_updated(PGresult *res, int field, char *new, char *updated)
 {

@@ -28,5 +28,6 @@ ssize_t buffer_copy(int fildes, const char *buf, ssize_t len, struct write_buffe
 ssize_t buffer_flush(int fildes, struct write_buffer *wbuf);
 ssize_t buffer_transfer(int fildes, struct write_buffer *sbuf, struct write_buffer *wbuf);
 void buffer_reset(struct write_buffer *buf);
+ssize_t copy_to_buffer(const char *buf, ssize_t len, struct write_buffer *wbuf);
 
 #endif //PDQ_BUFFER_H

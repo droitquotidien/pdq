@@ -14,4 +14,5 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 	struct write_buffer *dbbuf4, struct write_buffer *dbbuf5,
 	struct write_buffer *dbbuf6,
 	struct timings *tt, char bootstrap);
+int delete(PGconn *conn, enum doctype doctype, char id[], char tag[]);
 #endif //PDQ_DB_H
