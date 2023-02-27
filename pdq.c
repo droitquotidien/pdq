@@ -452,7 +452,7 @@ void set_parent_content(struct parsed_data *pdata,
 	pdata->parent_element = pe;
 }
 
-char *grow_dtext(struct parsed_data *pdata)
+char *grow_dtext(struct parsed_data *pdata, int len)
 {
 	char *newtext;
 	struct dtext *dtext;
@@ -463,15 +463,14 @@ char *grow_dtext(struct parsed_data *pdata)
 	dtext = pdata->current_dtext;
 	assert(dtext != NULL);
 	if (dtext != NULL) {
-		newsize = dtext->size * 2;
+		newsize = (dtext->size + len) * 5;
 		offset = pdata->current_field - dtext->text;
 		remaining = dtext->size + pdata->current_size;
 
-		/*
+		fprintf(stderr, "DEBUG: asking for len=%d\n", len);
 		fprintf(stderr, "DEBUG: dtext->text=%p pdata->current_field=%p\n", dtext->text, pdata->current_field);
 		fprintf(stderr, "DEBUG: dtext->size=%zu pdata->current_size=%zu\n", dtext->size, pdata->current_size);
 		fprintf(stderr, "DEBUG: newsize=%zu offset=%zu remaining=%zu\n", newsize, offset, remaining);
-		*/
 
 		newtext = realloc(dtext->text, newsize + 1);
 		if (newtext == NULL) {
@@ -573,7 +572,7 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 		if (pdata->current_field != NULL) {
 			len = xmlStrlen(name) + 1; /* 1=len("<") */
 			if (len > pdata->current_size) {
-				if (grow_dtext(pdata) == NULL) {
+				if (grow_dtext(pdata, len) == NULL) {
 					exit(EXIT_FAILURE);
 				}
 			}
@@ -587,7 +586,7 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 				len2 = xmlStrlen(attrs[1]);
 				len = len1 + len2 + 4; /* 4=len(' =""') */
 				if (len > pdata->current_size) {
-					if (grow_dtext(pdata) == NULL) {
+					if (grow_dtext(pdata, len) == NULL) {
 						exit(EXIT_FAILURE);
 					}
 				}
@@ -605,7 +604,7 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 			}
 			len = 1; /* 1=len(">") */
 			if (len > pdata->current_size) {
-				if (grow_dtext(pdata) == NULL) {
+				if (grow_dtext(pdata, len) == NULL) {
 					exit(EXIT_FAILURE);
 				}
 			}
@@ -1460,7 +1459,7 @@ void end_element_callback(void *user_data, const xmlChar *name)
 		if (pdata->current_field != NULL) {
 			len = xmlStrlen(name) + 3; /* 3=len("</>") */
 			if (len > pdata->current_size) {
-				if (grow_dtext(pdata) == NULL) {
+				if (grow_dtext(pdata, len) == NULL) {
 					exit(EXIT_FAILURE);
 				}
 			}
@@ -1483,7 +1482,7 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 	if (pdata->current_field != NULL) {
 		if (len > pdata->current_size) {
 			if (pdata->current_dtext != NULL) {
-				if (grow_dtext(pdata) == NULL) {
+				if (grow_dtext(pdata, len) == NULL) {
 					exit(EXIT_FAILURE);
 				}
 			} else {
@@ -1503,7 +1502,8 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 	}
 }
 
-int archive_parse_file(struct archive *a, struct archive_entry *entry, void *user_data)
+int archive_parse_file(struct archive *a, struct archive_entry *entry,
+	void *user_data)
 {
 	int r;
 	int uri_len;
@@ -1531,16 +1531,15 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 		if (is_dat_file(fname, size)) {
 			r = read_archive_file(a, infos->wbuf);
 			r = apply_deletions(infos->wbuf, infos->pg_conn,
-					    &infos->ts);
+					    &infos->ts, infos->log_file);
 			buffer_reset(infos->wbuf);
 			if (r != 0) return -1;
-			/* GASWASHERE */
 		}
 		return 0;
 	}
 
 	/* TEST */
-	return 0;
+	//return 0;
 
 	pdata = infos->pdata;
 	reset_parsed_data(pdata);
@@ -1570,7 +1569,8 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 					uri_cpy(&mdata->uri_parts, mdata->uri);
 				}
 				if (mdata->contexte.uri_parts.kind != EMPTY_URI_KIND) {
-					uri_cpy(&mdata->contexte.uri_parts, mdata->contexte.uri);
+					uri_cpy(&mdata->contexte.uri_parts,
+						mdata->contexte.uri);
 				}
 				if (infos->pg_conn != NULL) {
 					r = db_import(infos->pg_conn,
@@ -1583,10 +1583,15 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 						      infos->dbbuf5,
 						      infos->dbbuf6,
 						      &infos->tt,
-						      infos->bootstrap);
+						      infos->bootstrap,
+						      infos->log_file);
 					if (r > 0) {
-						fprintf(stderr, "STAT:DBinsert: %f\n", infos->tt.db_insert_tm);
-						fprintf(stderr, "STAT:SIGcomp: %f\n", infos->tt.sig_comp_tm);
+						fprintf(infos->log_file,
+							"STAT:DBinsert:%f\n",
+							infos->tt.db_insert_tm);
+						fprintf(infos->log_file,
+							"STAT:SIGcomp:%f\n",
+							infos->tt.sig_comp_tm);
 					}
 				} else {
 					fprintf_parsed_data(stderr, pdata);
@@ -1638,6 +1643,7 @@ struct params {
 	char *data_file;
 	char *target_dir;
 	char *conninfo;
+	char *logfile;
 	char force;
 	char bootstrap;
 };
@@ -1645,7 +1651,7 @@ struct params {
 void print_usage()
 {
 	printf("Usage: pdq [-f] [-b] -d data.tar.gz [-t target_dir]\n");
-	printf("           [-c pg_conninfo]\n");
+	printf("           [-c pg_conninfo] [-l logfile]\n");
 }
 
 int set_params(int argc, char *argv[], struct params *params)
@@ -1655,7 +1661,7 @@ int set_params(int argc, char *argv[], struct params *params)
 		return 1;
 	}
 	memset(params, 0, sizeof(struct params));
-	while((c = getopt(argc, argv, "bfxc:d:t:")) != -1) {
+	while((c = getopt(argc, argv, "bfxc:d:t:l:")) != -1) {
 		switch(c) {
 			case 'f':
 				params->force = 1;
@@ -1672,6 +1678,9 @@ int set_params(int argc, char *argv[], struct params *params)
 			case 't':
 				params->target_dir = optarg;
 				break;
+			case 'l':
+				params->logfile = optarg;
+				break;
 			case '?':
 			default:
 				return 1;
@@ -1684,6 +1693,13 @@ int import_files_from_archive(struct gen_uri_info *infos)
 {
 	int r;
 	xmlSAXHandler parser_handler = {0};
+	char stag[20];
+
+	sprintf(stag, "%04d-%02d-%02d %02d:%02d:%02d",
+		infos->ts.tm_year, infos->ts.tm_mon, infos->ts.tm_mday,
+		infos->ts.tm_hour, infos->ts.tm_min, infos->ts.tm_sec);
+
+	fprintf(infos->log_file, "START:%s\n", stag);
 
 	infos->pdata = allocate_parsed_data();
 	if (infos->pdata == NULL) {
@@ -1735,6 +1751,8 @@ int import_files_from_archive(struct gen_uri_info *infos)
 	xmlFreeParserCtxt(infos->ctxt);
 	free_parsed_data(infos->pdata);
 
+	fprintf(infos->log_file, "STOP:%s\n", stag);
+
 	return r;
 }
 
@@ -1763,8 +1781,6 @@ int main(int argc, char **argv)
 
 	r = init_delete_re();
 	if (r != 0) return 1;
-	//free_delete_re();
-	//return 0;
 
 	/*
 	 * Retrieve timestamp in the filename of the Archive
@@ -1793,6 +1809,15 @@ int main(int argc, char **argv)
 
 	infos.target_dir = params.target_dir;
 	infos.data_file = params.data_file;
+	if (params.logfile != NULL) {
+		infos.log_file = fopen(params.logfile, "w+");
+		if (infos.log_file == NULL) {
+			perror("Impossible d'ouvrir le fichier de log.");
+			exit(EXIT_FAILURE);
+		}
+	} else {
+		infos.log_file = stderr;
+	}
 	infos.bootstrap = params.bootstrap; /* TODO: TO BE REMOVED (infered) */
 	infos.force = params.force; /* TODO: what for? */
 	infos.fund = JORFLEGI_FUND;
@@ -1801,10 +1826,14 @@ int main(int argc, char **argv)
 
 	r = import_files_from_archive(&infos);
 
-	fprintf(stderr, "INFO::bye\n");
+	if (params.logfile != NULL) {
+		fclose(infos.log_file);
+	}
 	if (conn != NULL)
 		PQfinish(conn);
 	cleanup_signature_system();
+
+	free_delete_re();
 
 	return r;
 }

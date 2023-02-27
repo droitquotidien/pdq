@@ -25,6 +25,7 @@ struct gen_uri_info {
     char force;
     char *target_dir;
     char *data_file;
+    FILE *log_file;
     PGconn *pg_conn;
     const EVP_MD *sig_gen;
     struct tm ts;

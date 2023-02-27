@@ -290,6 +290,8 @@ int delete(PGconn *conn, enum doctype doctype, char id[], char tag[])
 	param_values[0] = id;
 	param_values[1] = tag; /* tag */
 	param_values[2] = c_ltag; /* ltag */
+	if (c_ltag[0] == '\0')
+		param_values[2] = NULL;
 	param_values[3] = NULL;
 	res = PQexecParams(conn, upd_requests[doctype],
 			   3, NULL,
@@ -1139,7 +1141,8 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 	struct write_buffer *dbbuf5,
 	struct write_buffer *dbbuf6,
 	struct timings *tt,
-	char bootstrap)
+	char bootstrap,
+	FILE *log_file)
 {
 	ssize_t r;
 	struct metadata *mdata = pdata->metadata;
@@ -1209,11 +1212,11 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(stderr,
+						fprintf(log_file,
 							"IGNORE:%s:%s\n",
 							mdata->id, stag);
 					} else {
-						fprintf(stderr,
+						fprintf(log_file,
 							"IDENTICAL:%s:%s\n",
 							mdata->id, stag);
 						update_ltag(
@@ -1238,7 +1241,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					 * UPDATE doc.mod_tm AND doc.sig
 		 			 * DO NOT CHANGE URI/URI PARTS (?)
 					 */
-					fprintf(stderr,
+					fprintf(log_file,
 						"CREATE_UPDATED:%s:%s\n",
 						mdata->id, c_tag);
 					create_updated_jorf_arti(
@@ -1259,7 +1262,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(stderr, "CREATE:%s:%s\n",
+			fprintf(log_file, "CREATE:%s:%s\n",
 				mdata->id, stag);
 			r = write_uri_parts_json(-1, &mdata->uri_parts,
 						 dbbuf6, 1);
@@ -1306,7 +1309,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 			buffer_reset(dbbuf6);
 		} else {
-			fprintf(stderr, "UPDATE:%s:%s\n",
+			fprintf(log_file, "UPDATE:%s:%s\n",
 				mdata->id, stag);
 			param_values[11] = stag; /* tag */
 			param_values[12] = stag; /* ltag */
@@ -1383,11 +1386,11 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(stderr,
+						fprintf(log_file,
 							"IGNORE:%s:%s\n",
 							mdata->id, stag);
 					} else {
-						fprintf(stderr,
+						fprintf(log_file,
 							"IDENTICAL:%s:%s\n",
 							mdata->id, stag);
 						update_ltag(
@@ -1400,7 +1403,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf2);
 					return 0;
 				} else {
-					fprintf(stderr,
+					fprintf(log_file,
 						"CREATE_UPDATED:%s:%s\n",
 						mdata->id, c_tag);
 					create_updated_jorf_scta(
@@ -1416,7 +1419,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(stderr, "CREATE:%s:%s\n",
+			fprintf(log_file, "CREATE:%s:%s\n",
 				mdata->id, stag);
 			r = write_uri_parts_json(-1, &mdata->uri_parts,
 						 dbbuf3, 1);
@@ -1456,7 +1459,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 			buffer_reset(dbbuf3);
 		} else {
-			fprintf(stderr, "UPDATE:%s:%s\n",
+			fprintf(log_file, "UPDATE:%s:%s\n",
 				mdata->id, stag);
 			param_values[5] = stag; /* tag */
 			param_values[6] = stag; /* ltag */
@@ -1541,11 +1544,11 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(stderr,
+						fprintf(log_file,
 							"IGNORE:%s:%s\n",
 							mdata->rid, stag);
 					} else {
-						fprintf(stderr,
+						fprintf(log_file,
 							"IDENTICAL:%s:%s\n",
 							mdata->rid, stag);
 						update_ltag(
@@ -1560,7 +1563,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf4);
 					return 0;
 				} else {
-					fprintf(stderr,
+					fprintf(log_file,
 						"CREATE_UPDATED:%s:%s\n",
 						mdata->rid, c_tag);
 					create_updated_jorf_vers(
@@ -1583,7 +1586,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(stderr, "CREATE:%s:%s\n",
+			fprintf(log_file, "CREATE:%s:%s\n",
 				mdata->rid, stag);
 			r = write_uri_parts_json(-1, &mdata->uri_parts,
 						 dbbuf5, 1);
@@ -1625,7 +1628,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 			buffer_reset(dbbuf5);
 		} else {
-			fprintf(stderr, "UPDATE:%s:%s\n",
+			fprintf(log_file, "UPDATE:%s:%s\n",
 				mdata->rid, stag);
 			param_values[12] = stag; /* tag */
 			param_values[13] = stag; /* ltag */
@@ -1709,11 +1712,11 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(stderr,
+						fprintf(log_file,
 							"IGNORE:%s:%s\n",
 							mdata->id, stag);
 					} else {
-						fprintf(stderr,
+						fprintf(log_file,
 							"IDENTICAL:%s:%s\n",
 							mdata->id, stag);
 						update_ltag(
@@ -1726,7 +1729,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf2);
 					return 0;
 				} else {
-					fprintf(stderr,
+					fprintf(log_file,
 						"CREATE_UPDATED:%s:%s\n",
 						mdata->id, c_tag);
 					create_updated_jorf_text(
@@ -1752,7 +1755,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(stderr, "CREATE:%s:%s\n",
+			fprintf(log_file, "CREATE:%s:%s\n",
 				mdata->id, stag);
 			r = write_uri_parts_json(-1, &mdata->uri_parts,
 						 dbbuf3, 1);
@@ -1793,7 +1796,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 			buffer_reset(dbbuf3);
 		} else {
-			fprintf(stderr, "UPDATE:%s:%s\n",
+			fprintf(log_file, "UPDATE:%s:%s\n",
 				mdata->id, stag);
 			param_values[15] = stag; /* tag */
 			param_values[16] = stag; /* ltag */
@@ -1868,11 +1871,11 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(stderr,
+						fprintf(log_file,
 							"IGNORE:%s:%s\n",
 							mdata->id, stag);
 					} else {
-						fprintf(stderr,
+						fprintf(log_file,
 							"IDENTICAL:%s:%s\n",
 							mdata->id, stag);
 						update_ltag(
@@ -1884,7 +1887,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf1);
 					return 0;
 				} else {
-					fprintf(stderr,
+					fprintf(log_file,
 						"CREATE_UPDATED:%s:%s\n",
 						mdata->id, c_tag);
 					create_updated_jorf_cont(
@@ -1899,7 +1902,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(stderr, "CREATE:%s:%s\n",
+			fprintf(log_file, "CREATE:%s:%s\n",
 				mdata->id, stag);
 			r = write_uri_parts_json(-1, &mdata->uri_parts,
 						 dbbuf2, 1);
@@ -1935,7 +1938,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 			buffer_reset(dbbuf2);
 		} else {
-			fprintf(stderr, "UPDATE:%s:%s\n",
+			fprintf(log_file, "UPDATE:%s:%s\n",
 				mdata->id, stag);
 			param_values[4] = stag; /* tag */
 			param_values[5] = stag; /* ltag */
@@ -2014,11 +2017,11 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(stderr,
+						fprintf(log_file,
 							"IGNORE:%s:%s\n",
 							mdata->id, stag);
 					} else {
-						fprintf(stderr,
+						fprintf(log_file,
 							"IDENTICAL:%s:%s\n",
 							mdata->id, stag);
 						update_ltag(
@@ -2033,7 +2036,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf4);
 					return 0;
 				} else {
-					fprintf(stderr,
+					fprintf(log_file,
 						"CREATE_UPDATED:%s:%s\n",
 						mdata->id, c_tag);
 					create_updated_legi_arti(
@@ -2054,7 +2057,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(stderr, "CREATE:%s:%s\n",
+			fprintf(log_file, "CREATE:%s:%s\n",
 				mdata->id, stag);
 			r = write_uri_parts_json(-1, &mdata->uri_parts,
 						 dbbuf5, 1);
@@ -2094,7 +2097,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 			buffer_reset(dbbuf5);
 		} else {
-			fprintf(stderr, "UPDATE:%s:%s\n",
+			fprintf(log_file, "UPDATE:%s:%s\n",
 				mdata->id, stag);
 			param_values[11] = stag; /* tag */
 			param_values[12] = stag; /* ltag */
@@ -2168,11 +2171,11 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(stderr,
+						fprintf(log_file,
 							"IGNORE:%s:%s\n",
 							mdata->id, stag);
 					} else {
-						fprintf(stderr,
+						fprintf(log_file,
 							"IDENTICAL:%s:%s\n",
 							mdata->id, stag);
 						update_ltag(
@@ -2185,7 +2188,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf2);
 					return 0;
 				} else {
-					fprintf(stderr,
+					fprintf(log_file,
 						"CREATE_UPDATED:%s:%s\n",
 						mdata->id, c_tag);
 					create_updated_legi_scta(
@@ -2201,7 +2204,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(stderr, "CREATE:%s:%s\n",
+			fprintf(log_file, "CREATE:%s:%s\n",
 				mdata->id, stag);
 			r = write_uri_parts_json(-1, &mdata->uri_parts,
 						 dbbuf3, 1);
@@ -2241,7 +2244,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 			buffer_reset(dbbuf3);
 		} else {
-			fprintf(stderr, "UPDATE:%s:%s\n",
+			fprintf(log_file, "UPDATE:%s:%s\n",
 				mdata->id, stag);
 			param_values[5] = stag; /* tag */
 			param_values[6] = stag; /* ltag */
@@ -2322,11 +2325,11 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(stderr,
+						fprintf(log_file,
 							"IGNORE:%s:%s\n",
 							mdata->id, stag);
 					} else {
-						fprintf(stderr,
+						fprintf(log_file,
 							"IDENTICAL:%s:%s\n",
 							mdata->id, stag);
 						update_ltag(
@@ -2339,7 +2342,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf2);
 					return 0;
 				} else {
-					fprintf(stderr,
+					fprintf(log_file,
 						"CREATE_UPDATED:%s:%s\n",
 						mdata->id, c_tag);
 					create_updated_legi_text(
@@ -2365,7 +2368,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(stderr, "CREATE:%s:%s\n",
+			fprintf(log_file, "CREATE:%s:%s\n",
 				mdata->id, stag);
 			r = write_uri_parts_json(-1, &mdata->uri_parts,
 						 dbbuf3, 1);
@@ -2406,7 +2409,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 			buffer_reset(dbbuf3);
 		} else {
-			fprintf(stderr, "UPDATE:%s:%s\n",
+			fprintf(log_file, "UPDATE:%s:%s\n",
 				mdata->id, stag);
 			param_values[15] = stag; /* tag */
 			param_values[16] = stag; /* ltag */
@@ -2496,11 +2499,11 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(stderr,
+						fprintf(log_file,
 							"IGNORE:%s:%s\n",
 							mdata->rid, stag);
 					} else {
-						fprintf(stderr,
+						fprintf(log_file,
 							"IDENTICAL:%s:%s\n",
 							mdata->rid, stag);
 						update_ltag(
@@ -2514,7 +2517,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf3);
 					return 0;
 				} else {
-					fprintf(stderr,
+					fprintf(log_file,
 						"CREATE_UPDATED:%s:%s\n",
 						mdata->rid, c_tag);
 					create_updated_legi_vers(
@@ -2536,7 +2539,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 		}
 		if (to_create) {
-			fprintf(stderr, "CREATE:%s:%s\n",
+			fprintf(log_file, "CREATE:%s:%s\n",
 				mdata->rid, stag);
 			r = write_uri_parts_json(-1, &mdata->uri_parts,
 						 dbbuf4, 1);
@@ -2578,7 +2581,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 			buffer_reset(dbbuf4);
 		} else {
-			fprintf(stderr, "UPDATE:%s:%s\n",
+			fprintf(log_file, "UPDATE:%s:%s\n",
 				mdata->rid, stag);
 			param_values[12] = stag; /* tag */
 			param_values[13] = stag; /* ltag */

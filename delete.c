@@ -115,7 +115,8 @@ enum doctype str_to_doctype_and_rid(const char *kind, char *id)
 	return EMPTY_DOCTYPE;
 }
 
-int apply_deletions(struct write_buffer *buf, PGconn *pg_conn, struct tm *tag)
+int apply_deletions(struct write_buffer *buf, PGconn *pg_conn, struct tm *tag,
+		    FILE *log_file)
 {
 	int rc;
 	regmatch_t matches[3];
@@ -131,12 +132,10 @@ int apply_deletions(struct write_buffer *buf, PGconn *pg_conn, struct tm *tag)
 	sprintf(stag, "%04d-%02d-%02d %02d:%02d:%02d",
 		tag->tm_year, tag->tm_mon, tag->tm_mday,
 		tag->tm_hour, tag->tm_min, tag->tm_sec);
-
-	fprintf(stderr, "DELETIONS FILE:\n");
+	/*fprintf(stderr, "DELETIONS FILE:\n");
 	fwrite(buf->buffer, 1, buf->current_size, stderr);
-
+	*/
 	buf->buffer[buf->current_size] = 0;
-
 	start_line = buf->buffer;
 	stop_line = start_line;
 
@@ -151,27 +150,28 @@ int apply_deletions(struct write_buffer *buf, PGconn *pg_conn, struct tm *tag)
 				     (regmatch_t *) &matches, 0);
 			if (rc != 0) {
 				if (rc == REG_NOMATCH) {
-					fprintf(stderr, "NOMATCH\n");
+					//fprintf(stderr, "NOMATCH\n");
 					return 0;
 				}
 				regerror(rc, &suppr_re, errbuf, sizeof(errbuf));
-				fprintf(stderr, "ts regexp match error: %s\n", errbuf);
+				fprintf(stderr, "ts regexp match error: %s\n",
+					errbuf);
 				return -1;
 			}
-			fprintf(stderr, "MATCH\n");
+			//fprintf(stderr, "MATCH\n");
 			get_match(&matches[1], kind, start_line, 12);
 			get_match(&matches[2], id, start_line, 32);
-			fprintf(stderr, "%s %s\n", kind, id);
+			//fprintf(stderr, "%s %s\n", kind, id);
 			doctype = str_to_doctype_and_rid(kind, id);
 			if (doctype != EMPTY_DOCTYPE) {
 				deleted = delete(pg_conn, doctype,
 						 id, stag);
 				if (deleted) {
-					fprintf(stderr,
-						"DELETED:%s:%s", id, stag);
+					fprintf(log_file,
+						"DELETED:%s:%s\n", id, stag);
 				} else {
-					fprintf(stderr,
-						"UNKNOWN:%s:%s", id, stag);
+					fprintf(log_file,
+						"UNKNOWN:%s:%s\n", id, stag);
 				}
 			}
 			start_line = stop_line + 1;
