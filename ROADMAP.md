@@ -12,10 +12,10 @@
 - [X] Support CONTEXTE (SCTA, ARTI)
 - [X] Support VERSION_A_VENIR (LEGIVERS)
 - [X] Support VERSIONS
-- [ ] Passer à un parsed_data modulaire. versions, etc, n'ont pas forcément besoin d'être mis à zero avant d'écrire dedans. Permet de gagner du temps sur le memset(). Essayer le realloc également.
-- [ ] Support LIENS
-- [ ] Support MCS_ART
-- [ ] Support MCS_TXT
+- [X] Passer à un parsed_data modulaire. versions, etc, n'ont pas forcément besoin d'être mis à zero avant d'écrire dedans. Permet de gagner du temps sur le memset(). Essayer le realloc également.
+- [X] Support LIENS
+- [X] Support MCS_ART
+- [X] Support MCS_TXT
 - [ ] Identifiants de section s1.2.3
 
 ## 0.2

@@ -1,48 +1,27 @@
 # Parseur en C pour les données juridiques de "Droit Quotidien"
 
+Ce programme lit les fichiers XML contenus dans les archives TGZ fournies
+par la DILA (https://echanges.dila.gouv.fr/OPENDATA/) et les importe dans
+une base de données PostgreSQL.
+
 ## Ubuntu / Debian Linux
 
+Prérequis pour compiler le code:
+
 ```bash
+apt-get install cmake
 apt-get install libarchive-dev
 apt-get install libxml2-dev libxml2-utils
 ```
 
-## Parse data, write JSON and generate actions 
+Compilation, dans ce répertoire, faire:
 
 ```bash
-./cmake-build-debug/pdq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20220406-004356.tar.gz -t ~/dq/raw
+mkdir build
+cd build
+cmake ..
+make
 ```
 
-Importation complète du stock JORF:
-
-```bash
-(dqdata) gasilber@mulhouse:~/work/mines/pdq$ time ./cmake-build-debug/pdq \
-  -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/Freemium_jorf_global_20191011-123107.tar.gz \
-  -t ~/dq/raw 2> ~/dq/JORF_20191011-123107.log | dq_build_map ~/dq/www > ~/dq/JORF_20191011-123107.www.log
-
-real	24m51.844s
-user	14m3.814s
-sys	13m27.385s
-```
-
-Importation complète du stock LEGI:
-
-```bash
-(dqdata) gasilber@mulhouse:~/work/mines/pdq$ time ./cmake-build-debug/pdq \
-  -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/Freemium_Legi_global_20191011-102231.tar.gz \
-  -t /data/dq/raw 2> /data/dq/LEGI_20191011-102231.log\
-  | dq_build_map /data/dq/www > /data/dq/LEGI_20191011-102231.www.log
-real	9m30.741s
-user	7m3.437s
-sys	3m52.437s
-```
-
-Le problème avec cette approche est qu'elle génère beaucoup de fichiers, épuisant le nombre d'inodes du FS.
-
-## PG DB
-
-```bash
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata \
-  -t ~/dq \
-  -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/Freemium_jorf_global_20220417-170000.tar.gz
-```
+Dans le répertoire `build`, l'exécutable `pdq` est le programme d'importation
+principal.
