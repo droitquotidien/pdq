@@ -1,9 +1,0 @@
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata -t ~/dq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20230222-213507.tar.gz -l ~/logs/JORF_20230222-213507.tar.gz.log
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata -t ~/dq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20230223-002013.tar.gz -l ~/logs/JORF_20230223-002013.tar.gz.log
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata -t ~/dq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20230223-214145.tar.gz -l ~/logs/JORF_20230223-214145.tar.gz.log
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata -t ~/dq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20230224-001824.tar.gz -l ~/logs/JORF_20230224-001824.tar.gz.log
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata -t ~/dq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20230224-212227.tar.gz -l ~/logs/JORF_20230224-212227.tar.gz.log
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata -t ~/dq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20230225-002033.tar.gz -l ~/logs/JORF_20230225-002033.tar.gz.log
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata -t ~/dq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20230225-211502.tar.gz -l ~/logs/JORF_20230225-211502.tar.gz.log
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata -t ~/dq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20230226-001905.tar.gz -l ~/logs/JORF_20230226-001905.tar.gz.log
-./cmake-build-debug/pdq -c postgresql://dqdata:dqdata@localhost:5432/dqdata -t ~/dq -d ~/Dropbox/data_cons/source_data/DILA/JORFLEGI/JORF_20230226-205706.tar.gz -l ~/logs/JORF_20230226-205706.tar.gz.log
