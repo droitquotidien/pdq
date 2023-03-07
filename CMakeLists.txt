@@ -2,10 +2,16 @@ cmake_minimum_required(VERSION 3.14)
 project(pdq)
 include(FindLibXml2)
 if(CMAKE_HOST_APPLE)
-	set(LibArchive_INCLUDE_DIRS /usr/local/opt/libarchive/include)
-    set(LibArchive_INCLUDE_DIR /usr/local/opt/libarchive/include)
-    set(LibArchive_LIBRARIES /usr/local/opt/libarchive/lib)
+	set(LibArchive_INCLUDE_DIRS /opt/local/include)
+    set(LibArchive_INCLUDE_DIR /opt/local/include)
+    set(LibArchive_LIBRARIES /opt/local/lib)
+    set(PostgreSQL_INCLUDE_DIR /Applications/Postgres.app/Contents/Versions/15/include)
+    set(PostgreSQL_LIBRARY_DIR /Applications/Postgres.app/Contents/Versions/15/lib)
 endif()
+include(FindPostgreSQL)
+find_package(PostgreSQL REQUIRED)
+find_package(OpenSSL REQUIRED)
+
 # apt-get install libarchive-dev
 include_directories(${LibArchive_INCLUDE_DIR})
 link_directories(${LibArchive_LIBRARIES})
@@ -14,8 +20,6 @@ if(LibXml2_FOUND)
     include_directories(${LIBXML2_INCLUDE_DIR})
     #link_directories(${LIBXML2_LIBRARIES})
 endif()
-find_package(PostgreSQL REQUIRED)
-find_package(OpenSSL REQUIRED)
 add_executable(pdq pdq.h pdq.c uri.h uri.c parse.h
         jorflegi.h jorflegi.c fs.h fs.c json.h json.c buffer.h buffer.c
         db.c db.h timestamp.c timestamp.h signature.c signature.h
