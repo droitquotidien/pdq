@@ -1161,7 +1161,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 	char c_signature[SIG_HEX_MAX];
 	char c_tag[64];
 	unsigned char digest[EVP_MAX_MD_SIZE];
-	int digest_len;
+	unsigned int digest_len;
 	char to_create = 1;
 
 	sprintf(stag, "%04d-%02d-%02d %02d:%02d:%02d",

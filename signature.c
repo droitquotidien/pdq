@@ -14,7 +14,7 @@ void cleanup_signature_system()
 
 int compute_signature(const EVP_MD *md,
                       const char **values, int nb_values,
-                      unsigned char *sig_value, int *sig_len,
+                      unsigned char *sig_value, unsigned int *sig_len,
                       struct timings *tt)
 {
 	int i;
