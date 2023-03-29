@@ -16,7 +16,13 @@
 - [X] Support LIENS
 - [X] Support MCS_ART
 - [X] Support MCS_TXT
-- [ ] Identifiants de section s1.2.3
 
 ## 0.2
+
+- [ ] Support ENTREPRISES
+- [ ] Ne plus transformer les TEXT en VERS
+- [ ] Virer la notion de RID
+- [ ] Passer à des BigInteger?
+- [ ] Ne plus calculer d'URI
+- [ ] Update auto à partir d'un répertoire
 
