@@ -1650,6 +1650,7 @@ struct params {
 
 void print_usage()
 {
+	printf("pdq (Parseur pour Droit Quotidien) v"VERSION"\n\n");
 	printf("Usage: pdq [-f] [-b] -d data.tar.gz [-t target_dir]\n");
 	printf("           [-c pg_conninfo] [-l logfile]\n");
 }

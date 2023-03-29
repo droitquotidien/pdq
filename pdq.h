@@ -8,6 +8,8 @@
 #include "db.h"
 #include "signature.h"
 
+#define VERSION "0.8"
+
 struct gen_uri_info {
     enum fund fund;
     int xml_files;
