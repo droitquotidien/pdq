@@ -12,6 +12,7 @@ Prérequis pour compiler le code:
 apt-get install cmake
 apt-get install libarchive-dev
 apt-get install libxml2-dev libxml2-utils
+apt-get install postgresql-server-dev-14
 ```
 
 Compilation, dans ce répertoire, faire:
