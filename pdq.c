@@ -9,7 +9,6 @@
 #include "uri.h"
 #include "parse.h"
 #include "jorflegi.h"
-#include "fs.h"
 #include "buffer.h"
 #include "db.h"
 #include "timestamp.h"
@@ -1518,9 +1517,6 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry,
 	struct gen_uri_info *infos = user_data;
 	size_t size;
 	char base[5];
-	struct fs_backend fs;
-
-	fs.rootdir = infos->target_dir;
 
 	fname = archive_entry_pathname(entry);
 	//fprintf(stdout, "%s\n",fname);
@@ -1595,7 +1591,6 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry,
 					}
 				} else {
 					fprintf_parsed_data(stderr, pdata);
-					write_fs(&fs, pdata, infos->wbuf, 0);
 				}
 			}
 			return 0;
@@ -1641,18 +1636,16 @@ int iterate_archive(char *fname, int (*f)(struct archive *, struct archive_entry
 
 struct params {
 	char *data_file;
-	char *target_dir;
 	char *conninfo;
 	char *logfile;
-	char force;
 	char bootstrap;
 };
 
 void print_usage()
 {
 	printf("pdq (Parseur pour Droit Quotidien) v"VERSION"\n\n");
-	printf("Usage: pdq [-f] [-b] -d data.tar.gz [-t target_dir]\n");
-	printf("           [-c pg_conninfo] [-l logfile]\n");
+	printf("Usage: pdq [-b] -d data.tar.gz \n");
+	printf("           -c pg_conninfo [-l logfile]\n");
 }
 
 int set_params(int argc, char *argv[], struct params *params)
@@ -1664,23 +1657,17 @@ int set_params(int argc, char *argv[], struct params *params)
 	memset(params, 0, sizeof(struct params));
 	while((c = getopt(argc, argv, "bfxc:d:t:l:")) != -1) {
 		switch(c) {
-			case 'f':
-				params->force = 1;
-				break;
-			case 'b':
-				params->bootstrap = 1;
-				break;
 			case 'd':
 				params->data_file = optarg;
 				break;
-            		case 'c':
-                		params->conninfo = optarg;
-                		break;
-			case 't':
-				params->target_dir = optarg;
+			case 'c':
+				params->conninfo = optarg;
 				break;
 			case 'l':
 				params->logfile = optarg;
+				break;
+			case 'b':
+				params->bootstrap = 1;
 				break;
 			case '?':
 			default:
@@ -1736,11 +1723,6 @@ int import_files_from_archive(struct gen_uri_info *infos)
 		exit(EXIT_FAILURE);
 	}
 
-	r = create_dir(infos->target_dir);
-	if (r < 0) {
-		exit(EXIT_FAILURE);
-	}
-
 	parser_handler.startElement = start_element_callback;
 	parser_handler.endElement = end_element_callback;
 	parser_handler.characters = characters_callback;
@@ -1757,84 +1739,85 @@ int import_files_from_archive(struct gen_uri_info *infos)
 	return r;
 }
 
+int import_jorflegi_data_file(char *data_file, PGconn *conn,
+							  regex_t *ts_re, FILE *log_file,
+							  const EVP_MD *sig_gen, char bootstrap)
+{
+	int r = 0;
+	struct gen_uri_info infos = {0};
+
+	r = parse_timestamp(data_file, ts_re, &infos.ts);
+	if (r < 0) return 1;
+	if (r == 0) {
+		fprintf(stderr, "No timestamp found in %s\n",
+				data_file);
+		return 1;
+	}
+	infos.data_file = data_file;
+	infos.fund = JORFLEGI_FUND;
+	infos.log_file = log_file;
+	infos.pg_conn = conn;
+	infos.sig_gen = sig_gen;
+	infos.bootstrap = bootstrap;
+
+	r = import_files_from_archive(&infos);
+
+	return r;
+}
+
 int main(int argc, char **argv)
 {
 	int r = 0;
 	struct params params;
-	struct gen_uri_info infos = {0};
 	PGconn *conn = NULL;
 	regex_t ts_re;
-
-	/* TODO: cleanly defines backends: JSON in FS, JSON in DB, ... */
+	FILE *log_file;
+	const EVP_MD *sig_gen;
 
 	if (set_params(argc, argv, &params) == 1) {
 		print_usage();
 		return 1;
 	}
-	if (params.conninfo != NULL) {
-		conn = db_connect(params.conninfo);
-		/*exit_nicely(conn);*/
-	}
-	if (params.target_dir == NULL || params.data_file == NULL) {
+	if (params.data_file == NULL || params.conninfo == NULL) {
 		print_usage();
 		return 1;
 	}
 
-	r = init_delete_re();
-	if (r != 0) return 1;
-
 	/*
-	 * Retrieve timestamp in the filename of the Archive
+	 * Initializations
 	 */
-	r = init_timestamp_re(&ts_re);
-	if (r < 0) return 1;
-	r = parse_timestamp(params.data_file, &ts_re, &infos.ts);
-	if (r < 0) return 1;
-	if (r == 0) {
-		fprintf(stderr, "No timestamp found in %s\n",
-			params.data_file);
-		return 1;
-	}
-
-	/*
-	 * TODO
-	 * If: update_set table in DB in empty => Bootstrap mode
-	 * Else: update mode
-	 */
-
-	/*
-	 * TODO: If in update mode, check if params.data_file
-	 *       is already in PG DB
-	 * If true: do not import
-	 */
-
-	infos.target_dir = params.target_dir;
-	infos.data_file = params.data_file;
 	if (params.logfile != NULL) {
-		infos.log_file = fopen(params.logfile, "w+");
-		if (infos.log_file == NULL) {
+		log_file = fopen(params.logfile, "w+");
+		if (log_file == NULL) {
 			perror("Impossible d'ouvrir le fichier de log.");
 			exit(EXIT_FAILURE);
 		}
 	} else {
-		infos.log_file = stderr;
+		log_file = stderr;
 	}
-	infos.bootstrap = params.bootstrap; /* TODO: TO BE REMOVED (infered) */
-	infos.force = params.force; /* TODO: what for? */
-	infos.fund = JORFLEGI_FUND;
-	infos.pg_conn = conn;
-	infos.sig_gen = init_signature_system();
+	conn = db_connect(params.conninfo);
+	r = init_delete_re();
+	if (r != 0) return 1;
+	r = init_timestamp_re(&ts_re);
+	if (r < 0) return 1;
+	sig_gen = init_signature_system();
 
-	r = import_files_from_archive(&infos);
+	/*
+	 * Import one file
+	 */
+	r = import_jorflegi_data_file(params.data_file, conn, &ts_re, log_file, sig_gen, params.bootstrap);
 
+	/*
+	 * Clean-up
+	 */
 	if (params.logfile != NULL) {
-		fclose(infos.log_file);
+		fclose(log_file);
 	}
 	if (conn != NULL)
 		PQfinish(conn);
 	cleanup_signature_system();
-
 	free_delete_re();
+	free_timestamp_re(&ts_re);
 
 	return r;
 }

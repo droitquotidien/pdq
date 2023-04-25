@@ -58,3 +58,8 @@ int parse_timestamp(char *s, regex_t *ts_re, struct tm *tag)
 
     return 1;
 }
+
+void free_timestamp_re(regex_t *tag_re)
+{
+	regfree(tag_re);
+}
