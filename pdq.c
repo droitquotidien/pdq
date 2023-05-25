@@ -1646,6 +1646,11 @@ void print_usage()
 	printf("pdq (Parseur pour Droit Quotidien) v"VERSION"\n\n");
 	printf("Usage: pdq [-b] -d data.tar.gz \n");
 	printf("           -c pg_conninfo [-l logfile]\n");
+    printf("\n");
+    printf("  -b : bootstrap (for an empty DB) [deprecated]\n");
+    printf("  -d data.tar.gz : import this file\n");
+    printf("  -c pg_conninfo : URI of the DB\n");
+    printf("  -l logfile : file where to log infos (default: stdout)\n");
 }
 
 int set_params(int argc, char *argv[], struct params *params)
