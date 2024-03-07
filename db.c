@@ -64,23 +64,23 @@ void update_ltag(PGconn *conn, enum doctype doctype, char id[], char tag[])
 	static char *requests[] = {
 		NULL,
 		NULL,
-		("UPDATE raw_jorflegi.import_jorf_cont SET ltag = $2"
+		("UPDATE jorflegi.jorf_cont SET ltag = $2"
 		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
-		("UPDATE raw_jorflegi.import_jorf_text SET ltag = $2"
+		("UPDATE jorflegi.jorf_text SET ltag = $2"
 		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
-		("UPDATE raw_jorflegi.import_jorf_vers SET ltag = $2"
+		("UPDATE jorflegi.jorf_vers SET ltag = $2"
 		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
-		("UPDATE raw_jorflegi.import_jorf_scta SET ltag = $2"
+		("UPDATE jorflegi.jorf_scta SET ltag = $2"
 		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
-		("UPDATE raw_jorflegi.import_jorf_arti SET ltag = $2"
+		("UPDATE jorflegi.jorf_arti SET ltag = $2"
 		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
-		("UPDATE raw_jorflegi.import_legi_text SET ltag = $2"
+		("UPDATE jorflegi.legi_text SET ltag = $2"
 		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
-		("UPDATE raw_jorflegi.import_legi_vers SET ltag = $2"
+		("UPDATE jorflegi.legi_vers SET ltag = $2"
 		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
-		("UPDATE raw_jorflegi.import_legi_scta SET ltag = $2"
+		("UPDATE jorflegi.legi_scta SET ltag = $2"
 		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
-		("UPDATE raw_jorflegi.import_legi_arti SET ltag = $2"
+		("UPDATE jorflegi.legi_arti SET ltag = $2"
 		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
 	};
 	param_values[0] = id;
@@ -111,23 +111,23 @@ int get_document_signature(PGconn *conn, enum doctype doctype, char id[],
 	static char *requests[] = {
 		NULL,
 		NULL,
-		("SELECT sig, tag FROM raw_jorflegi.import_jorf_cont"
+		("SELECT sig, tag FROM jorflegi.jorf_cont"
 		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
-		("SELECT sig, tag FROM raw_jorflegi.import_jorf_text"
+		("SELECT sig, tag FROM jorflegi.jorf_text"
 		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
-		("SELECT sig, tag FROM raw_jorflegi.import_jorf_vers"
+		("SELECT sig, tag FROM jorflegi.jorf_vers"
 		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
-		("SELECT sig, tag FROM raw_jorflegi.import_jorf_scta"
+		("SELECT sig, tag FROM jorflegi.jorf_scta"
 		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
-		("SELECT sig, tag FROM raw_jorflegi.import_jorf_arti"
+		("SELECT sig, tag FROM jorflegi.jorf_arti"
 		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
-		("SELECT sig, tag FROM raw_jorflegi.import_legi_text"
+		("SELECT sig, tag FROM jorflegi.legi_text"
 		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
-		("SELECT sig, tag FROM raw_jorflegi.import_legi_vers"
+		("SELECT sig, tag FROM jorflegi.legi_vers"
 		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
-		("SELECT sig, tag FROM raw_jorflegi.import_legi_scta"
+		("SELECT sig, tag FROM jorflegi.legi_scta"
 		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
-		("SELECT sig, tag FROM raw_jorflegi.import_legi_arti"
+		("SELECT sig, tag FROM jorflegi.legi_arti"
 		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
 	};
 
@@ -165,23 +165,23 @@ int get_document_tags(PGconn *conn, enum doctype doctype, char id[],
 	static char *requests[] = {
 		NULL,
 		NULL,
-		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_cont"
+		("SELECT tag, ltag FROM jorflegi.jorf_cont"
 		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
-		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_text"
+		("SELECT tag, ltag FROM jorflegi.jorf_text"
 		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
-		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_vers"
+		("SELECT tag, ltag FROM jorflegi.jorf_vers"
 		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
-		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_scta"
+		("SELECT tag, ltag FROM jorflegi.jorf_scta"
 		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
-		("SELECT tag, ltag FROM raw_jorflegi.import_jorf_arti"
+		("SELECT tag, ltag FROM jorflegi.jorf_arti"
 		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
-		("SELECT tag, ltag FROM raw_jorflegi.import_legi_text"
+		("SELECT tag, ltag FROM jorflegi.legi_text"
 		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
-		("SELECT tag, ltag FROM raw_jorflegi.import_legi_vers"
+		("SELECT tag, ltag FROM jorflegi.legi_vers"
 		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
-		("SELECT tag, ltag FROM raw_jorflegi.import_legi_scta"
+		("SELECT tag, ltag FROM jorflegi.legi_scta"
 		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
-		("SELECT tag, ltag FROM raw_jorflegi.import_legi_arti"
+		("SELECT tag, ltag FROM jorflegi.legi_arti"
 		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
 	};
 
@@ -220,40 +220,40 @@ int delete(PGconn *conn, enum doctype doctype, char id[], char tag[])
 	static char *upd_requests[] = {
 		NULL,
 		NULL,
-		("INSERT INTO raw_jorflegi.updated_jorf_cont"
+		("INSERT INTO jorflegi.updated_jorf_cont"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"),
 		 /*JORFCONT_DOCTYPE*/
-		("INSERT INTO raw_jorflegi.updated_jorf_text"
+		("INSERT INTO jorflegi.updated_jorf_text"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFTEXT_DOCTYPE*/
-		("INSERT INTO raw_jorflegi.updated_jorf_vers"
+		("INSERT INTO jorflegi.updated_jorf_vers"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFVERS_DOCTYPE*/
-		("INSERT INTO raw_jorflegi.updated_jorf_scta"
+		("INSERT INTO jorflegi.updated_jorf_scta"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFSCTA_DOCTYPE*/
-		("INSERT INTO raw_jorflegi.updated_jorf_arti"
+		("INSERT INTO jorflegi.updated_jorf_arti"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFARTI_DOCTYPE*/
-		("INSERT INTO raw_jorflegi.updated_legi_text"
+		("INSERT INTO jorflegi.updated_legi_text"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGITEXT_DOCTYPE*/
-		("INSERT INTO raw_jorflegi.updated_legi_vers"
+		("INSERT INTO jorflegi.updated_legi_vers"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGIVERS_DOCTYPE*/
-		("INSERT INTO raw_jorflegi.updated_legi_scta"
+		("INSERT INTO jorflegi.updated_legi_scta"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGISCTA_DOCTYPE*/
-		("INSERT INTO raw_jorflegi.updated_legi_arti"
+		("INSERT INTO jorflegi.updated_legi_arti"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGIARTI_DOCTYPE*/
@@ -261,23 +261,23 @@ int delete(PGconn *conn, enum doctype doctype, char id[], char tag[])
 	static char *del_requests[] = {
 		NULL,
 		NULL,
-		("DELETE FROM raw_jorflegi.import_jorf_cont"
+		("DELETE FROM jorflegi.jorf_cont"
 		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
-		("DELETE FROM raw_jorflegi.import_jorf_text"
+		("DELETE FROM jorflegi.jorf_text"
 		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
-		("DELETE FROM raw_jorflegi.import_jorf_vers"
+		("DELETE FROM jorflegi.jorf_vers"
 		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
-		("DELETE FROM raw_jorflegi.import_jorf_scta"
+		("DELETE FROM jorflegi.jorf_scta"
 		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
-		("DELETE FROM raw_jorflegi.import_jorf_arti"
+		("DELETE FROM jorflegi.jorf_arti"
 		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
-		("DELETE FROM raw_jorflegi.import_legi_text"
+		("DELETE FROM jorflegi.legi_text"
 		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
-		("DELETE FROM raw_jorflegi.import_legi_vers"
+		("DELETE FROM jorflegi.legi_vers"
 		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
-		("DELETE FROM raw_jorflegi.import_legi_scta"
+		("DELETE FROM jorflegi.legi_scta"
 		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
-		("DELETE FROM raw_jorflegi.import_legi_arti"
+		("DELETE FROM jorflegi.legi_arti"
 		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
 	};
 
@@ -360,7 +360,7 @@ void create_updated_jorf_arti(PGconn *conn,
 	static char request[] = (
 		"SELECT id, rid, num, date_debut, date_fin, type,"
 		"       mcs, liens, contexte, contenu, versions,"
-		"       tag, ltag FROM raw_jorflegi.import_jorf_arti"
+		"       tag, ltag FROM jorflegi.jorf_arti"
 		"  WHERE id = $1"
 		);
 
@@ -407,7 +407,7 @@ void create_updated_jorf_arti(PGconn *conn,
 	param_values[14] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO raw_jorflegi.updated_jorf_arti"
+			   "INSERT INTO jorflegi.updated_jorf_arti"
 			   " (id, rid, num,"
 			   "  date_debut, date_fin, type,"
 			   "  mcs, liens, contexte, contenu, versions,"
@@ -448,7 +448,7 @@ void create_updated_jorf_scta(PGconn *conn,
 	static char request[] = (
 		"SELECT id, rid, titrefull, commentaire,"
 		"       contexte, toc,"
-		"       tag, ltag FROM raw_jorflegi.import_jorf_scta"
+		"       tag, ltag FROM jorflegi.jorf_scta"
 		"  WHERE id = $1"
 	);
 
@@ -490,7 +490,7 @@ void create_updated_jorf_scta(PGconn *conn,
 	param_values[9] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO raw_jorflegi.updated_jorf_scta"
+			   "INSERT INTO jorflegi.updated_jorf_scta"
 			   " (id, rid, titrefull, commentaire,"
 			   "  contexte, toc,"
 			   "  tag, ltag, mod_tm, updates)"
@@ -528,7 +528,7 @@ void create_updated_jorf_cont(PGconn *conn,
 	char updates[5];
 	static char request[] = (
 		"SELECT id, titre, num, date_publi, toc,"
-		"       tag, ltag FROM raw_jorflegi.import_jorf_cont"
+		"       tag, ltag FROM jorflegi.jorf_cont"
 		"  WHERE id = $1"
 	);
 
@@ -569,7 +569,7 @@ void create_updated_jorf_cont(PGconn *conn,
 	param_values[8] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO raw_jorflegi.updated_jorf_cont"
+			   "INSERT INTO jorflegi.updated_jorf_cont"
 			   " (id, titre, num, date_publi,"
 			   "  toc,"
 			   "  tag, ltag, mod_tm, updates)"
@@ -615,7 +615,7 @@ void create_updated_jorf_text(PGconn *conn,
 		"       page_fin_publi, date_publi, date_texte,"
 		"       derniere_modification,"
 		"       toc, versions,"
-		"       tag, ltag FROM raw_jorflegi.import_jorf_text"
+		"       tag, ltag FROM jorflegi.jorf_text"
 		"  WHERE id = $1"
 	);
 
@@ -659,7 +659,7 @@ void create_updated_jorf_text(PGconn *conn,
 
 	res = PQexecParams(conn,
 			   "INSERT INTO"
-			   " raw_jorflegi.updated_jorf_text"
+			   " jorflegi.updated_jorf_text"
 			   " (id, cid, rid, nature, num, nor,"
 			   "  num_parution, num_sequence,"
 			   "  origine_publi, page_deb_publi, page_fin_publi,"
@@ -708,7 +708,7 @@ void create_updated_jorf_vers(PGconn *conn,
 	static char request[] = (
 		"SELECT id, cid, rid, titre, titrefull, autorite, ministere,"
 		"       date_debut, date_fin, mcs, liens, contexte, contenu,"
-		"       tag, ltag FROM raw_jorflegi.import_jorf_vers"
+		"       tag, ltag FROM jorflegi.jorf_vers"
 		"  WHERE id = $1"
 	);
 
@@ -749,7 +749,7 @@ void create_updated_jorf_vers(PGconn *conn,
 
 	res = PQexecParams(conn,
 			   "INSERT INTO"
-			   " raw_jorflegi.updated_jorf_vers"
+			   " jorflegi.updated_jorf_vers"
 			   " (id, cid, rid,"
 			   "  titre, titrefull, autorite, ministere,"
 			   "  date_debut, date_fin, mcs, liens, contexte, contenu,"
@@ -791,7 +791,7 @@ void create_updated_legi_arti(PGconn *conn,
 	static char request[] = (
 		"SELECT id, rid, num, etat, date_debut, date_fin, type,"
 		"       liens, contexte, contenu, versions,"
-		"       tag, ltag FROM raw_jorflegi.import_legi_arti"
+		"       tag, ltag FROM jorflegi.legi_arti"
 		"  WHERE id = $1"
 	);
 
@@ -841,7 +841,7 @@ void create_updated_legi_arti(PGconn *conn,
 	param_values[14] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO raw_jorflegi.updated_legi_arti"
+			   "INSERT INTO jorflegi.updated_legi_arti"
 			   " (id, rid, num, etat,"
 			   "  date_debut, date_fin, type,"
 			   "  liens, contexte, contenu, versions,"
@@ -882,7 +882,7 @@ void create_updated_legi_scta(PGconn *conn,
 	static char request[] = (
 		"SELECT id, rid, titrefull, commentaire,"
 		"       contexte, toc,"
-		"       tag, ltag FROM raw_jorflegi.import_legi_scta"
+		"       tag, ltag FROM jorflegi.legi_scta"
 		"  WHERE id = $1"
 	);
 
@@ -924,7 +924,7 @@ void create_updated_legi_scta(PGconn *conn,
 	param_values[9] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO raw_jorflegi.updated_legi_scta"
+			   "INSERT INTO jorflegi.updated_legi_scta"
 			   " (id, rid, titrefull, commentaire,"
 			   "  contexte, toc,"
 			   "  tag, ltag, mod_tm, updates)"
@@ -971,7 +971,7 @@ void create_updated_legi_text(PGconn *conn,
 		"       page_fin_publi, date_publi, date_texte,"
 		"       derniere_modification,"
 		"       toc, versions,"
-		"       tag, ltag FROM raw_jorflegi.import_legi_text"
+		"       tag, ltag FROM jorflegi.legi_text"
 		"  WHERE id = $1"
 	);
 
@@ -1015,7 +1015,7 @@ void create_updated_legi_text(PGconn *conn,
 
 	res = PQexecParams(conn,
 			   "INSERT INTO"
-			   " raw_jorflegi.updated_legi_text"
+			   " jorflegi.updated_legi_text"
 			   " (id, cid, rid, nature, num, nor,"
 			   "  num_parution, num_sequence,"
 			   "  origine_publi, page_deb_publi, page_fin_publi,"
@@ -1064,7 +1064,7 @@ void create_updated_legi_vers(PGconn *conn,
 	static char request[] = (
 		"SELECT id, cid, rid, titre, titrefull, autorite, ministere,"
 		"       etat, date_debut, date_fin, liens, contexte, contenu,"
-		"       tag, ltag FROM raw_jorflegi.import_legi_vers"
+		"       tag, ltag FROM jorflegi.legi_vers"
 		"  WHERE id = $1"
 	);
 
@@ -1105,7 +1105,7 @@ void create_updated_legi_vers(PGconn *conn,
 
 	res = PQexecParams(conn,
 			   "INSERT INTO"
-			   " raw_jorflegi.updated_legi_vers"
+			   " jorflegi.updated_legi_vers"
 			   " (id, cid, rid,"
 			   "  titre, titrefull, autorite, ministere,"
 			   "  etat, date_debut, date_fin, liens, contexte, contenu,"
@@ -1279,7 +1279,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
 					   "INSERT INTO "
-					   "raw_jorflegi.import_jorf_arti"
+					   "jorflegi.jorf_arti"
 					   " (cid, rid, num,"
 					   "  date_debut, date_fin, type,"
 					   "  mcs, liens, contexte, contenu,"
@@ -1318,7 +1318,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[15] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " raw_jorflegi.import_jorf_arti"
+					   " jorflegi.jorf_arti"
 					   " SET (cid, rid, num,"
 					   "  date_debut, date_fin, type,"
 					   "  mcs, liens, contexte, contenu,"
@@ -1434,7 +1434,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			tt->db_insert = clock();
 			res = PQexecParams(conn,
 					   "INSERT INTO"
-					   " raw_jorflegi.import_jorf_scta"
+					   " jorflegi.jorf_scta"
 					   " (rid, titrefull, commentaire,"
 					   "  contexte, toc,"
 					   "  id, uri, uri_parts, tag, sig,"
@@ -1468,7 +1468,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[9] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " raw_jorflegi.import_jorf_scta"
+					   " jorflegi.jorf_scta"
 					   " SET ("
 					   "  rid, titrefull, commentaire,"
 					   "  contexte, toc,"
@@ -1601,7 +1601,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			tt->db_insert = clock();
 			res = PQexecParams(conn,
 					   "INSERT INTO "
-					   " raw_jorflegi.import_jorf_vers"
+					   " jorflegi.jorf_vers"
 					   " (cid, rid, titre, titrefull, autorite,"
 					   "  ministere,"
 					   "  date_debut, date_fin, mcs, liens,"
@@ -1637,7 +1637,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[16] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " raw_jorflegi.import_jorf_vers"
+					   " jorflegi.jorf_vers"
 					   " SET ("
 					   "  cid, rid, titre, titrefull, autorite,"
 					   "  ministere,"
@@ -1771,7 +1771,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO raw_jorflegi.import_jorf_text"
+					   "INSERT INTO jorflegi.jorf_text"
 					   " (cid, rid, nature, num, nor, num_parution, num_sequence,"
 					   "  origine_publi, page_deb_publi, page_fin_publi, date_publi,"
 					   "  date_texte, derniere_modification, toc, versions,"
@@ -1805,7 +1805,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[19] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " raw_jorflegi.import_jorf_text"
+					   " jorflegi.jorf_text"
 					   " SET ("
 					   "  cid, rid, nature, num, nor,"
 					   "  num_parution, num_sequence,"
@@ -1918,7 +1918,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO raw_jorflegi.import_jorf_cont"
+					   "INSERT INTO jorflegi.jorf_cont"
 					   " (titre, num, date_publi, toc, id, uri, uri_parts, tag, sig, mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3, $4, "
@@ -1947,7 +1947,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[8] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " raw_jorflegi.import_jorf_cont"
+					   " jorflegi.jorf_cont"
 					   " SET ("
 					   "  titre, num, date_publi,"
 					   "  toc,"
@@ -2072,7 +2072,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO raw_jorflegi.import_legi_arti"
+					   "INSERT INTO jorflegi.legi_arti"
 					   " (cid, rid, num, etat,"
 					   "  date_debut, date_fin, type,"
 					   "  liens, contexte, contenu, versions,"
@@ -2106,7 +2106,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[15] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " raw_jorflegi.import_legi_arti"
+					   " jorflegi.legi_arti"
 					   " SET (cid, rid, num, etat,"
 					   "  date_debut, date_fin, type,"
 					   "  liens, contexte, contenu,"
@@ -2219,7 +2219,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			tt->db_insert = clock();
 			res = PQexecParams(conn,
 					   "INSERT INTO"
-					   " raw_jorflegi.import_legi_scta"
+					   " jorflegi.legi_scta"
 					   " (rid, titrefull, commentaire,"
 					   "  contexte, toc,"
 					   "  id, uri, uri_parts, tag, sig,"
@@ -2253,7 +2253,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[9] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " raw_jorflegi.import_legi_scta"
+					   " jorflegi.legi_scta"
 					   " SET ("
 					   "  rid, titrefull, commentaire,"
 					   "  contexte, toc,"
@@ -2384,7 +2384,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO raw_jorflegi.import_legi_text"
+					   "INSERT INTO jorflegi.legi_text"
 					   " (cid, rid, nature, num, nor, num_parution, num_sequence,"
 					   "  origine_publi, page_deb_publi, page_fin_publi, date_publi,"
 					   "  date_texte, derniere_modification, toc, versions,"
@@ -2418,7 +2418,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[19] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " raw_jorflegi.import_legi_text"
+					   " jorflegi.legi_text"
 					   " SET ("
 					   "  cid, rid, nature, num, nor,"
 					   "  num_parution, num_sequence,"
@@ -2554,7 +2554,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO raw_jorflegi.import_legi_vers"
+					   "INSERT INTO jorflegi.legi_vers"
 					   " (cid, rid, titre, titrefull, autorite,"
 					   "  ministere, etat,"
 					   "  date_debut, date_fin, liens,"
@@ -2590,7 +2590,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[16] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " raw_jorflegi.import_legi_vers"
+					   " jorflegi.legi_vers"
 					   " SET ("
 					   "  cid, rid, titre, titrefull, autorite,"
 					   "  ministere, etat,"

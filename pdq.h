@@ -24,8 +24,6 @@ struct gen_uri_info {
     struct write_buffer *dbbuf5;
     struct write_buffer *dbbuf6;
     char bootstrap;
-    char force;
-    char *target_dir;
     char *data_file;
     FILE *log_file;
     PGconn *pg_conn;
