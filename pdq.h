@@ -8,7 +8,7 @@
 #include "db.h"
 #include "signature.h"
 
-#define VERSION "0.8"
+#define VERSION "0.9"
 
 struct gen_uri_info {
     enum fund fund;

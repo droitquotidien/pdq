@@ -329,20 +329,26 @@ int delete(PGconn *conn, enum doctype doctype, char id[], char tag[])
 
 char *has_been_updated(PGresult *res, int field, char *new, char *updated)
 {
+    /*
+     * Compare the previous value with the new one, and
+     * determine the operation executed: no change (' '),
+     * update ('*'), create ('+'), or delete ('-'), store in `updated`.
+     * When there is a change, return the previous value.
+     */
 	char *old = PQgetvalue(res, 0, field);
 	*updated = ' ';
 	if (old == NULL && new != NULL) {
-		*updated = '+';
-		return new;
+		*updated = '+';  /* CREATE */
+		return old;  /* return previous value to store */
 	}
 	if (old != NULL && new == NULL) {
-		*updated = '-';
+		*updated = '-';  /* DELETE */
 		return NULL;
 	}
 	if (strcmp(old, new) == 0)
 		return NULL;
-	*updated = '*';
-	return new;
+	*updated = '*';  /* UPDATE */
+	return old;  /* return previous value to store */
 }
 
 void create_updated_jorf_arti(PGconn *conn,
