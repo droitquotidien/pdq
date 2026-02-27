@@ -241,19 +241,19 @@ int delete(PGconn *conn, enum doctype doctype, char id[], char tag[])
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFARTI_DOCTYPE*/
-		("INSERT INTO jorflegi.updated_legi_text"
+		("INSERT INTO dila_legi.updated_legi_text"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGITEXT_DOCTYPE*/
-		("INSERT INTO jorflegi.updated_legi_vers"
+		("INSERT INTO dila_legi.updated_legi_vers"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGIVERS_DOCTYPE*/
-		("INSERT INTO jorflegi.updated_legi_scta"
+		("INSERT INTO dila_legi.updated_legi_scta"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGISCTA_DOCTYPE*/
-		("INSERT INTO jorflegi.updated_legi_arti"
+		("INSERT INTO dila_legi.updated_legi_arti"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*LEGIARTI_DOCTYPE*/
@@ -847,7 +847,7 @@ void create_updated_legi_arti(PGconn *conn,
 	param_values[14] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO jorflegi.updated_legi_arti"
+			   "INSERT INTO dila_legi.updated_legi_arti"
 			   " (id, rid, num, etat,"
 			   "  date_debut, date_fin, type,"
 			   "  liens, contexte, contenu, versions,"
@@ -930,7 +930,7 @@ void create_updated_legi_scta(PGconn *conn,
 	param_values[9] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO jorflegi.updated_legi_scta"
+			   "INSERT INTO dila_legi.updated_legi_scta"
 			   " (id, rid, titrefull, commentaire,"
 			   "  contexte, toc,"
 			   "  tag, ltag, mod_tm, updates)"
@@ -1021,7 +1021,7 @@ void create_updated_legi_text(PGconn *conn,
 
 	res = PQexecParams(conn,
 			   "INSERT INTO"
-			   " jorflegi.updated_legi_text"
+			   " dila_legi.updated_legi_text"
 			   " (id, cid, rid, nature, num, nor,"
 			   "  num_parution, num_sequence,"
 			   "  origine_publi, page_deb_publi, page_fin_publi,"
@@ -1111,7 +1111,7 @@ void create_updated_legi_vers(PGconn *conn,
 
 	res = PQexecParams(conn,
 			   "INSERT INTO"
-			   " jorflegi.updated_legi_vers"
+			   " dila_legi.updated_legi_vers"
 			   " (id, cid, rid,"
 			   "  titre, titrefull, autorite, ministere,"
 			   "  etat, date_debut, date_fin, liens, contexte, contenu,"

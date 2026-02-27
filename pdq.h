@@ -9,7 +9,7 @@
 
 #define VERSION "0.9"
 
-struct gen_uri_info {
+struct parse_info {
     enum fund fund;
     int xml_files;
     struct parsed_data *pdata;

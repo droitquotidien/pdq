@@ -226,8 +226,6 @@ struct metadata {
     enum fund fund;
     enum doctype doctype;
     char base[5];
-    //struct uri uri_parts;
-    //char uri[MAX_URI];
     char rid[FIELD_LEN_ID+1]; /* JORFVERS000037658324 + \0 */
 };
 

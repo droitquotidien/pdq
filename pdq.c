@@ -1,10 +1,11 @@
 /*
- * PDQ - Droit Quotidien Parser
+ * PDQ - Parseur de Droit Quotidien
  *
  * Copyright (C) GA Silber, 2020
  */
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 #include "pdq.h"
 #include "parse.h"
 #include "buffer.h"
@@ -1552,7 +1553,7 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 	}
 }
 
-int archive_parse_file(struct archive *a, struct archive_entry *entry, void *user_data)
+int parse_archive_file(struct archive *a, struct archive_entry *entry, void *user_data)
 {
 	int r;
 	int uri_len;
@@ -1564,7 +1565,7 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry, void *use
 	struct metadata *mdata;
 	xmlSAXHandler parser_handler = {0};
 	const char *fname;
-	struct gen_uri_info *infos = user_data;
+	struct parse_info *infos = user_data;
 	size_t size;
 	char base[5];
 
@@ -1711,7 +1712,7 @@ int set_params(int argc, char *argv[], struct params *params)
 	return 0;
 }
 
-int import_files_from_archive(struct gen_uri_info *infos)
+int import_files_from_archive(struct parse_info *infos)
 {
 	int r;
 	xmlSAXHandler parser_handler = {0};
@@ -1761,7 +1762,7 @@ int import_files_from_archive(struct gen_uri_info *infos)
 	parser_handler.endElement = end_element_callback;
 	parser_handler.characters = characters_callback;
 	infos->ctxt = xmlCreatePushParserCtxt(&parser_handler, infos->pdata, NULL, 0, NULL);
-	r = iterate_archive(infos->data_file, archive_parse_file, infos);
+	r = iterate_archive(infos->data_file, parse_archive_file, infos);
 	xmlFreeParserCtxt(infos->ctxt);
 	free_parsed_data(infos->pdata);
 
@@ -1770,11 +1771,11 @@ int import_files_from_archive(struct gen_uri_info *infos)
 	return r;
 }
 
-int import_jorflegi_data_file(char *data_file, PGconn *conn, regex_t *ts_re, FILE *log_file,
-							  const EVP_MD *sig_gen, char bootstrap)
+int import_dila_data_file(char *data_file, PGconn *conn, regex_t *ts_re, FILE *log_file,
+                          const EVP_MD *sig_gen, char bootstrap)
 {
 	int r = 0;
-	struct gen_uri_info infos = {0};
+	struct parse_info infos = {0};
 
 	r = parse_timestamp(data_file, ts_re, &infos.ts);
 	if (r < 0) return 1;
@@ -1802,6 +1803,11 @@ int main(int argc, char **argv)
 	regex_t ts_re;
 	FILE *log_file;
 	const EVP_MD *sig_gen;
+	time_t tstart;
+	time_t tstop;
+	clock_t start, start_import;
+    clock_t stop, stop_import;
+    clock_t t;
 
 	if (set_params(argc, argv, &params) == 1) {
 		print_usage();
@@ -1812,6 +1818,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	start = clock();
+	tstart = time(NULL);
 	/*
 	 * Initializations
 	 */
@@ -1834,21 +1842,29 @@ int main(int argc, char **argv)
 	/*
 	 * Import one file
 	 */
-	r = import_jorflegi_data_file(params.data_file, conn, &ts_re, log_file, sig_gen,
-	                              params.bootstrap);
+	start_import = clock();
+	r = import_dila_data_file(params.data_file, conn, &ts_re, log_file, sig_gen, params.bootstrap);
+	stop_import = clock();
 
 	/*
 	 * Clean-up
 	 */
-	if (params.logfile != NULL) {
-		fclose(log_file);
-	}
 	if (conn != NULL) {
 	    PQfinish(conn);
 	}
 	cleanup_signature_system();
 	free_delete_re();
 	free_timestamp_re(&ts_re);
+	stop = clock();
+	tstop = time(NULL);
+
+	fprintf(log_file, "TOTAL CPU: %ld seconds.\n", (stop - start) / CLOCKS_PER_SEC);
+	fprintf(log_file, "IMPORT only CPU: %ld seconds.\n",
+	    (stop_import - start_import) / CLOCKS_PER_SEC);
+	fprintf(log_file, "TOTAL time: %ld seconds.\n", (tstop - tstart));
+	if (params.logfile != NULL) {
+		fclose(log_file);
+	}
 
 	return r;
 }
