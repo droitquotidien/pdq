@@ -4,7 +4,6 @@
 #include <libxml/xmlreader.h>
 #include <archive.h>
 #include <archive_entry.h>
-#include "jorflegi.h"
 #include "db.h"
 #include "signature.h"
 

@@ -64,23 +64,23 @@ void update_ltag(PGconn *conn, enum doctype doctype, char id[], char tag[])
 	static char *requests[] = {
 		NULL,
 		NULL,
-		("UPDATE jorflegi.jorf_cont SET ltag = $2"
+		("UPDATE dila_jorf.jorf_cont SET ltag = $2"
 		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
-		("UPDATE jorflegi.jorf_text SET ltag = $2"
+		("UPDATE dila_jorf.jorf_text SET ltag = $2"
 		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
-		("UPDATE jorflegi.jorf_vers SET ltag = $2"
+		("UPDATE dila_jorf.jorf_vers SET ltag = $2"
 		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
-		("UPDATE jorflegi.jorf_scta SET ltag = $2"
+		("UPDATE dila_jorf.jorf_scta SET ltag = $2"
 		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
-		("UPDATE jorflegi.jorf_arti SET ltag = $2"
+		("UPDATE dila_jorf.jorf_arti SET ltag = $2"
 		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
-		("UPDATE jorflegi.legi_text SET ltag = $2"
+		("UPDATE dila_legi.legi_text SET ltag = $2"
 		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
-		("UPDATE jorflegi.legi_vers SET ltag = $2"
+		("UPDATE dila_legi.legi_vers SET ltag = $2"
 		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
-		("UPDATE jorflegi.legi_scta SET ltag = $2"
+		("UPDATE dila_legi.legi_scta SET ltag = $2"
 		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
-		("UPDATE jorflegi.legi_arti SET ltag = $2"
+		("UPDATE dila_legi.legi_arti SET ltag = $2"
 		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
 	};
 	param_values[0] = id;
@@ -111,23 +111,23 @@ int get_document_signature(PGconn *conn, enum doctype doctype, char id[],
 	static char *requests[] = {
 		NULL,
 		NULL,
-		("SELECT sig, tag FROM jorflegi.jorf_cont"
+		("SELECT sig, tag FROM dila_jorf.jorf_cont"
 		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
-		("SELECT sig, tag FROM jorflegi.jorf_text"
+		("SELECT sig, tag FROM dila_jorf.jorf_text"
 		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
-		("SELECT sig, tag FROM jorflegi.jorf_vers"
+		("SELECT sig, tag FROM dila_jorf.jorf_vers"
 		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
-		("SELECT sig, tag FROM jorflegi.jorf_scta"
+		("SELECT sig, tag FROM dila_jorf.jorf_scta"
 		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
-		("SELECT sig, tag FROM jorflegi.jorf_arti"
+		("SELECT sig, tag FROM dila_jorf.jorf_arti"
 		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
-		("SELECT sig, tag FROM jorflegi.legi_text"
+		("SELECT sig, tag FROM dila_legi.legi_text"
 		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
-		("SELECT sig, tag FROM jorflegi.legi_vers"
+		("SELECT sig, tag FROM dila_legi.legi_vers"
 		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
-		("SELECT sig, tag FROM jorflegi.legi_scta"
+		("SELECT sig, tag FROM dila_legi.legi_scta"
 		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
-		("SELECT sig, tag FROM jorflegi.legi_arti"
+		("SELECT sig, tag FROM dila_legi.legi_arti"
 		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
 	};
 
@@ -165,23 +165,23 @@ int get_document_tags(PGconn *conn, enum doctype doctype, char id[],
 	static char *requests[] = {
 		NULL,
 		NULL,
-		("SELECT tag, ltag FROM jorflegi.jorf_cont"
+		("SELECT tag, ltag FROM dila_jorf.jorf_cont"
 		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
-		("SELECT tag, ltag FROM jorflegi.jorf_text"
+		("SELECT tag, ltag FROM dila_jorf.jorf_text"
 		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
-		("SELECT tag, ltag FROM jorflegi.jorf_vers"
+		("SELECT tag, ltag FROM dila_jorf.jorf_vers"
 		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
-		("SELECT tag, ltag FROM jorflegi.jorf_scta"
+		("SELECT tag, ltag FROM dila_jorf.jorf_scta"
 		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
-		("SELECT tag, ltag FROM jorflegi.jorf_arti"
+		("SELECT tag, ltag FROM dila_jorf.jorf_arti"
 		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
-		("SELECT tag, ltag FROM jorflegi.legi_text"
+		("SELECT tag, ltag FROM dila_legi.legi_text"
 		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
-		("SELECT tag, ltag FROM jorflegi.legi_vers"
+		("SELECT tag, ltag FROM dila_legi.legi_vers"
 		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
-		("SELECT tag, ltag FROM jorflegi.legi_scta"
+		("SELECT tag, ltag FROM dila_legi.legi_scta"
 		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
-		("SELECT tag, ltag FROM jorflegi.legi_arti"
+		("SELECT tag, ltag FROM dila_legi.legi_arti"
 		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
 	};
 
@@ -220,24 +220,24 @@ int delete(PGconn *conn, enum doctype doctype, char id[], char tag[])
 	static char *upd_requests[] = {
 		NULL,
 		NULL,
-		("INSERT INTO jorflegi.updated_jorf_cont"
+		("INSERT INTO dila_jorf.updated_jorf_cont"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"),
 		 /*JORFCONT_DOCTYPE*/
-		("INSERT INTO jorflegi.updated_jorf_text"
+		("INSERT INTO dila_jorf.updated_jorf_text"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFTEXT_DOCTYPE*/
-		("INSERT INTO jorflegi.updated_jorf_vers"
+		("INSERT INTO dila_jorf.updated_jorf_vers"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFVERS_DOCTYPE*/
-		("INSERT INTO jorflegi.updated_jorf_scta"
+		("INSERT INTO dila_jorf.updated_jorf_scta"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFSCTA_DOCTYPE*/
-		("INSERT INTO jorflegi.updated_jorf_arti"
+		("INSERT INTO dila_jorf.updated_jorf_arti"
 		 "(id, tag, ltag, updates, mod_tm)"
 		 "VALUES"
 		 "($1, $2, $3, 'DEL', NOW()::timestamp)"), /*JORFARTI_DOCTYPE*/
@@ -261,23 +261,23 @@ int delete(PGconn *conn, enum doctype doctype, char id[], char tag[])
 	static char *del_requests[] = {
 		NULL,
 		NULL,
-		("DELETE FROM jorflegi.jorf_cont"
+		("DELETE FROM dila_jorf.jorf_cont"
 		 " WHERE id = $1"), /*JORFCONT_DOCTYPE*/
-		("DELETE FROM jorflegi.jorf_text"
+		("DELETE FROM dila_jorf.jorf_text"
 		 " WHERE id = $1"), /*JORFTEXT_DOCTYPE*/
-		("DELETE FROM jorflegi.jorf_vers"
+		("DELETE FROM dila_jorf.jorf_vers"
 		 " WHERE id = $1"), /*JORFVERS_DOCTYPE*/
-		("DELETE FROM jorflegi.jorf_scta"
+		("DELETE FROM dila_jorf.jorf_scta"
 		 " WHERE id = $1"), /*JORFSCTA_DOCTYPE*/
-		("DELETE FROM jorflegi.jorf_arti"
+		("DELETE FROM dila_jorf.jorf_arti"
 		 " WHERE id = $1"), /*JORFARTI_DOCTYPE*/
-		("DELETE FROM jorflegi.legi_text"
+		("DELETE FROM dila_legi.legi_text"
 		 " WHERE id = $1"), /*LEGITEXT_DOCTYPE*/
-		("DELETE FROM jorflegi.legi_vers"
+		("DELETE FROM dila_legi.legi_vers"
 		 " WHERE id = $1"), /*LEGIVERS_DOCTYPE*/
-		("DELETE FROM jorflegi.legi_scta"
+		("DELETE FROM dila_legi.legi_scta"
 		 " WHERE id = $1"), /*LEGISCTA_DOCTYPE*/
-		("DELETE FROM jorflegi.legi_arti"
+		("DELETE FROM dila_legi.legi_arti"
 		 " WHERE id = $1"), /*LEGIARTI_DOCTYPE*/
 	};
 
@@ -366,7 +366,7 @@ void create_updated_jorf_arti(PGconn *conn,
 	static char request[] = (
 		"SELECT id, rid, num, date_debut, date_fin, type,"
 		"       mcs, liens, contexte, contenu, versions,"
-		"       tag, ltag FROM jorflegi.jorf_arti"
+		"       tag, ltag FROM dila_jorf.jorf_arti"
 		"  WHERE id = $1"
 		);
 
@@ -413,7 +413,7 @@ void create_updated_jorf_arti(PGconn *conn,
 	param_values[14] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO jorflegi.updated_jorf_arti"
+			   "INSERT INTO dila_jorf.updated_jorf_arti"
 			   " (id, rid, num,"
 			   "  date_debut, date_fin, type,"
 			   "  mcs, liens, contexte, contenu, versions,"
@@ -454,7 +454,7 @@ void create_updated_jorf_scta(PGconn *conn,
 	static char request[] = (
 		"SELECT id, rid, titrefull, commentaire,"
 		"       contexte, toc,"
-		"       tag, ltag FROM jorflegi.jorf_scta"
+		"       tag, ltag FROM dila_jorf.jorf_scta"
 		"  WHERE id = $1"
 	);
 
@@ -496,7 +496,7 @@ void create_updated_jorf_scta(PGconn *conn,
 	param_values[9] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO jorflegi.updated_jorf_scta"
+			   "INSERT INTO dila_jorf.updated_jorf_scta"
 			   " (id, rid, titrefull, commentaire,"
 			   "  contexte, toc,"
 			   "  tag, ltag, mod_tm, updates)"
@@ -534,7 +534,7 @@ void create_updated_jorf_cont(PGconn *conn,
 	char updates[5];
 	static char request[] = (
 		"SELECT id, titre, num, date_publi, toc,"
-		"       tag, ltag FROM jorflegi.jorf_cont"
+		"       tag, ltag FROM dila_jorf.jorf_cont"
 		"  WHERE id = $1"
 	);
 
@@ -575,7 +575,7 @@ void create_updated_jorf_cont(PGconn *conn,
 	param_values[8] = NULL;
 
 	res = PQexecParams(conn,
-			   "INSERT INTO jorflegi.updated_jorf_cont"
+			   "INSERT INTO dila_jorf.updated_jorf_cont"
 			   " (id, titre, num, date_publi,"
 			   "  toc,"
 			   "  tag, ltag, mod_tm, updates)"
@@ -621,7 +621,7 @@ void create_updated_jorf_text(PGconn *conn,
 		"       page_fin_publi, date_publi, date_texte,"
 		"       derniere_modification,"
 		"       toc, versions,"
-		"       tag, ltag FROM jorflegi.jorf_text"
+		"       tag, ltag FROM dila_jorf.jorf_text"
 		"  WHERE id = $1"
 	);
 
@@ -665,7 +665,7 @@ void create_updated_jorf_text(PGconn *conn,
 
 	res = PQexecParams(conn,
 			   "INSERT INTO"
-			   " jorflegi.updated_jorf_text"
+			   " dila_jorf.updated_jorf_text"
 			   " (id, cid, rid, nature, num, nor,"
 			   "  num_parution, num_sequence,"
 			   "  origine_publi, page_deb_publi, page_fin_publi,"
@@ -714,7 +714,7 @@ void create_updated_jorf_vers(PGconn *conn,
 	static char request[] = (
 		"SELECT id, cid, rid, titre, titrefull, autorite, ministere,"
 		"       date_debut, date_fin, mcs, liens, contexte, contenu,"
-		"       tag, ltag FROM jorflegi.jorf_vers"
+		"       tag, ltag FROM dila_jorf.jorf_vers"
 		"  WHERE id = $1"
 	);
 
@@ -755,7 +755,7 @@ void create_updated_jorf_vers(PGconn *conn,
 
 	res = PQexecParams(conn,
 			   "INSERT INTO"
-			   " jorflegi.updated_jorf_vers"
+			   " dila_jorf.updated_jorf_vers"
 			   " (id, cid, rid,"
 			   "  titre, titrefull, autorite, ministere,"
 			   "  date_debut, date_fin, mcs, liens, contexte, contenu,"
@@ -797,7 +797,7 @@ void create_updated_legi_arti(PGconn *conn,
 	static char request[] = (
 		"SELECT id, rid, num, etat, date_debut, date_fin, type,"
 		"       liens, contexte, contenu, versions,"
-		"       tag, ltag FROM jorflegi.legi_arti"
+		"       tag, ltag FROM dila_legi.legi_arti"
 		"  WHERE id = $1"
 	);
 
@@ -888,7 +888,7 @@ void create_updated_legi_scta(PGconn *conn,
 	static char request[] = (
 		"SELECT id, rid, titrefull, commentaire,"
 		"       contexte, toc,"
-		"       tag, ltag FROM jorflegi.legi_scta"
+		"       tag, ltag FROM dila_legi.legi_scta"
 		"  WHERE id = $1"
 	);
 
@@ -977,7 +977,7 @@ void create_updated_legi_text(PGconn *conn,
 		"       page_fin_publi, date_publi, date_texte,"
 		"       derniere_modification,"
 		"       toc, versions,"
-		"       tag, ltag FROM jorflegi.legi_text"
+		"       tag, ltag FROM dila_legi.legi_text"
 		"  WHERE id = $1"
 	);
 
@@ -1070,7 +1070,7 @@ void create_updated_legi_vers(PGconn *conn,
 	static char request[] = (
 		"SELECT id, cid, rid, titre, titrefull, autorite, ministere,"
 		"       etat, date_debut, date_fin, liens, contexte, contenu,"
-		"       tag, ltag FROM jorflegi.legi_vers"
+		"       tag, ltag FROM dila_legi.legi_vers"
 		"  WHERE id = $1"
 	);
 
@@ -1174,7 +1174,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		tag->tm_year, tag->tm_mon, tag->tm_mday,
 		tag->tm_hour, tag->tm_min, tag->tm_sec);
 
-	switch (mdata->uri_parts.doctype) {
+	switch (mdata->doctype) {
 
 	case JORFARTI_DOCTYPE:
 		r = write_mcs_json(-1, mcs, dbbuf1, 1);
@@ -1203,33 +1203,22 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		param_values[8] = dbbuf3->buffer;  // contexte
 		param_values[9] = dbbuf4->buffer;  // contenu
 		param_values[10] = dbbuf5->buffer;  // versions
-		compute_signature(md, param_values, 11,
-				  digest, &digest_len, tt);
+		compute_signature(md, param_values, 11, digest, &digest_len, tt);
 		hex_signature(digest, digest_len, signature);
 
 		if (!bootstrap) {
 			/* Get existing document signature and tag */
-			int exists = get_document_signature(
-				conn,
-				mdata->uri_parts.doctype,
-				mdata->id, c_signature, c_tag);
+			int exists;
+		    exists = get_document_signature(conn, mdata->doctype, mdata->id, c_signature, c_tag);
 			if (exists) {
 				if (strcmp(signature, c_signature) == 0) {
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(log_file,
-							"IGNORE:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IGNORE:%s:%s\n", mdata->id, stag);
 					} else {
-						fprintf(log_file,
-							"IDENTICAL:%s:%s\n",
-							mdata->id, stag);
-						update_ltag(
-							conn,
-							mdata->uri_parts.doctype,
-							mdata->id,
-							stag);
+						fprintf(log_file, "IDENTICAL:%s:%s\n", mdata->id, stag);
+						update_ltag(conn, mdata->doctype, mdata->id, stag);
 					}
 					buffer_reset(dbbuf1);
 					buffer_reset(dbbuf2);
@@ -1247,9 +1236,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					 * UPDATE doc.mod_tm AND doc.sig
 		 			 * DO NOT CHANGE URI/URI PARTS (?)
 					 */
-					fprintf(log_file,
-						"CREATE_UPDATED:%s:%s\n",
-						mdata->id, c_tag);
+					fprintf(log_file, "CREATE_UPDATED:%s:%s\n", mdata->id, c_tag);
 					create_updated_jorf_arti(
 						conn, mdata->id,
 						mdata->rid,
@@ -1268,55 +1255,44 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(log_file, "CREATE:%s:%s\n",
-				mdata->id, stag);
-			r = write_uri_parts_json(-1, &mdata->uri_parts,
-						 dbbuf6, 1);
-			if (r < 0) exit_nicely(conn);
-			dbbuf6->buffer[dbbuf6->current_size] = 0;
+			fprintf(log_file, "CREATE:%s:%s\n", mdata->id, stag);
 			param_values[11] = mdata->id;
-			param_values[12] = mdata->uri;
-			param_values[13] = dbbuf6->buffer;  // uri_parts
-			param_values[14] = stag;
+			param_values[12] = stag;
 			/* TODO: ltag */
-			param_values[15] = signature;
-			param_values[16] = NULL;
+			param_values[13] = signature;
+			param_values[14] = NULL;
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
 					   "INSERT INTO "
-					   "jorflegi.jorf_arti"
+					   "dila_jorf.jorf_arti"
 					   " (cid, rid, num,"
 					   "  date_debut, date_fin, type,"
 					   "  mcs, liens, contexte, contenu,"
 					   "  versions,"
-					   "  id, uri, uri_parts, tag, sig,"
+					   "  id, tag, sig,"
 					   "  mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3,"
 					   "  $4, $5, $6,"
 					   "  $7, $8, $9, $10,"
 					   "  $11,"
-					   "  $12, $13, $14, $15, $16,"
+					   "  $12, $13, $14,"
 					   "  NOW()::timestamp)"
 					   " ON CONFLICT DO NOTHING",
-					   16,
+					   14,
 					   NULL,
 					   param_values,
 					   NULL,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"INSERT failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "INSERT failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
-			buffer_reset(dbbuf6);
 		} else {
-			fprintf(log_file, "UPDATE:%s:%s\n",
-				mdata->id, stag);
+			fprintf(log_file, "UPDATE:%s:%s\n", mdata->id, stag);
 			param_values[11] = stag; /* tag */
 			param_values[12] = stag; /* ltag */
 			param_values[13] = signature; /* sig */
@@ -1324,7 +1300,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[15] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " jorflegi.jorf_arti"
+					   " dila_jorf.jorf_arti"
 					   " SET (cid, rid, num,"
 					   "  date_debut, date_fin, type,"
 					   "  mcs, liens, contexte, contenu,"
@@ -1344,9 +1320,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"UPDATE failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "UPDATE failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
@@ -1365,8 +1339,6 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		break;
 
 	case JORFSCTA_DOCTYPE:
-		/*fprintf(stderr, "INFO:%s: insert in DB\n",
-			mdata->rid);*/
 		r = write_contexte_json(-1, contexte, dbbuf1, 1);
 		if (r < 0) exit_nicely(conn);
 		dbbuf1->buffer[dbbuf1->current_size] = 0;
@@ -1378,40 +1350,27 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		param_values[2] = mdata->commentaire;
 		param_values[3] = dbbuf1->buffer;  // contexte
 		param_values[4] = dbbuf2->buffer;  // toc
-		compute_signature(md, param_values, 5,
-				  digest, &digest_len, tt);
+		compute_signature(md, param_values, 5, digest, &digest_len, tt);
 		hex_signature(digest, digest_len, signature);
 
 		if (!bootstrap) {
-			int exists = get_document_signature(
-				conn,
-				mdata->uri_parts.doctype,
-				mdata->id, c_signature, c_tag);
+			int exists;
+		    exists = get_document_signature(conn, mdata->doctype, mdata->id, c_signature, c_tag);
 			if (exists) {
 				if (strcmp(signature, c_signature) == 0) {
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(log_file,
-							"IGNORE:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IGNORE:%s:%s\n", mdata->id, stag);
 					} else {
-						fprintf(log_file,
-							"IDENTICAL:%s:%s\n",
-							mdata->id, stag);
-						update_ltag(
-							conn,
-							mdata->uri_parts.doctype,
-							mdata->id,
-							stag);
+						fprintf(log_file, "IDENTICAL:%s:%s\n", mdata->id, stag);
+						update_ltag(conn, mdata->doctype, mdata->id, stag);
 					}
 					buffer_reset(dbbuf1);
 					buffer_reset(dbbuf2);
 					return 0;
 				} else {
-					fprintf(log_file,
-						"CREATE_UPDATED:%s:%s\n",
-						mdata->id, c_tag);
+					fprintf(log_file, "CREATE_UPDATED:%s:%s\n", mdata->id, c_tag);
 					create_updated_jorf_scta(
 						conn, mdata->id,
 						mdata->rid,
@@ -1425,48 +1384,37 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(log_file, "CREATE:%s:%s\n",
-				mdata->id, stag);
-			r = write_uri_parts_json(-1, &mdata->uri_parts,
-						 dbbuf3, 1);
-			if (r < 0) exit_nicely(conn);
-			dbbuf3->buffer[dbbuf3->current_size] = 0;
+			fprintf(log_file, "CREATE:%s:%s\n", mdata->id, stag);
 			param_values[5] = mdata->id;
-			param_values[6] = mdata->uri;
-			param_values[7] = dbbuf3->buffer;  // uri_parts
-			param_values[8] = stag;
-			param_values[9] = signature;
-			param_values[10] = NULL;
+			param_values[6] = stag;
+			param_values[7] = signature;
+			param_values[8] = NULL;
 			tt->db_insert = clock();
 			res = PQexecParams(conn,
 					   "INSERT INTO"
-					   " jorflegi.jorf_scta"
+					   " dila_jorf.jorf_scta"
 					   " (rid, titrefull, commentaire,"
 					   "  contexte, toc,"
-					   "  id, uri, uri_parts, tag, sig,"
+					   "  id, tag, sig,"
 					   "  mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3, $4, $5,"
-					   "  $6, $7, $8, $9, $10,"
+					   "  $6, $7, $8,"
 					   "  NOW()::timestamp)"
 					   " ON CONFLICT DO NOTHING",
-					   10,
+					   8,
 					   NULL,
 					   param_values,
 					   NULL,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"INSERT failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "INSERT failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
-			buffer_reset(dbbuf3);
 		} else {
-			fprintf(log_file, "UPDATE:%s:%s\n",
-				mdata->id, stag);
+			fprintf(log_file, "UPDATE:%s:%s\n", mdata->id, stag);
 			param_values[5] = stag; /* tag */
 			param_values[6] = stag; /* ltag */
 			param_values[7] = signature; /* sig */
@@ -1474,7 +1422,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[9] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " jorflegi.jorf_scta"
+					   " dila_jorf.jorf_scta"
 					   " SET ("
 					   "  rid, titrefull, commentaire,"
 					   "  contexte, toc,"
@@ -1492,9 +1440,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"UPDATE failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "UPDATE failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
@@ -1536,32 +1482,21 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		param_values[10] = dbbuf3->buffer;  // contexte
 		param_values[11] = dbbuf4->buffer;  // contenu
 		// FIXME: entreprise
-		compute_signature(md, param_values, 12,
-				  digest, &digest_len, tt);
+		compute_signature(md, param_values, 12, digest, &digest_len, tt);
 		hex_signature(digest, digest_len, signature);
 
 		if (!bootstrap) {
-			int exists = get_document_signature(
-				conn,
-				mdata->uri_parts.doctype,
-				mdata->rid, c_signature, c_tag);
+			int exists;
+		    exists = get_document_signature(conn, mdata->doctype, mdata->rid, c_signature, c_tag);
 			if (exists) {
 				if (strcmp(signature, c_signature) == 0) {
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(log_file,
-							"IGNORE:%s:%s\n",
-							mdata->rid, stag);
+						fprintf(log_file, "IGNORE:%s:%s\n", mdata->rid, stag);
 					} else {
-						fprintf(log_file,
-							"IDENTICAL:%s:%s\n",
-							mdata->rid, stag);
-						update_ltag(
-							conn,
-							mdata->uri_parts.doctype,
-							mdata->rid,
-							stag);
+						fprintf(log_file, "IDENTICAL:%s:%s\n", mdata->rid, stag);
+						update_ltag(conn, mdata->doctype, mdata->rid, stag);
 					}
 					buffer_reset(dbbuf1);
 					buffer_reset(dbbuf2);
@@ -1569,9 +1504,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf4);
 					return 0;
 				} else {
-					fprintf(log_file,
-						"CREATE_UPDATED:%s:%s\n",
-						mdata->rid, c_tag);
+					fprintf(log_file, "CREATE_UPDATED:%s:%s\n", mdata->rid, c_tag);
 					create_updated_jorf_vers(
 						conn, mdata->rid,
 						mdata->cid,
@@ -1592,50 +1525,40 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(log_file, "CREATE:%s:%s\n",
-				mdata->rid, stag);
-			r = write_uri_parts_json(-1, &mdata->uri_parts,
-						 dbbuf5, 1);
-			if (r < 0) exit_nicely(conn);
-			dbbuf5->buffer[dbbuf5->current_size] = 0;
+			fprintf(log_file, "CREATE:%s:%s\n", mdata->rid, stag);
 			param_values[12] = mdata->rid;
-			param_values[13] = mdata->uri;
-			param_values[14] = dbbuf5->buffer;  // uri_parts
-			param_values[15] = stag;
-			param_values[16] = signature;
-			param_values[17] = NULL;
+			param_values[13] = stag;
+			param_values[14] = signature;
+			param_values[15] = NULL;
 			tt->db_insert = clock();
 			res = PQexecParams(conn,
 					   "INSERT INTO "
-					   " jorflegi.jorf_vers"
+					   " dila_jorf.jorf_vers"
 					   " (cid, rid, titre, titrefull, autorite,"
 					   "  ministere,"
 					   "  date_debut, date_fin, mcs, liens,"
 					   "  contexte, contenu,"
-					   "  id, uri, uri_parts, tag, sig, mod_tm)"
+					   "  id, tag, sig, mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3, $4, $5,"
 					   "  $6,"
 					   "  $7, $8, $9, $10,"
 					   "  $11, $12,"
-					   "  $13, $14, $15, $16, $17, NOW()::timestamp)"
+					   "  $13, $14, $15, NOW()::timestamp)"
 					   " ON CONFLICT DO NOTHING",
-					   17,
+					   15,
 					   NULL,
 					   param_values,
 					   NULL,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr, "INSERT failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "INSERT failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
-			buffer_reset(dbbuf5);
 		} else {
-			fprintf(log_file, "UPDATE:%s:%s\n",
-				mdata->rid, stag);
+			fprintf(log_file, "UPDATE:%s:%s\n", mdata->rid, stag);
 			param_values[12] = stag; /* tag */
 			param_values[13] = stag; /* ltag */
 			param_values[14] = signature; /* sig */
@@ -1643,7 +1566,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[16] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " jorflegi.jorf_vers"
+					   " dila_jorf.jorf_vers"
 					   " SET ("
 					   "  cid, rid, titre, titrefull, autorite,"
 					   "  ministere,"
@@ -1664,9 +1587,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"UPDATE failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "UPDATE failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
@@ -1704,40 +1625,27 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		set_param(12, param_values, mdata->derniere_modification);
 		param_values[13] = dbbuf1->buffer;  // toc
 		param_values[14] = dbbuf2->buffer;  // versions
-		compute_signature(md, param_values, 15,
-				  digest, &digest_len, tt);
+		compute_signature(md, param_values, 15, digest, &digest_len, tt);
 		hex_signature(digest, digest_len, signature);
 
 		if (!bootstrap) {
-			int exists = get_document_signature(
-				conn,
-				mdata->uri_parts.doctype,
-				mdata->id, c_signature, c_tag);
+			int exists;
+		    exists = get_document_signature(conn, mdata->doctype, mdata->id, c_signature, c_tag);
 			if (exists) {
 				if (strcmp(signature, c_signature) == 0) {
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(log_file,
-							"IGNORE:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IGNORE:%s:%s\n", mdata->id, stag);
 					} else {
-						fprintf(log_file,
-							"IDENTICAL:%s:%s\n",
-							mdata->id, stag);
-						update_ltag(
-							conn,
-							mdata->uri_parts.doctype,
-							mdata->id,
-							stag);
+						fprintf(log_file, "IDENTICAL:%s:%s\n", mdata->id, stag);
+						update_ltag(conn, mdata->doctype, mdata->id, stag);
 					}
 					buffer_reset(dbbuf1);
 					buffer_reset(dbbuf2);
 					return 0;
 				} else {
-					fprintf(log_file,
-						"CREATE_UPDATED:%s:%s\n",
-						mdata->id, c_tag);
+					fprintf(log_file, "CREATE_UPDATED:%s:%s\n", mdata->id, c_tag);
 					create_updated_jorf_text(
 						conn, mdata->id,
 						mdata->cid,
@@ -1761,49 +1669,39 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(log_file, "CREATE:%s:%s\n",
-				mdata->id, stag);
-			r = write_uri_parts_json(-1, &mdata->uri_parts,
-						 dbbuf3, 1);
-			if (r < 0) exit_nicely(conn);
-			dbbuf3->buffer[dbbuf3->current_size] = 0;
+			fprintf(log_file, "CREATE:%s:%s\n", mdata->id, stag);
 			param_values[15] = mdata->id;
-			param_values[16] = mdata->uri;
-			param_values[17] = dbbuf3->buffer;  // uri_parts
-			param_values[18] = stag;
-			param_values[19] = signature;
-			param_values[20] = NULL;
+			param_values[16] = stag;
+			param_values[17] = signature;
+			param_values[18] = NULL;
 
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO jorflegi.jorf_text"
+					   "INSERT INTO dila_jorf.jorf_text"
 					   " (cid, rid, nature, num, nor, num_parution, num_sequence,"
 					   "  origine_publi, page_deb_publi, page_fin_publi, date_publi,"
 					   "  date_texte, derniere_modification, toc, versions,"
-					   "  id, uri, uri_parts, tag, sig, mod_tm)"
+					   "  id, tag, sig, mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3, $4, $5, $6, $7,"
 					   "  $8, $9, $10, $11,"
 					   "  $12, $13, $14, $15,"
-					   "  $16, $17, $18, $19, $20, NOW()::timestamp)"
+					   "  $16, $17, $18, NOW()::timestamp)"
 					   " ON CONFLICT DO NOTHING",
-					   20,
+					   18,
 					   NULL,
 					   param_values,
 					   NULL,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr, "INSERT failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "INSERT failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
-			buffer_reset(dbbuf3);
 		} else {
-			fprintf(log_file, "UPDATE:%s:%s\n",
-				mdata->id, stag);
+			fprintf(log_file, "UPDATE:%s:%s\n", mdata->id, stag);
 			param_values[15] = stag; /* tag */
 			param_values[16] = stag; /* ltag */
 			param_values[17] = signature; /* sig */
@@ -1811,7 +1709,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[19] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " jorflegi.jorf_text"
+					   " dila_jorf.jorf_text"
 					   " SET ("
 					   "  cid, rid, nature, num, nor,"
 					   "  num_parution, num_sequence,"
@@ -1839,9 +1737,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"UPDATE failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "UPDATE failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
@@ -1863,39 +1759,32 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		param_values[1] = mdata->num;
 		param_values[2] = mdata->date_publi;
 		param_values[3] = dbbuf1->buffer; // toc
-		compute_signature(md, param_values, 4,
-				  digest, &digest_len, tt);
+		compute_signature(md, param_values, 4, digest, &digest_len, tt);
 		hex_signature(digest, digest_len, signature);
 
 		if (!bootstrap) {
 			int exists = get_document_signature(
 				conn,
-				mdata->uri_parts.doctype,
+				mdata->doctype,
 				mdata->id, c_signature, c_tag);
 			if (exists) {
 				if (strcmp(signature, c_signature) == 0) {
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(log_file,
-							"IGNORE:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IGNORE:%s:%s\n", mdata->id, stag);
 					} else {
-						fprintf(log_file,
-							"IDENTICAL:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IDENTICAL:%s:%s\n", mdata->id, stag);
 						update_ltag(
 							conn,
-							mdata->uri_parts.doctype,
+							mdata->doctype,
 							mdata->id,
 							stag);
 					}
 					buffer_reset(dbbuf1);
 					return 0;
 				} else {
-					fprintf(log_file,
-						"CREATE_UPDATED:%s:%s\n",
-						mdata->id, c_tag);
+					fprintf(log_file, "CREATE_UPDATED:%s:%s\n", mdata->id, c_tag);
 					create_updated_jorf_cont(
 						conn, mdata->id,
 						mdata->titre,
@@ -1908,44 +1797,35 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(log_file, "CREATE:%s:%s\n",
-				mdata->id, stag);
-			r = write_uri_parts_json(-1, &mdata->uri_parts,
-						 dbbuf2, 1);
-			if (r < 0) exit_nicely(conn);
-			dbbuf2->buffer[dbbuf2->current_size] = 0;
+			fprintf(log_file, "CREATE:%s:%s\n", mdata->id, stag);
 			param_values[4] = mdata->id;
-			param_values[5] = mdata->uri;
-			param_values[6] = dbbuf2->buffer; // uri_parts
-			param_values[7] = stag;
-			param_values[8] = signature;
-			param_values[9] = NULL;
+			param_values[5] = stag;
+			param_values[6] = signature;
+			param_values[7] = NULL;
 
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO jorflegi.jorf_cont"
-					   " (titre, num, date_publi, toc, id, uri, uri_parts, tag, sig, mod_tm)"
+					   "INSERT INTO dila_jorf.jorf_cont"
+					   " (titre, num, date_publi, toc, id, tag, sig, mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3, $4, "
-					   "  $5, $6, $7, $8, $9, NOW()::timestamp)"
+					   "  $5, $6, $7, NOW()::timestamp)"
 					   " ON CONFLICT DO NOTHING",
-					   9,
+					   7,
 					   NULL,
 					   param_values,
 					   NULL,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr, "INSERT failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "INSERT failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
 			buffer_reset(dbbuf2);
 		} else {
-			fprintf(log_file, "UPDATE:%s:%s\n",
-				mdata->id, stag);
+			fprintf(log_file, "UPDATE:%s:%s\n", mdata->id, stag);
 			param_values[4] = stag; /* tag */
 			param_values[5] = stag; /* ltag */
 			param_values[6] = signature; /* sig */
@@ -1953,7 +1833,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[8] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " jorflegi.jorf_cont"
+					   " dila_jorf.jorf_cont"
 					   " SET ("
 					   "  titre, num, date_publi,"
 					   "  toc,"
@@ -1971,9 +1851,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"UPDATE failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "UPDATE failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
@@ -2009,32 +1887,21 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		param_values[8] = dbbuf2->buffer;  // contexte
 		param_values[9] = dbbuf3->buffer;  // contenu
 		param_values[10] = dbbuf4->buffer;  // versions
-		compute_signature(md, param_values, 11,
-				  digest, &digest_len, tt);
+		compute_signature(md, param_values, 11, digest, &digest_len, tt);
 		hex_signature(digest, digest_len, signature);
 
 		if (!bootstrap) {
-			int exists = get_document_signature(
-				conn,
-				mdata->uri_parts.doctype,
-				mdata->id, c_signature, c_tag);
+			int exists;
+		    exists = get_document_signature(conn, mdata->doctype, mdata->id, c_signature, c_tag);
 			if (exists) {
 				if (strcmp(signature, c_signature) == 0) {
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(log_file,
-							"IGNORE:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IGNORE:%s:%s\n", mdata->id, stag);
 					} else {
-						fprintf(log_file,
-							"IDENTICAL:%s:%s\n",
-							mdata->id, stag);
-						update_ltag(
-							conn,
-							mdata->uri_parts.doctype,
-							mdata->id,
-							stag);
+						fprintf(log_file, "IDENTICAL:%s:%s\n", mdata->id, stag);
+						update_ltag(conn, mdata->doctype, mdata->id, stag);
 					}
 					buffer_reset(dbbuf1);
 					buffer_reset(dbbuf2);
@@ -2042,9 +1909,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf4);
 					return 0;
 				} else {
-					fprintf(log_file,
-						"CREATE_UPDATED:%s:%s\n",
-						mdata->id, c_tag);
+					fprintf(log_file, "CREATE_UPDATED:%s:%s\n", mdata->id, c_tag);
 					create_updated_legi_arti(
 						conn, mdata->id,
 						mdata->rid,
@@ -2063,48 +1928,38 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(log_file, "CREATE:%s:%s\n",
-				mdata->id, stag);
-			r = write_uri_parts_json(-1, &mdata->uri_parts,
-						 dbbuf5, 1);
-			if (r < 0) exit_nicely(conn);
-			dbbuf5->buffer[dbbuf5->current_size] = 0;
+			fprintf(log_file, "CREATE:%s:%s\n", mdata->id, stag);
 			param_values[11] = mdata->id;
-			param_values[12] = mdata->uri;
-			param_values[13] = dbbuf5->buffer;  // uri_parts
-			param_values[14] = stag;
-			param_values[15] = signature;
-			param_values[16] = NULL;
+			param_values[12] = stag;
+			param_values[13] = signature;
+			param_values[14] = NULL;
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO jorflegi.legi_arti"
+					   "INSERT INTO dila_legi.legi_arti"
 					   " (cid, rid, num, etat,"
 					   "  date_debut, date_fin, type,"
 					   "  liens, contexte, contenu, versions,"
-					   "  id, uri, uri_parts, tag, sig, mod_tm)"
+					   "  id, tag, sig, mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3,"
 					   "  $4, $5, $6,"
 					   "  $7, $8, $9, $10, $11,"
-					   "  $12, $13, $14, $15, $16, NOW()::timestamp)"
+					   "  $12, $13, $14, NOW()::timestamp)"
 					   " ON CONFLICT DO NOTHING",
-					   16,
+					   14,
 					   NULL,
 					   param_values,
 					   NULL,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr, "INSERT failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "INSERT failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
-			buffer_reset(dbbuf5);
 		} else {
-			fprintf(log_file, "UPDATE:%s:%s\n",
-				mdata->id, stag);
+			fprintf(log_file, "UPDATE:%s:%s\n", mdata->id, stag);
 			param_values[11] = stag; /* tag */
 			param_values[12] = stag; /* ltag */
 			param_values[13] = signature; /* sig */
@@ -2112,7 +1967,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[15] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " jorflegi.legi_arti"
+					   " dila_legi.legi_arti"
 					   " SET (cid, rid, num, etat,"
 					   "  date_debut, date_fin, type,"
 					   "  liens, contexte, contenu,"
@@ -2132,9 +1987,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"UPDATE failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "UPDATE failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
@@ -2163,30 +2016,23 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		param_values[2] = mdata->commentaire;
 		param_values[3] = dbbuf1->buffer;  // contexte
 		param_values[4] = dbbuf2->buffer;  // toc
-		compute_signature(md, param_values, 5,
-				  digest, &digest_len, tt);
+		compute_signature(md, param_values, 5, digest, &digest_len, tt);
 		hex_signature(digest, digest_len, signature);
 
 		if (!bootstrap) {
-			int exists = get_document_signature(
-				conn,
-				mdata->uri_parts.doctype,
-				mdata->id, c_signature, c_tag);
+			int exists;
+		    exists = get_document_signature(conn, mdata->doctype, mdata->id, c_signature, c_tag);
 			if (exists) {
 				if (strcmp(signature, c_signature) == 0) {
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(log_file,
-							"IGNORE:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IGNORE:%s:%s\n", mdata->id, stag);
 					} else {
-						fprintf(log_file,
-							"IDENTICAL:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IDENTICAL:%s:%s\n", mdata->id, stag);
 						update_ltag(
 							conn,
-							mdata->uri_parts.doctype,
+							mdata->doctype,
 							mdata->id,
 							stag);
 					}
@@ -2194,9 +2040,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf2);
 					return 0;
 				} else {
-					fprintf(log_file,
-						"CREATE_UPDATED:%s:%s\n",
-						mdata->id, c_tag);
+					fprintf(log_file, "CREATE_UPDATED:%s:%s\n", mdata->id, c_tag);
 					create_updated_legi_scta(
 						conn, mdata->id,
 						mdata->rid,
@@ -2210,48 +2054,37 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(log_file, "CREATE:%s:%s\n",
-				mdata->id, stag);
-			r = write_uri_parts_json(-1, &mdata->uri_parts,
-						 dbbuf3, 1);
-			if (r < 0) exit_nicely(conn);
-			dbbuf3->buffer[dbbuf3->current_size] = 0;
+			fprintf(log_file, "CREATE:%s:%s\n", mdata->id, stag);
 			param_values[5] = mdata->id;
-			param_values[6] = mdata->uri;
-			param_values[7] = dbbuf3->buffer;  // uri_parts
-			param_values[8] = stag;
-			param_values[9] = signature;
-			param_values[10] = NULL;
+			param_values[6] = stag;
+			param_values[7] = signature;
+			param_values[8] = NULL;
 			tt->db_insert = clock();
 			res = PQexecParams(conn,
 					   "INSERT INTO"
-					   " jorflegi.legi_scta"
+					   " dila_legi.legi_scta"
 					   " (rid, titrefull, commentaire,"
 					   "  contexte, toc,"
-					   "  id, uri, uri_parts, tag, sig,"
+					   "  id, tag, sig,"
 					   "  mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3, $4, $5,"
-					   "  $6, $7, $8, $9, $10,"
+					   "  $6, $7, $8,"
 					   "  NOW()::timestamp)"
 					   " ON CONFLICT DO NOTHING",
-					   10,
+					   8,
 					   NULL,
 					   param_values,
 					   NULL,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"INSERT failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "INSERT failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
-			buffer_reset(dbbuf3);
 		} else {
-			fprintf(log_file, "UPDATE:%s:%s\n",
-				mdata->id, stag);
+			fprintf(log_file, "UPDATE:%s:%s\n", mdata->id, stag);
 			param_values[5] = stag; /* tag */
 			param_values[6] = stag; /* ltag */
 			param_values[7] = signature; /* sig */
@@ -2259,7 +2092,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[9] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " jorflegi.legi_scta"
+					   " dila_legi.legi_scta"
 					   " SET ("
 					   "  rid, titrefull, commentaire,"
 					   "  contexte, toc,"
@@ -2277,9 +2110,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"UPDATE failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "UPDATE failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
@@ -2317,30 +2148,23 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		set_param(12, param_values, mdata->derniere_modification);
 		param_values[13] = dbbuf1->buffer;  // toc
 		param_values[14] = dbbuf2->buffer;  // versions
-		compute_signature(md, param_values, 15,
-				  digest, &digest_len, tt);
+		compute_signature(md, param_values, 15, digest, &digest_len, tt);
 		hex_signature(digest, digest_len, signature);
 
 		if (!bootstrap) {
-			int exists = get_document_signature(
-				conn,
-				mdata->uri_parts.doctype,
-				mdata->id, c_signature, c_tag);
+			int exists;
+		    exists = get_document_signature(conn, mdata->doctype, mdata->id, c_signature, c_tag);
 			if (exists) {
 				if (strcmp(signature, c_signature) == 0) {
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(log_file,
-							"IGNORE:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IGNORE:%s:%s\n", mdata->id, stag);
 					} else {
-						fprintf(log_file,
-							"IDENTICAL:%s:%s\n",
-							mdata->id, stag);
+						fprintf(log_file, "IDENTICAL:%s:%s\n", mdata->id, stag);
 						update_ltag(
 							conn,
-							mdata->uri_parts.doctype,
+							mdata->doctype,
 							mdata->id,
 							stag);
 					}
@@ -2348,9 +2172,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					buffer_reset(dbbuf2);
 					return 0;
 				} else {
-					fprintf(log_file,
-						"CREATE_UPDATED:%s:%s\n",
-						mdata->id, c_tag);
+					fprintf(log_file, "CREATE_UPDATED:%s:%s\n", mdata->id, c_tag);
 					create_updated_legi_text(
 						conn, mdata->id,
 						mdata->cid,
@@ -2374,49 +2196,38 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		}
 
 		if (to_create) {
-			fprintf(log_file, "CREATE:%s:%s\n",
-				mdata->id, stag);
-			r = write_uri_parts_json(-1, &mdata->uri_parts,
-						 dbbuf3, 1);
-			if (r < 0) exit_nicely(conn);
-			dbbuf3->buffer[dbbuf3->current_size] = 0;
+			fprintf(log_file, "CREATE:%s:%s\n", mdata->id, stag);
 			param_values[15] = mdata->id;
-			param_values[16] = mdata->uri;
-			param_values[17] = dbbuf3->buffer;  // uri_parts
-			param_values[18] = stag;
-			param_values[19] = signature;
-			param_values[20] = NULL;
-
+			param_values[16] = stag;
+			param_values[17] = signature;
+			param_values[18] = NULL;
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO jorflegi.legi_text"
+					   "INSERT INTO dila_legi.legi_text"
 					   " (cid, rid, nature, num, nor, num_parution, num_sequence,"
 					   "  origine_publi, page_deb_publi, page_fin_publi, date_publi,"
 					   "  date_texte, derniere_modification, toc, versions,"
-					   "  id, uri, uri_parts, tag, sig, mod_tm)"
+					   "  id, tag, sig, mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3, $4, $5, $6, $7,"
 					   "  $8, $9, $10, $11,"
 					   "  $12, $13, $14, $15,"
-					   "  $16, $17, $18, $19, $20, NOW()::timestamp)"
+					   "  $16, $17, $18, NOW()::timestamp)"
 					   " ON CONFLICT DO NOTHING",
-					   20,
+					   18,
 					   NULL,
 					   param_values,
 					   NULL,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr, "INSERT failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "INSERT failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
-			buffer_reset(dbbuf3);
 		} else {
-			fprintf(log_file, "UPDATE:%s:%s\n",
-				mdata->id, stag);
+			fprintf(log_file, "UPDATE:%s:%s\n", mdata->id, stag);
 			param_values[15] = stag; /* tag */
 			param_values[16] = stag; /* ltag */
 			param_values[17] = signature; /* sig */
@@ -2424,7 +2235,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[19] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " jorflegi.legi_text"
+					   " dila_legi.legi_text"
 					   " SET ("
 					   "  cid, rid, nature, num, nor,"
 					   "  num_parution, num_sequence,"
@@ -2452,9 +2263,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 					   NULL,
 					   0);
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-				fprintf(stderr,
-					"UPDATE failed: %s\n",
-					PQresultErrorMessage(res));
+				fprintf(stderr, "UPDATE failed: %s\n", PQresultErrorMessage(res));
 				PQclear(res);
 				exit_nicely(conn);
 			}
@@ -2491,41 +2300,28 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 		param_values[10] = dbbuf2->buffer;  // contexte
 		param_values[11] = dbbuf3->buffer;  // contenu
 		// FIXME: entreprise
-		compute_signature(md, param_values, 12,
-				  digest, &digest_len, tt);
+		compute_signature(md, param_values, 12, digest, &digest_len, tt);
 		hex_signature(digest, digest_len, signature);
 
 		if (!bootstrap) {
-			int exists = get_document_signature(
-				conn,
-				mdata->uri_parts.doctype,
-				mdata->rid, c_signature, c_tag);
+			int exists;
+		    exists = get_document_signature(conn, mdata->doctype, mdata->rid, c_signature, c_tag);
 			if (exists) {
 				if (strcmp(signature, c_signature) == 0) {
 					/* Same content */
 					if (strcmp(c_tag, stag) == 0) {
 						/* Same tag */
-						fprintf(log_file,
-							"IGNORE:%s:%s\n",
-							mdata->rid, stag);
+						fprintf(log_file, "IGNORE:%s:%s\n", mdata->rid, stag);
 					} else {
-						fprintf(log_file,
-							"IDENTICAL:%s:%s\n",
-							mdata->rid, stag);
-						update_ltag(
-							conn,
-							mdata->uri_parts.doctype,
-							mdata->rid,
-							stag);
+						fprintf(log_file, "IDENTICAL:%s:%s\n", mdata->rid, stag);
+						update_ltag(conn, mdata->doctype, mdata->rid, stag);
 					}
 					buffer_reset(dbbuf1);
 					buffer_reset(dbbuf2);
 					buffer_reset(dbbuf3);
 					return 0;
 				} else {
-					fprintf(log_file,
-						"CREATE_UPDATED:%s:%s\n",
-						mdata->rid, c_tag);
+					fprintf(log_file, "CREATE_UPDATED:%s:%s\n", mdata->rid, c_tag);
 					create_updated_legi_vers(
 						conn, mdata->rid,
 						mdata->cid,
@@ -2545,35 +2341,28 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			}
 		}
 		if (to_create) {
-			fprintf(log_file, "CREATE:%s:%s\n",
-				mdata->rid, stag);
-			r = write_uri_parts_json(-1, &mdata->uri_parts,
-						 dbbuf4, 1);
-			if (r < 0) exit_nicely(conn);
-			dbbuf4->buffer[dbbuf4->current_size] = 0;
+			fprintf(log_file, "CREATE:%s:%s\n", mdata->rid, stag);
 			param_values[12] = mdata->rid;
-			param_values[13] = mdata->uri;
-			param_values[14] = dbbuf4->buffer;  // uri_parts
-			param_values[15] = stag;
-			param_values[16] = signature;
-			param_values[17] = NULL;
+			param_values[13] = stag;
+			param_values[14] = signature;
+			param_values[15] = NULL;
 			tt->db_insert = clock();
 			/* https://linuxfr.org/users/n_e/journaux/upsert-dans-postgresql-ca-dechire */
 			res = PQexecParams(conn,
-					   "INSERT INTO jorflegi.legi_vers"
+					   "INSERT INTO dila_legi.legi_vers"
 					   " (cid, rid, titre, titrefull, autorite,"
 					   "  ministere, etat,"
 					   "  date_debut, date_fin, liens,"
 					   "  contexte, contenu,"
-					   "  id, uri, uri_parts, tag, sig, mod_tm)"
+					   "  id, tag, sig, mod_tm)"
 					   " VALUES"
 					   " ($1, $2, $3, $4, $5,"
 					   "  $6,"
 					   "  $7, $8, $9, $10,"
 					   "  $11, $12,"
-					   "  $13, $14, $15, $16, $17, NOW()::timestamp)"
+					   "  $13, $14, $15, NOW()::timestamp)"
 					   " ON CONFLICT DO NOTHING",
-					   17,
+					   15,
 					   NULL,
 					   param_values,
 					   NULL,
@@ -2585,10 +2374,8 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 				PQclear(res);
 				exit_nicely(conn);
 			}
-			buffer_reset(dbbuf4);
 		} else {
-			fprintf(log_file, "UPDATE:%s:%s\n",
-				mdata->rid, stag);
+			fprintf(log_file, "UPDATE:%s:%s\n", mdata->rid, stag);
 			param_values[12] = stag; /* tag */
 			param_values[13] = stag; /* ltag */
 			param_values[14] = signature; /* sig */
@@ -2596,7 +2383,7 @@ int db_import(PGconn *conn, const EVP_MD *md, struct tm *tag,
 			param_values[16] = NULL;
 			res = PQexecParams(conn,
 					   "UPDATE"
-					   " jorflegi.legi_vers"
+					   " dila_legi.legi_vers"
 					   " SET ("
 					   "  cid, rid, titre, titrefull, autorite,"
 					   "  ministere, etat,"

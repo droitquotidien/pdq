@@ -6,9 +6,7 @@
 #include <string.h>
 #include <assert.h>
 #include "pdq.h"
-#include "uri.h"
 #include "parse.h"
-#include "jorflegi.h"
 #include "buffer.h"
 #include "db.h"
 #include "timestamp.h"
@@ -111,6 +109,68 @@ static const xmlChar *FIELD_NAME_DOMAINES = BAD_CAST "DOMAINES";
 static const xmlChar *FIELD_NAME_DOMAINE = BAD_CAST "DOMAINE";
 static const xmlChar *FIELD_NAME_COMMENTAIRE = BAD_CAST "COMMENTAIRE";
 
+int fprintf_doctype(FILE *f, enum doctype doctype)
+{
+	int r = 0;
+
+	switch(doctype) {
+		case JORFCONT_DOCTYPE:
+			r = fprintf(f, "JORFCONT");
+			break;
+		case JORFTEXT_DOCTYPE:
+			r = fprintf(f, "JORFTEXT");
+			break;
+		case JORFVERS_DOCTYPE:
+			r = fprintf(f, "JORFVERS");
+			break;
+		case JORFSCTA_DOCTYPE:
+			r = fprintf(f, "JORFSCTA");
+			break;
+		case JORFARTI_DOCTYPE:
+			r = fprintf(f, "JORFARTI");
+			break;
+		case LEGITEXT_DOCTYPE:
+			r = fprintf(f, "LEGITEXT");
+			break;
+		case LEGIVERS_DOCTYPE:
+			r = fprintf(f, "LEGIVERS");
+			break;
+		case LEGISCTA_DOCTYPE:
+			r = fprintf(f, "LEGISCTA");
+			break;
+		case LEGIARTI_DOCTYPE:
+			r = fprintf(f, "LEGIARTI");
+			break;
+		case EMPTY_DOCTYPE:
+		default:
+			r = fprintf(f, "EMPTYDOC");
+			break;
+	}
+
+	return r;
+}
+
+void set_rid(struct metadata *mdata)
+{
+	if (mdata->doctype == JORFCONT_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
+	} else if (mdata->doctype == JORFTEXT_DOCTYPE || mdata->doctype == LEGITEXT_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
+	} else if (mdata->doctype == JORFVERS_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
+	} else if (mdata->doctype == JORFSCTA_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
+	} else if (mdata->doctype == JORFARTI_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
+	} else if (mdata->doctype == LEGIVERS_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
+	} else if (mdata->doctype == LEGISCTA_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
+	} else if (mdata->doctype == LEGIARTI_DOCTYPE) {
+		strcpy(mdata->rid+8, mdata->id+8);
+	}
+}
+
 int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 {
 	int r = 0;
@@ -127,20 +187,11 @@ int fprintf_parsed_data(FILE *f, struct parsed_data *pdata)
 	struct entreprise *entreprise = pdata->entreprise;
 	char *buf;
 
-	r += fprintf_doctype(f, mdata->uri_parts.doctype);
-	r += fprintf(f, "%s;%s;%s;%s;%d;%s;%d;%s;%d;%s;%d;%s\n", mdata->id + 8,
-		mdata->uri_parts.base,
+	r += fprintf_doctype(f, mdata->doctype);
+	r += fprintf(f, "%s;%s;%s;%s\n", mdata->id + 8,
+		mdata->base,
 		mdata->nature,
-		(*mdata->contexte.cid == 0?(*mdata->cid == 0?"":mdata->cid):mdata->contexte.cid),
-		mdata->uri_parts.kind,
-		mdata->uri,
-		mdata->uri_parts.num1kind,
-		(mdata->uri_parts.num1kind == EMPTY_NUMKIND?"":mdata->uri_parts.num1),
-		mdata->uri_parts.num2kind,
-		(mdata->uri_parts.num2kind == EMPTY_NUMKIND?"":mdata->uri_parts.num2),
-		mdata->uri_parts.num3kind,
-		(mdata->uri_parts.num3kind == EMPTY_NUMKIND?"":mdata->uri_parts.num3));
-
+		(*mdata->contexte.cid == 0?(*mdata->cid == 0?"":mdata->cid):mdata->contexte.cid));
 	/*
 	if (*contenu->notice.text != 0) {
 		fprintf(f, "\tcontenu.notice;\"\"\"%s\"\"\"\n", contenu->notice.text);
@@ -518,43 +569,43 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 	mcs = pdata->mcs;
 	entreprise = pdata->entreprise;
 
-	if (mdata->uri_parts.doctype == EMPTY_DOCTYPE) {
-		if (strcmp(mdata->uri_parts.base, "JORF") == 0) {
+	if (mdata->doctype == EMPTY_DOCTYPE) {
+		if (strcmp(mdata->base, "JORF") == 0) {
 			if (xmlStrEqual(name, ROOT_JORFCONT)) {
-				mdata->uri_parts.doctype = JORFCONT_DOCTYPE;
+				mdata->doctype = JORFCONT_DOCTYPE;
 				strcpy(mdata->rid, "JORFCONT");
 			} else if (xmlStrEqual(name, ROOT_JORFTEXT)) {
-				mdata->uri_parts.doctype = JORFTEXT_DOCTYPE;
+				mdata->doctype = JORFTEXT_DOCTYPE;
 				strcpy(mdata->rid, "JORFTEXT");
 			} else if (xmlStrEqual(name, ROOT_JORFVERS)) {
-				mdata->uri_parts.doctype = JORFVERS_DOCTYPE;
+				mdata->doctype = JORFVERS_DOCTYPE;
 				strcpy(mdata->rid, "JORFVERS");
 			} else if (xmlStrEqual(name, ROOT_JORFSCTA)) {
-				mdata->uri_parts.doctype = JORFSCTA_DOCTYPE;
+				mdata->doctype = JORFSCTA_DOCTYPE;
 				strcpy(mdata->rid, "JORFSCTA");
 			} else if (xmlStrEqual(name, ROOT_JORFARTI)) {
-				mdata->uri_parts.doctype = JORFARTI_DOCTYPE;
+				mdata->doctype = JORFARTI_DOCTYPE;
 				strcpy(mdata->rid, "JORFARTI");
 			} else {
 				fprintf(stderr, "Unknown root for XML file: %s\n",
 					(char *)name);
 				exit(1);
 			}
-		} else if (strcmp(mdata->uri_parts.base, "LEGI") == 0) {
+		} else if (strcmp(mdata->base, "LEGI") == 0) {
 			if (xmlStrEqual(name, ROOT_LEGITEXT)) {
-				mdata->uri_parts.doctype = LEGITEXT_DOCTYPE;
+				mdata->doctype = LEGITEXT_DOCTYPE;
 				strcpy(mdata->rid, "LEGITEXT");
 			} else if (xmlStrEqual(name, ROOT_LEGIVERS)) {
-				mdata->uri_parts.doctype = LEGIVERS_DOCTYPE;
+				mdata->doctype = LEGIVERS_DOCTYPE;
 				strcpy(mdata->rid, "LEGIVERS");
 			} else if (xmlStrEqual(name, ROOT_LEGISCTA)) {
-				mdata->uri_parts.doctype = LEGISCTA_DOCTYPE;
+				mdata->doctype = LEGISCTA_DOCTYPE;
 				strcpy(mdata->rid, "LEGISCTA");
 			} else if (xmlStrEqual(name, ROOT_LEGIARTI)) {
-				mdata->uri_parts.doctype = LEGIARTI_DOCTYPE;
+				mdata->doctype = LEGIARTI_DOCTYPE;
 				strcpy(mdata->rid, "LEGIARTI");
 			} else if (xmlStrEqual(name, ROOT_VERSIONS)) {
-				mdata->uri_parts.doctype = VERSIONS_DOCTYPE;
+				mdata->doctype = VERSIONS_DOCTYPE;
 			} else {
 				fprintf(stderr, "Unknown root for XML file: %s\n",
 					(char *) name);
@@ -562,7 +613,7 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 			}
 		} else {
 			if (xmlStrEqual(name, ROOT_ID)) {
-				mdata->uri_parts.doctype = VERSIONS_ID_DOCTYPE;
+				mdata->doctype = VERSIONS_ID_DOCTYPE;
 			}
 		}
 	}
@@ -895,10 +946,10 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 			/*reset_current(pdata);*/
 		}
 	} else if (xmlStrEqual(name, FIELD_NAME_TEXTE) && (
-			mdata->uri_parts.doctype == JORFSCTA_DOCTYPE
-			|| mdata->uri_parts.doctype == JORFARTI_DOCTYPE
-			|| mdata->uri_parts.doctype == LEGISCTA_DOCTYPE
-			|| mdata->uri_parts.doctype == LEGIARTI_DOCTYPE)) {
+			mdata->doctype == JORFSCTA_DOCTYPE
+			|| mdata->doctype == JORFARTI_DOCTYPE
+			|| mdata->doctype == LEGISCTA_DOCTYPE
+			|| mdata->doctype == LEGIARTI_DOCTYPE)) {
 		/*
 		 * <CONTEXTE>
 		 *  <TEXTE autorite="" cid="LEGITEXT000006071367"
@@ -946,10 +997,10 @@ void start_element_callback(void *user_data, const xmlChar *name, const xmlChar 
 			attrs = &attrs[2];
 		}
 	} else if (xmlStrEqual(name, FIELD_NAME_TITRE_TXT) && (
-			mdata->uri_parts.doctype == JORFSCTA_DOCTYPE
-			|| mdata->uri_parts.doctype == JORFARTI_DOCTYPE
-			|| mdata->uri_parts.doctype == LEGISCTA_DOCTYPE
-			|| mdata->uri_parts.doctype == LEGIARTI_DOCTYPE)) {
+			mdata->doctype == JORFSCTA_DOCTYPE
+			|| mdata->doctype == JORFARTI_DOCTYPE
+			|| mdata->doctype == LEGISCTA_DOCTYPE
+			|| mdata->doctype == LEGIARTI_DOCTYPE)) {
 		/*
 		 * <CONTEXTE>
 		 *   ...
@@ -1501,8 +1552,7 @@ void characters_callback(void *user_data, const xmlChar *chars, int len)
 	}
 }
 
-int archive_parse_file(struct archive *a, struct archive_entry *entry,
-	void *user_data)
+int archive_parse_file(struct archive *a, struct archive_entry *entry, void *user_data)
 {
 	int r;
 	int uri_len;
@@ -1519,29 +1569,24 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry,
 	char base[5];
 
 	fname = archive_entry_pathname(entry);
-	//fprintf(stdout, "%s\n",fname);
 	size = strlen(fname);
 
 	if (!has_xml_suffix(fname, size)) {
-		//fprintf(stderr, "%s\n", fname);
 		if (is_dat_file(fname, size)) {
+		    /* This is a file with a list of documents du delete */
 			r = read_archive_file(a, infos->wbuf);
-			r = apply_deletions(infos->wbuf, infos->pg_conn,
-					    &infos->ts, infos->log_file);
+			r = apply_deletions(infos->wbuf, infos->pg_conn, &infos->ts, infos->log_file);
 			buffer_reset(infos->wbuf);
 			if (r != 0) return -1;
 		}
 		return 0;
 	}
 
-	/* TEST */
-	//return 0;
-
 	pdata = infos->pdata;
 	reset_parsed_data(pdata);
 	mdata = pdata->metadata;
-	mdata->uri_parts.fund = infos->fund;
-	set_base(fname, size, mdata->uri_parts.base);
+	mdata->fund = infos->fund;
+	set_base(fname, size, mdata->base);
 	infos->xml_files++;
 	ctxt = infos->ctxt;
 
@@ -1549,54 +1594,38 @@ int archive_parse_file(struct archive *a, struct archive_entry *entry,
 		fprintf(stderr, "cannot reset parser ctxt.\n");
 		return -1;
 	}
+
 	for (;;) {
 		r = archive_read_data_block(a, &buff, &len, &offset);
 		if (r == ARCHIVE_EOF) {
-			uri_len = set_jorflegi_uri(mdata);
-			if (uri_len == -1) {
-				fprintf_doctype(stderr, mdata->uri_parts.doctype);
-				fprintf(stderr, "%s ERROR\n", mdata->id + 8);
-				// return -1;
-			} else if (uri_len == 0) {
-				fprintf_doctype(stderr, mdata->uri_parts.doctype);
-				fprintf(stderr, "%s IGNORED\n", mdata->id + 8);
+			set_rid(mdata);
+			if (infos->pg_conn != NULL) {
+				r = db_import(infos->pg_conn,
+					      infos->sig_gen,
+					      &infos->ts, pdata,
+					      infos->dbbuf1,
+					      infos->dbbuf2,
+					      infos->dbbuf3,
+					      infos->dbbuf4,
+					      infos->dbbuf5,
+					      infos->dbbuf6,
+					      &infos->tt,
+					      infos->bootstrap,
+					      infos->log_file);
+				if (r > 0) {
+					fprintf(infos->log_file,
+						"STAT:DBinsert:%f\n",
+						infos->tt.db_insert_tm);
+					fprintf(infos->log_file,
+						"STAT:SIGcomp:%f\n",
+						infos->tt.sig_comp_tm);
+				}
 			} else {
-				if (mdata->uri_parts.kind != EMPTY_URI_KIND) {
-					uri_cpy(&mdata->uri_parts, mdata->uri);
-				}
-				if (mdata->contexte.uri_parts.kind != EMPTY_URI_KIND) {
-					uri_cpy(&mdata->contexte.uri_parts,
-						mdata->contexte.uri);
-				}
-				if (infos->pg_conn != NULL) {
-					r = db_import(infos->pg_conn,
-						      infos->sig_gen,
-						      &infos->ts, pdata,
-						      infos->dbbuf1,
-						      infos->dbbuf2,
-						      infos->dbbuf3,
-						      infos->dbbuf4,
-						      infos->dbbuf5,
-						      infos->dbbuf6,
-						      &infos->tt,
-						      infos->bootstrap,
-						      infos->log_file);
-					if (r > 0) {
-						fprintf(infos->log_file,
-							"STAT:DBinsert:%f\n",
-							infos->tt.db_insert_tm);
-						fprintf(infos->log_file,
-							"STAT:SIGcomp:%f\n",
-							infos->tt.sig_comp_tm);
-					}
-				} else {
-					fprintf_parsed_data(stderr, pdata);
-				}
+				fprintf_parsed_data(stderr, pdata);
 			}
 			return 0;
 		}
-		if (r < ARCHIVE_OK)
-			return r;
+		if (r < ARCHIVE_OK) return r;
 		r = xmlParseChunk(ctxt, buff, len, 0);
 		if (r != 0) {
 			fprintf(stderr, "error reading XML chunk.\n");
@@ -1731,11 +1760,8 @@ int import_files_from_archive(struct gen_uri_info *infos)
 	parser_handler.startElement = start_element_callback;
 	parser_handler.endElement = end_element_callback;
 	parser_handler.characters = characters_callback;
-	infos->ctxt = xmlCreatePushParserCtxt(&parser_handler,
-					      infos->pdata,
-					      NULL, 0, NULL);
-	r = iterate_archive(infos->data_file,
-			    archive_parse_file, infos);
+	infos->ctxt = xmlCreatePushParserCtxt(&parser_handler, infos->pdata, NULL, 0, NULL);
+	r = iterate_archive(infos->data_file, archive_parse_file, infos);
 	xmlFreeParserCtxt(infos->ctxt);
 	free_parsed_data(infos->pdata);
 
@@ -1744,8 +1770,7 @@ int import_files_from_archive(struct gen_uri_info *infos)
 	return r;
 }
 
-int import_jorflegi_data_file(char *data_file, PGconn *conn,
-							  regex_t *ts_re, FILE *log_file,
+int import_jorflegi_data_file(char *data_file, PGconn *conn, regex_t *ts_re, FILE *log_file,
 							  const EVP_MD *sig_gen, char bootstrap)
 {
 	int r = 0;
@@ -1754,8 +1779,7 @@ int import_jorflegi_data_file(char *data_file, PGconn *conn,
 	r = parse_timestamp(data_file, ts_re, &infos.ts);
 	if (r < 0) return 1;
 	if (r == 0) {
-		fprintf(stderr, "No timestamp found in %s\n",
-				data_file);
+		fprintf(stderr, "No timestamp found in %s\n", data_file);
 		return 1;
 	}
 	infos.data_file = data_file;
@@ -1810,7 +1834,8 @@ int main(int argc, char **argv)
 	/*
 	 * Import one file
 	 */
-	r = import_jorflegi_data_file(params.data_file, conn, &ts_re, log_file, sig_gen, params.bootstrap);
+	r = import_jorflegi_data_file(params.data_file, conn, &ts_re, log_file, sig_gen,
+	                              params.bootstrap);
 
 	/*
 	 * Clean-up
@@ -1818,8 +1843,9 @@ int main(int argc, char **argv)
 	if (params.logfile != NULL) {
 		fclose(log_file);
 	}
-	if (conn != NULL)
-		PQfinish(conn);
+	if (conn != NULL) {
+	    PQfinish(conn);
+	}
 	cleanup_signature_system();
 	free_delete_re();
 	free_timestamp_re(&ts_re);

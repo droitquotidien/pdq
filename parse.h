@@ -1,7 +1,6 @@
 #ifndef PDQ_PARSE_H
 #define PDQ_PARSE_H
 #include <libxml/xmlreader.h>
-#include "uri.h"
 
 #define FIELD_LEN_ID 20
 #define FIELD_LEN_NOR 15
@@ -13,7 +12,7 @@
 #define FIELD_LEN_TITREFULL 2048
 #define FIELD_LEN_ORIGINE_PUBLI 192
 #define FIELD_LEN_PAGE 8
-#define FIELD_LEN_AUTORITE 256
+#define FIELD_LEN_AUTORITE 256  /* Note: meme taille pour AUTORITE et MINISTERE */
 #define FIELD_LEN_ETAT 64
 #define FIELD_LEN_ORIGINE 20
 #define FIELD_LEN_SENS 8
@@ -30,71 +29,6 @@
 #define MAX_MCS 1024
 #define MAX_DATE_EFFET 256
 #define MAX_DOMAINES 256
-
-/*
-  <SECTION_TA>
-    <STRUCTURE_TA>
-      <LIEN_SECTION_TA cid="LEGISCTA000006138434" debut="2003-09-06" etat="VIGUEUR" fin="2999-01-01"
-      id="LEGISCTA000006138434" niv="3"
-      url="/LEGI/SCTA/00/00/06/13/84/LEGISCTA000006138434.xml">Titre Ier : Dispositions générales</LIEN_SECTION_TA>
-      <LIEN_SECTION_TA cid="LEGISCTA000006138435" debut="2003-09-06" etat="VIGUEUR" fin="2999-01-01"
-      id="LEGISCTA000006138435" niv="3"
-      url="/LEGI/SCTA/00/00/06/13/84/LEGISCTA000006138435.xml">Titre II : Les organismes d'intervention</LIEN_SECTION_TA>
-      <LIEN_ART debut="2007-01-01" etat="MODIFIE_MORT_NE" fin="2006-01-06" id="LEGIARTI000006584667" num="L641-1-1"
-        origine="LEGI"/>
-
-  <TEXTELR>
-    <VERSIONS>
-      <VERSION etat="VIGUEUR">
-        <LIEN_TXT debut="2010-05-08" fin="2999-01-01" id="LEGITEXT000022197698" num=""/>
-      </VERSION>
-      <VERSION etat="MODIFIE">
-        <LIEN_TXT debut="1979-12-01" fin="2010-05-08" id="LEGITEXT000006071367" num=""/>
-      </VERSION>
-    </VERSIONS>
-    <STRUCT>
-      <LIEN_SECTION_TA cid="LEGISCTA000006098262" debut="1982-12-01" etat="VIGUEUR" fin="2999-01-01" id="LEGISCTA000006098262" niv="1" url="/LEGI/SCTA/00/00/06/09/82/LEGISCTA000006098262.xml">Partie législative</LIEN_SECTION_TA>
-      <LIEN_SECTION_TA cid="LEGISCTA000006098287" debut="1979-12-01" etat="VIGUEUR" fin="2999-01-01" id="LEGISCTA000006098287" niv="1" url="/LEGI/SCTA/00/00/06/09/82/LEGISCTA000006098287.xml">Partie réglementaire</LIEN_SECTION_TA>
-      <LIEN_SECTION_TA cid="LEGISCTA000006098333" debut="1996-05-15" etat="VIGUEUR" fin="2999-01-01" id="LEGISCTA000006098333" niv="1" url="/LEGI/SCTA/00/00/06/09/83/LEGISCTA000006098333.xml">Annexes</LIEN_SECTION_TA>
-      <LIEN_ART debut="2007-01-01" etat="MODIFIE_MORT_NE" fin="2006-01-06" id="LEGIARTI000006584667" num="L641-1-1" origine="LEGI"/>
-    </STRUCT>
-
-  <ARTICLE>
-    <VERSIONS>
-	<VERSION etat="MODIFIE">
-	<LIEN_ART debut="1998-07-09" etat="MODIFIE" fin="1999-07-10" id="LEGIARTI000006584675" num="L641-3" origine="LEGI"/>
-	</VERSION>
-	<VERSION etat="MODIFIE">
-	<LIEN_ART debut="1999-07-10" etat="MODIFIE" fin="2001-07-11" id="LEGIARTI000006584676" num="L641-3" origine="LEGI"/>
-	</VERSION>
-	<VERSION etat="MODIFIE">
-	<LIEN_ART debut="2001-07-11" etat="MODIFIE" fin="2007-01-01" id="LEGIARTI000006584677" num="L641-3" origine="LEGI"/>
-	</VERSION>
-	<VERSION etat="MODIFIE_MORT_NE">
-	<LIEN_ART debut="2007-01-01" etat="MODIFIE_MORT_NE" fin="2006-12-08" id="LEGIARTI000006584678" num="L641-3" origine="LEGI"/>
-	</VERSION>
-	<VERSION etat="VIGUEUR">
-	<LIEN_ART debut="2007-01-01" etat="VIGUEUR" fin="2999-01-01" id="LEGIARTI000006584679" num="L641-3" origine="LEGI"/>
-	</VERSION>
-    <LIENS>
-      <LIEN cidtexte="JORFTEXT000000754945" datesignatexte="1998-07-08" id="JORFTEXT000000754945" naturetexte="LOI" nortexte="AGRX9500132L" num="" numtexte="98-565" sens="source" typelien="CODIFICATION">Loi 98-565 1998-07-08</LIEN>
-      <LIEN cidtexte="JORFTEXT000000754945" datesignatexte="1998-07-08" id="LEGIARTI000006600924" naturetexte="LOI" nortexte="AGRX9500132L" num="1" numtexte="98-565" sens="source" typelien="CREATION">Loi n°98-565 du 8 juillet 1998 - art. 1 (V) JORF 9 juillet 1998</LIEN>
-
-  <JO>
-    <STRUCTURE_TXT>
-      <TM niv="1">
-        <TITRE_TM>Journal officiel "Lois et Décrets"</TITRE_TM>
-        <TM niv="2">
-          <TITRE_TM>Décrets, arrêtés, circulaires</TITRE_TM>
-            <TM niv="3">
-              <TITRE_TM>Textes généraux</TITRE_TM>
-              <TM niv="4">
-                <TITRE_TM>Ministère de l'Europe et des affaires étrangères</TITRE_TM>
-                <LIEN_TXT idtxt="JORFTEXT000043933898" titretxt="Décret n° 2021-1071 du 12 août 2021 portant modification du décret n° 2013-1154 créant un Conseil national du développement et de la solidarité internationale"/>
-                <LIEN_TXT idtxt="JORFTEXT000043933906" titretxt="Décret n° 2021-1072 du 12 août 2021 portant convocation du collège électoral pour l'élection des sénateurs représentant les Français établis hors de France"/>
-              </TM>
-
- */
 
 enum document_kind {
     DOCKIND_EMPTY = 0,
@@ -120,8 +54,6 @@ struct contexte {
     char nature[FIELD_LEN_NATURE+1];
     char nor[FIELD_LEN_NOR+1];
     char num[FIELD_LEN_NUM+1];
-    struct uri uri_parts;  /* URI du texte parent */
-    char uri[MAX_URI];
     /* Ignored: autorite, ministere, num_parution_jo */
     /* Note: pas utile, en fait.
     struct document_version versions[MAX_VERSIONS+1];
@@ -197,33 +129,6 @@ struct liens {
     int surplus_liens;
 };
 
-/*
-LEGIVERS:
-  <TP><CONTENU/></TP>
-  <ABRO><CONTENU/></ABRO>
-  <RECT><CONTENU/></RECT>
-
-JORFVERS:
-  <TP><CONTENU/></TP>
-  <ABRO><CONTENU/></ABRO>
-  <RECT><CONTENU/></RECT>
-  <SM><CONTENU/></SM>
-  <ENTREPRISE texte_entreprise="non">
-    <DATES_EFFET/>
-    <DOMAINES/>
-  </ENTREPRISE>
-
-JORFARTI / LEGIARTI
-  <SM><CONTENU/></SM>
-  <BLOC_TEXTUEL><CONTENU>
-      <br/>   Chaque appellation d'origine contrôlée est définie par décret sur proposition de l'Institut national des appellations d'origine, sans préjudice pour les vins et eaux-de-vie, cidres, poirés, apéritifs à base de cidres, de poirés ou de vins des dispositions de l'article L. 641-15.<br/>
-      <br/>   Le décret délimite l'aire géographique de production et détermine les conditions de production et d'agrément du produit.<br/>
-      </CONTENU></BLOC_TEXTUEL>
-
- MCS_ART/MC
- MCS_TXT/MC
- */
-
 #define INITIAL_CONTENT_NOTICE 4096
 #define INITIAL_CONTENT_VISAS 4096
 #define INITIAL_CONTENT_SIGNATAIRES 4096
@@ -270,6 +175,27 @@ enum parent_element {
     PE_DOMAINES,
 };
 
+enum doctype {
+    EMPTY_DOCTYPE = 0,
+    COUNTRY_DOCTYPE,
+    JORFCONT_DOCTYPE,
+    JORFTEXT_DOCTYPE,
+    JORFVERS_DOCTYPE,
+    JORFSCTA_DOCTYPE,
+    JORFARTI_DOCTYPE,
+    LEGITEXT_DOCTYPE,
+    LEGIVERS_DOCTYPE,
+    LEGISCTA_DOCTYPE,
+    LEGIARTI_DOCTYPE,
+    VERSIONS_DOCTYPE,
+    VERSIONS_ID_DOCTYPE
+};
+
+enum fund {
+    EMPTY_FUND = 0,
+    JORFLEGI_FUND = 1
+};
+
 struct metadata {
     char id[FIELD_LEN_ID+1]; /* JORFARTI000037658324 + \0 */
     char cid[FIELD_LEN_ID+1]; /* JORFTEXT000041856940 + \0 */
@@ -297,8 +223,11 @@ struct metadata {
     char origine[FIELD_LEN_ORIGINE+1];
     char commentaire[FIELD_LEN_COMMENTAIRE+1];
     struct contexte contexte;
-    struct uri uri_parts;
-    char uri[MAX_URI];
+    enum fund fund;
+    enum doctype doctype;
+    char base[5];
+    //struct uri uri_parts;
+    //char uri[MAX_URI];
     char rid[FIELD_LEN_ID+1]; /* JORFVERS000037658324 + \0 */
 };
 

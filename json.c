@@ -148,39 +148,6 @@ ssize_t write_contenu_json(int fildes, struct contenu *contenu,
 	return rt;
 }
 
-ssize_t write_uri_parts_json(int fildes, struct uri *uri_parts,
-			     struct write_buffer *wbuf, char standalone)
-{
-	ssize_t r;
-	ssize_t rt = 0;
-	char skind[5];
-
-	if (standalone) {
-		CHECK_WRITE(fildes, "{\n", 2, wbuf)
-	} else {
-		OPENBLOCK(fildes, uri_parts, 9, wbuf);
-	}
-	if (uri_parts->num1kind != EMPTY_NUMKIND) {
-		CONTENT_WRITE(fildes, naturel, 7, uri_parts->num1, wbuf);
-	}
-	if (uri_parts->num2kind != EMPTY_NUMKIND) {
-		JATTR(fildes, nor, 3, uri_parts->num2, wbuf);
-	}
-	if (uri_parts->num3kind != EMPTY_NUMKIND) {
-		JATTR(fildes, id, 2, uri_parts->num3, wbuf);
-	}
-	snprintf(skind, 4, "%d", uri_parts->kind);
-	JATTRINT(fildes, kind, 4, skind, wbuf);
-	WTYPE(fildes, "uri", 3, wbuf);
-	if (standalone) {
-		CHECK_WRITE(fildes, "}\n", 2, wbuf)
-	} else {
-		CHECK_WRITE(fildes, "},\n", 3, wbuf)
-	}
-
-	return rt;
-}
-
 ssize_t write_contexte_json(int fildes, struct contexte *contexte,
 			    struct write_buffer *wbuf, char standalone)
 {
@@ -198,11 +165,6 @@ ssize_t write_contexte_json(int fildes, struct contexte *contexte,
 	JATTR(fildes, nature, 6, contexte->nature, wbuf);
 	JATTR(fildes, nor, 3, contexte->nor, wbuf);
 	JATTR(fildes, num, 3, contexte->num, wbuf);
-	r = write_uri_parts_json(fildes, &contexte->uri_parts, wbuf, 0);
-	if (r < 0)
-		return -1;
-	rt += r;
-	JATTR(fildes, uri, 3, contexte->uri, wbuf);
 	WTYPE(fildes, "contexte", 8, wbuf);
 	if (standalone) {
 		CHECK_WRITE(fildes, "}", 1, wbuf);
@@ -442,8 +404,7 @@ ssize_t write_json(struct parsed_data *pdata, int fildes,
 	CHECK_WRITE(fildes, "{\n", 2, wbuf)
 	    JATTR(fildes, id, 2, mdata->id, wbuf);
 	JATTR(fildes, nature, 6, mdata->nature, wbuf);
-	JATTR(fildes, uri, 3, mdata->uri, wbuf);
-	switch (mdata->uri_parts.doctype) {
+	switch (mdata->doctype) {
 	case JORFCONT_DOCTYPE:
 		JATTR(fildes, rid, 3, mdata->rid, wbuf);
 		/*JATTR(fildes, cid, 3, mdata->id, wbuf); */
@@ -593,7 +554,6 @@ ssize_t write_json(struct parsed_data *pdata, int fildes,
 	default:
 		break;
 	}
-	write_uri_parts_json(fildes, &mdata->uri_parts, wbuf, 0);
 	WTYPE(fildes, mdata->rid, 8, wbuf);
 	CHECK_WRITE(fildes, "}\n", 2, wbuf)
 	    return rt;
