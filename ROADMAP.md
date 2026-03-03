@@ -1,4 +1,0 @@
-# Roadmap
-
-- [ ] Support ENTREPRISES
-- [ ] Doc
